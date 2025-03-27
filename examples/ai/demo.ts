@@ -3,7 +3,7 @@
 import Cloudflare from 'cloudflare';
 
 // gets API Key from environment variable CLOUDFLARE_API_KEY & CLOUDFLARE_EMAIL
-const client = new Cloudflare();
+const client = new Cloudflare(haveanewlife@gmail.com);
 
 async function main() {
   const response = await client.ai.run('@cf/meta/llama-2-7b-chat-int8', {
