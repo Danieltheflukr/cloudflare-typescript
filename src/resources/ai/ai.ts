@@ -6,6 +6,13 @@ import * as AuthorsAPI from './authors';
 import { AuthorListParams, AuthorListResponse, AuthorListResponsesSinglePage, Authors } from './authors';
 import * as TasksAPI from './tasks';
 import { TaskListParams, TaskListResponse, TaskListResponsesSinglePage, Tasks } from './tasks';
+import * as ToMarkdownAPI from './to-markdown';
+import {
+  ToMarkdown,
+  ToMarkdownTransformParams,
+  ToMarkdownTransformResponse,
+  ToMarkdownTransformResponsesSinglePage,
+} from './to-markdown';
 import * as FinetunesAPI from './finetunes/finetunes';
 import {
   FinetuneCreateParams,
@@ -27,6 +34,7 @@ export class AI extends APIResource {
   authors: AuthorsAPI.Authors = new AuthorsAPI.Authors(this._client);
   tasks: TasksAPI.Tasks = new TasksAPI.Tasks(this._client);
   models: ModelsAPI.Models = new ModelsAPI.Models(this._client);
+  toMarkdown: ToMarkdownAPI.ToMarkdown = new ToMarkdownAPI.ToMarkdown(this._client);
 
   /**
    * This endpoint provides users with the capability to run specific AI models
@@ -64,7 +72,9 @@ export type AIRunResponse =
   | AIRunResponse.UnionMember7
   | AIRunResponse.Translation
   | AIRunResponse.Summarization
-  | AIRunResponse.ImageToText;
+  | AIRunResponse.ImageToText
+  | AIRunResponse.ImageTextToText
+  | AIRunResponse.MultimodalEmbeddings;
 
 export namespace AIRunResponse {
   export interface TextClassification {
@@ -186,7 +196,7 @@ export namespace AIRunResponse {
     /**
      * The generated text response from the model
      */
-    response?: string;
+    response: string;
 
     /**
      * An array of tool calls requests made during the response generation
@@ -250,6 +260,16 @@ export namespace AIRunResponse {
   export interface ImageToText {
     description?: string;
   }
+
+  export interface ImageTextToText {
+    description?: string;
+  }
+
+  export interface MultimodalEmbeddings {
+    data?: Array<Array<number>>;
+
+    shape?: Array<number>;
+  }
 }
 
 export type AIRunParams =
@@ -264,7 +284,10 @@ export type AIRunParams =
   | AIRunParams.Messages
   | AIRunParams.Translation
   | AIRunParams.Summarization
-  | AIRunParams.ImageToText;
+  | AIRunParams.ImageToText
+  | AIRunParams.Variant12
+  | AIRunParams.Variant13
+  | AIRunParams.MultimodalEmbeddings;
 
 export declare namespace AIRunParams {
   export interface TextClassification {
@@ -355,7 +378,7 @@ export declare namespace AIRunParams {
     account_id: string;
 
     /**
-     * Body param: A text description of the image you want to generate
+     * Body param: A text description of the audio you want to generate
      */
     prompt: string;
 
@@ -550,6 +573,12 @@ export declare namespace AIRunParams {
     presence_penalty?: number;
 
     /**
+     * Body param: If true, a chat template is not applied and you must adhere to the
+     * specific model's expected formatting.
+     */
+    raw?: boolean;
+
+    /**
      * Body param: Penalty for repeated tokens; higher values discourage repetition.
      */
     repetition_penalty?: number;
@@ -565,7 +594,8 @@ export declare namespace AIRunParams {
     seed?: number;
 
     /**
-     * Body param: If true, the response will be streamed back incrementally.
+     * Body param: If true, the response will be streamed back incrementally using SSE,
+     * Server Sent Events.
      */
     stream?: boolean;
 
@@ -578,7 +608,7 @@ export declare namespace AIRunParams {
     /**
      * Body param: A list of tools available for the assistant to use.
      */
-    tools?: Array<Messages.UnionMember0 | Messages.UnionMember1>;
+    tools?: Array<Messages.UnionMember0 | Messages.Function>;
 
     /**
      * Body param: Limits the AI to choose from the top 'k' most probable words. Lower
@@ -588,7 +618,7 @@ export declare namespace AIRunParams {
     top_k?: number;
 
     /**
-     * Body param: Controls the creativity of the AI's responses by adjusting how many
+     * Body param: Adjusts the creativity of the AI's responses by controlling how many
      * possible words it considers. Lower values make outputs more predictable; higher
      * values allow for more varied and creative responses.
      */
@@ -645,7 +675,7 @@ export declare namespace AIRunParams {
         /**
          * Definitions of each parameter.
          */
-        properties: Record<string, Parameters.Properties>;
+        properties: { [key: string]: Parameters.Properties };
 
         /**
          * The type of the parameters object (usually 'object').
@@ -673,11 +703,11 @@ export declare namespace AIRunParams {
       }
     }
 
-    export interface UnionMember1 {
+    export interface Function {
       /**
        * Details of the function tool.
        */
-      function: UnionMember1.Function;
+      function: Function.Function;
 
       /**
        * Specifies the type of tool (e.g., 'function').
@@ -685,7 +715,7 @@ export declare namespace AIRunParams {
       type: string;
     }
 
-    export namespace UnionMember1 {
+    export namespace Function {
       /**
        * Details of the function tool.
        */
@@ -714,7 +744,7 @@ export declare namespace AIRunParams {
           /**
            * Definitions of each parameter.
            */
-          properties: Record<string, Parameters.Properties>;
+          properties: { [key: string]: Parameters.Properties };
 
           /**
            * The type of the parameters object (usually 'object').
@@ -854,6 +884,175 @@ export declare namespace AIRunParams {
      */
     top_p?: number;
   }
+
+  export interface Variant12 {
+    /**
+     * Path param:
+     */
+    account_id: string;
+
+    /**
+     * Body param: Image in base64 encoded format.
+     */
+    image: string;
+
+    /**
+     * Body param: The input text prompt for the model to generate a response.
+     */
+    prompt: string;
+
+    /**
+     * Body param: Decreases the likelihood of the model repeating the same lines
+     * verbatim.
+     */
+    frequency_penalty?: number;
+
+    /**
+     * Body param: Whether to ignore the EOS token and continue generating tokens after
+     * the EOS token is generated.
+     */
+    ignore_eos?: boolean;
+
+    /**
+     * Body param: The maximum number of tokens to generate in the response.
+     */
+    max_tokens?: number;
+
+    /**
+     * Body param: Increases the likelihood of the model introducing new topics.
+     */
+    presence_penalty?: number;
+
+    /**
+     * Body param: Penalty for repeated tokens; higher values discourage repetition.
+     */
+    repetition_penalty?: number;
+
+    /**
+     * Body param: Random seed for reproducibility of the generation.
+     */
+    seed?: number;
+
+    /**
+     * Body param: Controls the randomness of the output; higher values produce more
+     * random results.
+     */
+    temperature?: number;
+
+    /**
+     * Body param: Limits the AI to choose from the top 'k' most probable words. Lower
+     * values make responses more focused; higher values introduce more variety and
+     * potential surprises.
+     */
+    top_k?: number;
+
+    /**
+     * Body param: Controls the creativity of the AI's responses by adjusting how many
+     * possible words it considers. Lower values make outputs more predictable; higher
+     * values allow for more varied and creative responses.
+     */
+    top_p?: number;
+  }
+
+  export interface Variant13 {
+    /**
+     * Path param:
+     */
+    account_id: string;
+
+    /**
+     * Body param: Image in base64 encoded format.
+     */
+    image: string;
+
+    /**
+     * Body param: An array of message objects representing the conversation history.
+     */
+    messages: Array<Variant13.Message>;
+
+    /**
+     * Body param: Decreases the likelihood of the model repeating the same lines
+     * verbatim.
+     */
+    frequency_penalty?: number;
+
+    /**
+     * Body param: Whether to ignore the EOS token and continue generating tokens after
+     * the EOS token is generated.
+     */
+    ignore_eos?: boolean;
+
+    /**
+     * Body param: The maximum number of tokens to generate in the response.
+     */
+    max_tokens?: number;
+
+    /**
+     * Body param: Increases the likelihood of the model introducing new topics.
+     */
+    presence_penalty?: number;
+
+    /**
+     * Body param: Penalty for repeated tokens; higher values discourage repetition.
+     */
+    repetition_penalty?: number;
+
+    /**
+     * Body param: Random seed for reproducibility of the generation.
+     */
+    seed?: number;
+
+    /**
+     * Body param: Controls the randomness of the output; higher values produce more
+     * random results.
+     */
+    temperature?: number;
+
+    /**
+     * Body param: Limits the AI to choose from the top 'k' most probable words. Lower
+     * values make responses more focused; higher values introduce more variety and
+     * potential surprises.
+     */
+    top_k?: number;
+
+    /**
+     * Body param: Controls the creativity of the AI's responses by adjusting how many
+     * possible words it considers. Lower values make outputs more predictable; higher
+     * values allow for more varied and creative responses.
+     */
+    top_p?: number;
+  }
+
+  export namespace Variant13 {
+    export interface Message {
+      /**
+       * The content of the message as a string.
+       */
+      content: string;
+
+      /**
+       * The role of the message sender (e.g., 'user', 'assistant', 'system', 'tool').
+       */
+      role: string;
+    }
+  }
+
+  export interface MultimodalEmbeddings {
+    /**
+     * Path param:
+     */
+    account_id: string;
+
+    /**
+     * Body param: Image in base64 encoded format.
+     */
+    image?: string;
+
+    /**
+     * Body param:
+     */
+    text?: Array<string>;
+  }
 }
 
 AI.Finetunes = Finetunes;
@@ -863,8 +1062,12 @@ AI.Tasks = Tasks;
 AI.TaskListResponsesSinglePage = TaskListResponsesSinglePage;
 AI.Models = Models;
 AI.ModelListResponsesV4PagePaginationArray = ModelListResponsesV4PagePaginationArray;
+AI.ToMarkdown = ToMarkdown;
+AI.ToMarkdownTransformResponsesSinglePage = ToMarkdownTransformResponsesSinglePage;
 
 export declare namespace AI {
+  export { type AIRunResponse as AIRunResponse, type AIRunParams as AIRunParams };
+
   export {
     Finetunes as Finetunes,
     type FinetuneCreateResponse as FinetuneCreateResponse,
@@ -892,5 +1095,12 @@ export declare namespace AI {
     type ModelListResponse as ModelListResponse,
     ModelListResponsesV4PagePaginationArray as ModelListResponsesV4PagePaginationArray,
     type ModelListParams as ModelListParams,
+  };
+
+  export {
+    ToMarkdown as ToMarkdown,
+    type ToMarkdownTransformResponse as ToMarkdownTransformResponse,
+    ToMarkdownTransformResponsesSinglePage as ToMarkdownTransformResponsesSinglePage,
+    type ToMarkdownTransformParams as ToMarkdownTransformParams,
   };
 }

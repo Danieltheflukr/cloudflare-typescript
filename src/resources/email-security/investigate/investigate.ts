@@ -43,6 +43,16 @@ export class Investigate extends APIResource {
 
   /**
    * Returns information for each email that matches the search parameter(s).
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const investigateListResponse of client.emailSecurity.investigate.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: InvestigateListParams,
@@ -58,6 +68,15 @@ export class Investigate extends APIResource {
 
   /**
    * Get message details
+   *
+   * @example
+   * ```ts
+   * const investigate =
+   *   await client.emailSecurity.investigate.get(
+   *     '4Njp3P0STMz2c02Q',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     postfixId: string,
@@ -94,6 +113,8 @@ export interface InvestigateListResponse {
    */
   postfix_id: string;
 
+  properties: InvestigateListResponse.Properties;
+
   ts: string;
 
   alert_id?: string | null;
@@ -127,9 +148,13 @@ export interface InvestigateListResponse {
     | 'NONE'
     | null;
 
+  findings?: Array<InvestigateListResponse.Finding> | null;
+
   from?: string | null;
 
   from_name?: string | null;
+
+  htmltext_structure_hash?: string | null;
 
   message_id?: string | null;
 
@@ -147,6 +172,40 @@ export interface InvestigateListResponse {
 }
 
 export namespace InvestigateListResponse {
+  export interface Properties {
+    allowlisted_pattern?: string;
+
+    allowlisted_pattern_type?:
+      | 'quarantine_release'
+      | 'acceptable_sender'
+      | 'allowed_sender'
+      | 'allowed_recipient'
+      | 'domain_similarity'
+      | 'domain_recency'
+      | 'managed_acceptable_sender';
+
+    blocklisted_message?: boolean;
+
+    blocklisted_pattern?: string;
+
+    whitelisted_pattern_type?:
+      | 'quarantine_release'
+      | 'acceptable_sender'
+      | 'allowed_sender'
+      | 'allowed_recipient'
+      | 'domain_similarity'
+      | 'domain_recency'
+      | 'managed_acceptable_sender';
+  }
+
+  export interface Finding {
+    detail?: string | null;
+
+    name?: string | null;
+
+    value?: string | null;
+  }
+
   export interface Validation {
     comment?: string | null;
 
@@ -176,6 +235,8 @@ export interface InvestigateGetResponse {
    */
   postfix_id: string;
 
+  properties: InvestigateGetResponse.Properties;
+
   ts: string;
 
   alert_id?: string | null;
@@ -209,9 +270,13 @@ export interface InvestigateGetResponse {
     | 'NONE'
     | null;
 
+  findings?: Array<InvestigateGetResponse.Finding> | null;
+
   from?: string | null;
 
   from_name?: string | null;
+
+  htmltext_structure_hash?: string | null;
 
   message_id?: string | null;
 
@@ -229,6 +294,40 @@ export interface InvestigateGetResponse {
 }
 
 export namespace InvestigateGetResponse {
+  export interface Properties {
+    allowlisted_pattern?: string;
+
+    allowlisted_pattern_type?:
+      | 'quarantine_release'
+      | 'acceptable_sender'
+      | 'allowed_sender'
+      | 'allowed_recipient'
+      | 'domain_similarity'
+      | 'domain_recency'
+      | 'managed_acceptable_sender';
+
+    blocklisted_message?: boolean;
+
+    blocklisted_pattern?: string;
+
+    whitelisted_pattern_type?:
+      | 'quarantine_release'
+      | 'acceptable_sender'
+      | 'allowed_sender'
+      | 'allowed_recipient'
+      | 'domain_similarity'
+      | 'domain_recency'
+      | 'managed_acceptable_sender';
+  }
+
+  export interface Finding {
+    detail?: string | null;
+
+    name?: string | null;
+
+    value?: string | null;
+  }
+
   export interface Validation {
     comment?: string | null;
 
@@ -335,6 +434,11 @@ export interface InvestigateListParams extends V4PagePaginationArrayParams {
    * `now - 30 days`.
    */
   start?: string;
+
+  /**
+   * Query param:
+   */
+  subject?: string;
 }
 
 export interface InvestigateGetParams {

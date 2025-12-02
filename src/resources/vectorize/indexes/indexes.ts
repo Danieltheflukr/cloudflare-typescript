@@ -19,6 +19,15 @@ export class Indexes extends APIResource {
 
   /**
    * Creates and returns a new Vectorize Index.
+   *
+   * @example
+   * ```ts
+   * const createIndex = await client.vectorize.indexes.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   config: { dimensions: 768, metric: 'cosine' },
+   *   name: 'example-index',
+   * });
+   * ```
    */
   create(params: IndexCreateParams, options?: Core.RequestOptions): Core.APIPromise<CreateIndex | null> {
     const { account_id, ...body } = params;
@@ -32,6 +41,16 @@ export class Indexes extends APIResource {
 
   /**
    * Returns a list of Vectorize Indexes
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const createIndex of client.vectorize.indexes.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: IndexListParams,
@@ -47,6 +66,14 @@ export class Indexes extends APIResource {
 
   /**
    * Deletes the specified Vectorize Index.
+   *
+   * @example
+   * ```ts
+   * const index = await client.vectorize.indexes.delete(
+   *   'example-index',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     indexName: string,
@@ -64,6 +91,14 @@ export class Indexes extends APIResource {
 
   /**
    * Delete a set of vectors from an index by their vector identifiers.
+   *
+   * @example
+   * ```ts
+   * const response = await client.vectorize.indexes.deleteByIds(
+   *   'example-index',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   deleteByIds(
     indexName: string,
@@ -81,6 +116,14 @@ export class Indexes extends APIResource {
 
   /**
    * Returns the specified Vectorize Index.
+   *
+   * @example
+   * ```ts
+   * const createIndex = await client.vectorize.indexes.get(
+   *   'example-index',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     indexName: string,
@@ -98,6 +141,14 @@ export class Indexes extends APIResource {
 
   /**
    * Get a set of vectors from an index by their vector identifiers.
+   *
+   * @example
+   * ```ts
+   * const response = await client.vectorize.indexes.getByIds(
+   *   'example-index',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   getByIds(
     indexName: string,
@@ -115,6 +166,14 @@ export class Indexes extends APIResource {
 
   /**
    * Get information about a vectorize index.
+   *
+   * @example
+   * ```ts
+   * const response = await client.vectorize.indexes.info(
+   *   'example-index',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   info(
     indexName: string,
@@ -133,6 +192,17 @@ export class Indexes extends APIResource {
   /**
    * Inserts vectors into the specified index and returns a mutation id corresponding
    * to the vectors enqueued for insertion.
+   *
+   * @example
+   * ```ts
+   * const response = await client.vectorize.indexes.insert(
+   *   'example-index',
+   *   {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     body: fs.createReadStream('path/to/file'),
+   *   },
+   * );
+   * ```
    */
   insert(
     indexName: string,
@@ -146,12 +216,49 @@ export class Indexes extends APIResource {
         body: body,
         ...options,
         headers: { 'Content-Type': 'application/x-ndjson', ...options?.headers },
+        __binaryRequest: true,
       }) as Core.APIPromise<{ result: IndexInsertResponse | null }>
     )._thenUnwrap((obj) => obj.result);
   }
 
   /**
+   * Returns a paginated list of vector identifiers from the specified index.
+   *
+   * @example
+   * ```ts
+   * const response = await client.vectorize.indexes.listVectors(
+   *   'example-index',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
+   */
+  listVectors(
+    indexName: string,
+    params: IndexListVectorsParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<IndexListVectorsResponse | null> {
+    const { account_id, ...query } = params;
+    return (
+      this._client.get(`/accounts/${account_id}/vectorize/v2/indexes/${indexName}/list`, {
+        query,
+        ...options,
+      }) as Core.APIPromise<{ result: IndexListVectorsResponse | null }>
+    )._thenUnwrap((obj) => obj.result);
+  }
+
+  /**
    * Finds vectors closest to a given vector in an index.
+   *
+   * @example
+   * ```ts
+   * const response = await client.vectorize.indexes.query(
+   *   'example-index',
+   *   {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     vector: [0.5, 0.5, 0.5],
+   *   },
+   * );
+   * ```
    */
   query(
     indexName: string,
@@ -170,6 +277,17 @@ export class Indexes extends APIResource {
   /**
    * Upserts vectors into the specified index, creating them if they do not exist and
    * returns a mutation id corresponding to the vectors enqueued for upsertion.
+   *
+   * @example
+   * ```ts
+   * const response = await client.vectorize.indexes.upsert(
+   *   'example-index',
+   *   {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     body: fs.createReadStream('path/to/file'),
+   *   },
+   * );
+   * ```
    */
   upsert(
     indexName: string,
@@ -183,6 +301,7 @@ export class Indexes extends APIResource {
         body: body,
         ...options,
         headers: { 'Content-Type': 'application/x-ndjson', ...options?.headers },
+        __binaryRequest: true,
       }) as Core.APIPromise<{ result: IndexUpsertResponse | null }>
     )._thenUnwrap((obj) => obj.result);
   }
@@ -346,6 +465,47 @@ export interface IndexInsertResponse {
   mutationId?: string;
 }
 
+export interface IndexListVectorsResponse {
+  /**
+   * Number of vectors returned in this response
+   */
+  count: number;
+
+  /**
+   * Whether there are more vectors available beyond this response
+   */
+  isTruncated: boolean;
+
+  /**
+   * Total number of vectors in the index
+   */
+  totalCount: number;
+
+  /**
+   * Array of vector items
+   */
+  vectors: Array<IndexListVectorsResponse.Vector>;
+
+  /**
+   * When the cursor expires as an ISO8601 string
+   */
+  cursorExpirationTimestamp?: string | null;
+
+  /**
+   * Cursor for the next page of results
+   */
+  nextCursor?: string | null;
+}
+
+export namespace IndexListVectorsResponse {
+  export interface Vector {
+    /**
+     * Identifier for a Vector
+     */
+    id: string;
+  }
+}
+
 export interface IndexQueryResponse {
   /**
    * Specifies the count of vectors returned by the search
@@ -484,12 +644,29 @@ export interface IndexInsertParams {
   /**
    * Body param: ndjson file containing vectors to insert.
    */
-  body: string;
+  body: Core.Uploadable;
 
   /**
    * Query param: Behavior for ndjson parse failures.
    */
   'unparsable-behavior'?: 'error' | 'discard';
+}
+
+export interface IndexListVectorsParams {
+  /**
+   * Path param: Identifier
+   */
+  account_id: string;
+
+  /**
+   * Query param: Maximum number of vectors to return
+   */
+  count?: number;
+
+  /**
+   * Query param: Cursor for pagination to get the next page of results
+   */
+  cursor?: string;
 }
 
 export interface IndexQueryParams {
@@ -534,7 +711,7 @@ export interface IndexUpsertParams {
   /**
    * Body param: ndjson file containing vectors to upsert.
    */
-  body: string;
+  body: Core.Uploadable;
 
   /**
    * Query param: Behavior for ndjson parse failures.
@@ -558,6 +735,7 @@ export declare namespace Indexes {
     type IndexGetByIDsResponse as IndexGetByIDsResponse,
     type IndexInfoResponse as IndexInfoResponse,
     type IndexInsertResponse as IndexInsertResponse,
+    type IndexListVectorsResponse as IndexListVectorsResponse,
     type IndexQueryResponse as IndexQueryResponse,
     type IndexUpsertResponse as IndexUpsertResponse,
     CreateIndicesSinglePage as CreateIndicesSinglePage,
@@ -569,6 +747,7 @@ export declare namespace Indexes {
     type IndexGetByIDsParams as IndexGetByIDsParams,
     type IndexInfoParams as IndexInfoParams,
     type IndexInsertParams as IndexInsertParams,
+    type IndexListVectorsParams as IndexListVectorsParams,
     type IndexQueryParams as IndexQueryParams,
     type IndexUpsertParams as IndexUpsertParams,
   };

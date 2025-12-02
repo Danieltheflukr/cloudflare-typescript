@@ -12,18 +12,23 @@ const client = new Cloudflare({
 describe('resource abuseReports', () => {
   // TODO: investigate unauthorized HTTP response
   test.skip('create: only required params', async () => {
-    const responsePromise = client.abuseReports.create('abuse_dmca', {
+    const responsePromise = client.abuseReports.create('report_type', {
       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      act: 'abuse_dmca',
       address1: 'x',
       agent_name: 'x',
-      agree: 0,
+      agree: 1,
       city: 'x',
       country: 'x',
+      email: 'email',
+      email2: 'email2',
       host_notification: 'send',
+      name: 'x',
       original_work: 'x',
       owner_notification: 'send',
       signature: 'signature',
       state: 'x',
+      urls: 'urls',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -36,36 +41,29 @@ describe('resource abuseReports', () => {
 
   // TODO: investigate unauthorized HTTP response
   test.skip('create: required and optional params', async () => {
-    const response = await client.abuseReports.create('abuse_dmca', {
+    const response = await client.abuseReports.create('report_type', {
       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      act: 'abuse_dmca',
       address1: 'x',
       agent_name: 'x',
-      agree: 0,
+      agree: 1,
       city: 'x',
       country: 'x',
+      email: 'email',
+      email2: 'email2',
       host_notification: 'send',
+      name: 'x',
       original_work: 'x',
       owner_notification: 'send',
       signature: 'signature',
       state: 'x',
-      act: 'abuse_dmca',
+      urls: 'urls',
       comments: 'x',
       company: 'x',
-      destination_ips: 'destination_ips',
-      email: 'email',
-      email2: 'email2',
-      justification: 'x',
-      name: 'x',
-      ncmec_notification: 'send',
-      ncsei_subject_representation: true,
-      ports_protocols: 'ports_protocols',
-      source_ips: 'source_ips',
+      reported_country: 'xx',
+      reported_user_agent: 'x',
       tele: 'x',
       title: 'x',
-      trademark_number: 'x',
-      trademark_office: 'x',
-      trademark_symbol: 'x',
-      urls: 'urls',
     });
   });
 });

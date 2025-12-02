@@ -6,7 +6,15 @@ import { SinglePage } from '../../../pagination';
 
 export class Certificates extends APIResource {
   /**
-   * Creates a new Zero Trust certificate.
+   * Create a new Zero Trust certificate.
+   *
+   * @example
+   * ```ts
+   * const certificate =
+   *   await client.zeroTrust.gateway.certificates.create({
+   *     account_id: '699d98642c564d2e855e9661899b7252',
+   *   });
+   * ```
    */
   create(
     params: CertificateCreateParams,
@@ -22,7 +30,17 @@ export class Certificates extends APIResource {
   }
 
   /**
-   * Fetches all Zero Trust certificates for an account.
+   * List all Zero Trust certificates for an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const certificateListResponse of client.zeroTrust.gateway.certificates.list(
+   *   { account_id: '699d98642c564d2e855e9661899b7252' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: CertificateListParams,
@@ -37,8 +55,17 @@ export class Certificates extends APIResource {
   }
 
   /**
-   * Deletes a gateway-managed Zero Trust certificate. A certificate must be
-   * deactivated from the edge (inactive) before it is deleted.
+   * Delete a gateway-managed Zero Trust certificate. You must deactivate the
+   * certificate from the edge (inactive) before deleting it.
+   *
+   * @example
+   * ```ts
+   * const certificate =
+   *   await client.zeroTrust.gateway.certificates.delete(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   delete(
     certificateId: string,
@@ -55,7 +82,19 @@ export class Certificates extends APIResource {
   }
 
   /**
-   * Binds a single Zero Trust certificate to the edge.
+   * Bind a single Zero Trust certificate to the edge.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.zeroTrust.gateway.certificates.activate(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     {
+   *       account_id: '699d98642c564d2e855e9661899b7252',
+   *       body: {},
+   *     },
+   *   );
+   * ```
    */
   activate(
     certificateId: string,
@@ -72,7 +111,19 @@ export class Certificates extends APIResource {
   }
 
   /**
-   * Unbinds a single Zero Trust certificate from the edge
+   * Unbind a single Zero Trust certificate from the edge.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.zeroTrust.gateway.certificates.deactivate(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     {
+   *       account_id: '699d98642c564d2e855e9661899b7252',
+   *       body: {},
+   *     },
+   *   );
+   * ```
    */
   deactivate(
     certificateId: string,
@@ -89,7 +140,16 @@ export class Certificates extends APIResource {
   }
 
   /**
-   * Fetches a single Zero Trust certificate.
+   * Get a single Zero Trust certificate.
+   *
+   * @example
+   * ```ts
+   * const certificate =
+   *   await client.zeroTrust.gateway.certificates.get(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   get(
     certificateId: string,
@@ -110,19 +170,19 @@ export class CertificateListResponsesSinglePage extends SinglePage<CertificateLi
 
 export interface CertificateCreateResponse {
   /**
-   * Certificate UUID tag.
+   * Identify the certificate with a UUID.
    */
   id?: string;
 
   /**
-   * The deployment status of the certificate on Cloudflare's edge. Certificates in
-   * the 'available' (previously called 'active') state may be used for Gateway TLS
-   * interception.
+   * Indicate the read-only deployment status of the certificate on Cloudflare's
+   * edge. Gateway TLS interception can use certificates in the 'available'
+   * (previously called 'active') state.
    */
   binding_status?: 'pending_deployment' | 'available' | 'pending_deletion' | 'inactive';
 
   /**
-   * The CA certificate
+   * Provide the CA certificate (read-only).
    */
   certificate?: string;
 
@@ -131,27 +191,29 @@ export interface CertificateCreateResponse {
   expires_on?: string;
 
   /**
-   * The SHA256 fingerprint of the certificate.
+   * Provide the SHA256 fingerprint of the certificate (read-only).
    */
   fingerprint?: string;
 
   /**
-   * Use this certificate for Gateway TLS interception
+   * Indicate whether Gateway TLS interception uses this certificate (read-only). You
+   * cannot set this value directly. To configure interception, use the Gateway
+   * configuration setting named `certificate` (read-only).
    */
   in_use?: boolean;
 
   /**
-   * The organization that issued the certificate.
+   * Indicate the organization that issued the certificate (read-only).
    */
   issuer_org?: string;
 
   /**
-   * The entire issuer field of the certificate.
+   * Provide the entire issuer field of the certificate (read-only).
    */
   issuer_raw?: string;
 
   /**
-   * The type of certificate, either BYO-PKI (custom) or Gateway-managed.
+   * Indicate the read-only certificate type, BYO-PKI (custom) or Gateway-managed.
    */
   type?: 'custom' | 'gateway_managed';
 
@@ -162,19 +224,19 @@ export interface CertificateCreateResponse {
 
 export interface CertificateListResponse {
   /**
-   * Certificate UUID tag.
+   * Identify the certificate with a UUID.
    */
   id?: string;
 
   /**
-   * The deployment status of the certificate on Cloudflare's edge. Certificates in
-   * the 'available' (previously called 'active') state may be used for Gateway TLS
-   * interception.
+   * Indicate the read-only deployment status of the certificate on Cloudflare's
+   * edge. Gateway TLS interception can use certificates in the 'available'
+   * (previously called 'active') state.
    */
   binding_status?: 'pending_deployment' | 'available' | 'pending_deletion' | 'inactive';
 
   /**
-   * The CA certificate
+   * Provide the CA certificate (read-only).
    */
   certificate?: string;
 
@@ -183,27 +245,29 @@ export interface CertificateListResponse {
   expires_on?: string;
 
   /**
-   * The SHA256 fingerprint of the certificate.
+   * Provide the SHA256 fingerprint of the certificate (read-only).
    */
   fingerprint?: string;
 
   /**
-   * Use this certificate for Gateway TLS interception
+   * Indicate whether Gateway TLS interception uses this certificate (read-only). You
+   * cannot set this value directly. To configure interception, use the Gateway
+   * configuration setting named `certificate` (read-only).
    */
   in_use?: boolean;
 
   /**
-   * The organization that issued the certificate.
+   * Indicate the organization that issued the certificate (read-only).
    */
   issuer_org?: string;
 
   /**
-   * The entire issuer field of the certificate.
+   * Provide the entire issuer field of the certificate (read-only).
    */
   issuer_raw?: string;
 
   /**
-   * The type of certificate, either BYO-PKI (custom) or Gateway-managed.
+   * Indicate the read-only certificate type, BYO-PKI (custom) or Gateway-managed.
    */
   type?: 'custom' | 'gateway_managed';
 
@@ -214,19 +278,19 @@ export interface CertificateListResponse {
 
 export interface CertificateDeleteResponse {
   /**
-   * Certificate UUID tag.
+   * Identify the certificate with a UUID.
    */
   id?: string;
 
   /**
-   * The deployment status of the certificate on Cloudflare's edge. Certificates in
-   * the 'available' (previously called 'active') state may be used for Gateway TLS
-   * interception.
+   * Indicate the read-only deployment status of the certificate on Cloudflare's
+   * edge. Gateway TLS interception can use certificates in the 'available'
+   * (previously called 'active') state.
    */
   binding_status?: 'pending_deployment' | 'available' | 'pending_deletion' | 'inactive';
 
   /**
-   * The CA certificate
+   * Provide the CA certificate (read-only).
    */
   certificate?: string;
 
@@ -235,27 +299,29 @@ export interface CertificateDeleteResponse {
   expires_on?: string;
 
   /**
-   * The SHA256 fingerprint of the certificate.
+   * Provide the SHA256 fingerprint of the certificate (read-only).
    */
   fingerprint?: string;
 
   /**
-   * Use this certificate for Gateway TLS interception
+   * Indicate whether Gateway TLS interception uses this certificate (read-only). You
+   * cannot set this value directly. To configure interception, use the Gateway
+   * configuration setting named `certificate` (read-only).
    */
   in_use?: boolean;
 
   /**
-   * The organization that issued the certificate.
+   * Indicate the organization that issued the certificate (read-only).
    */
   issuer_org?: string;
 
   /**
-   * The entire issuer field of the certificate.
+   * Provide the entire issuer field of the certificate (read-only).
    */
   issuer_raw?: string;
 
   /**
-   * The type of certificate, either BYO-PKI (custom) or Gateway-managed.
+   * Indicate the read-only certificate type, BYO-PKI (custom) or Gateway-managed.
    */
   type?: 'custom' | 'gateway_managed';
 
@@ -266,19 +332,19 @@ export interface CertificateDeleteResponse {
 
 export interface CertificateActivateResponse {
   /**
-   * Certificate UUID tag.
+   * Identify the certificate with a UUID.
    */
   id?: string;
 
   /**
-   * The deployment status of the certificate on Cloudflare's edge. Certificates in
-   * the 'available' (previously called 'active') state may be used for Gateway TLS
-   * interception.
+   * Indicate the read-only deployment status of the certificate on Cloudflare's
+   * edge. Gateway TLS interception can use certificates in the 'available'
+   * (previously called 'active') state.
    */
   binding_status?: 'pending_deployment' | 'available' | 'pending_deletion' | 'inactive';
 
   /**
-   * The CA certificate
+   * Provide the CA certificate (read-only).
    */
   certificate?: string;
 
@@ -287,27 +353,29 @@ export interface CertificateActivateResponse {
   expires_on?: string;
 
   /**
-   * The SHA256 fingerprint of the certificate.
+   * Provide the SHA256 fingerprint of the certificate (read-only).
    */
   fingerprint?: string;
 
   /**
-   * Use this certificate for Gateway TLS interception
+   * Indicate whether Gateway TLS interception uses this certificate (read-only). You
+   * cannot set this value directly. To configure interception, use the Gateway
+   * configuration setting named `certificate` (read-only).
    */
   in_use?: boolean;
 
   /**
-   * The organization that issued the certificate.
+   * Indicate the organization that issued the certificate (read-only).
    */
   issuer_org?: string;
 
   /**
-   * The entire issuer field of the certificate.
+   * Provide the entire issuer field of the certificate (read-only).
    */
   issuer_raw?: string;
 
   /**
-   * The type of certificate, either BYO-PKI (custom) or Gateway-managed.
+   * Indicate the read-only certificate type, BYO-PKI (custom) or Gateway-managed.
    */
   type?: 'custom' | 'gateway_managed';
 
@@ -318,19 +386,19 @@ export interface CertificateActivateResponse {
 
 export interface CertificateDeactivateResponse {
   /**
-   * Certificate UUID tag.
+   * Identify the certificate with a UUID.
    */
   id?: string;
 
   /**
-   * The deployment status of the certificate on Cloudflare's edge. Certificates in
-   * the 'available' (previously called 'active') state may be used for Gateway TLS
-   * interception.
+   * Indicate the read-only deployment status of the certificate on Cloudflare's
+   * edge. Gateway TLS interception can use certificates in the 'available'
+   * (previously called 'active') state.
    */
   binding_status?: 'pending_deployment' | 'available' | 'pending_deletion' | 'inactive';
 
   /**
-   * The CA certificate
+   * Provide the CA certificate (read-only).
    */
   certificate?: string;
 
@@ -339,27 +407,29 @@ export interface CertificateDeactivateResponse {
   expires_on?: string;
 
   /**
-   * The SHA256 fingerprint of the certificate.
+   * Provide the SHA256 fingerprint of the certificate (read-only).
    */
   fingerprint?: string;
 
   /**
-   * Use this certificate for Gateway TLS interception
+   * Indicate whether Gateway TLS interception uses this certificate (read-only). You
+   * cannot set this value directly. To configure interception, use the Gateway
+   * configuration setting named `certificate` (read-only).
    */
   in_use?: boolean;
 
   /**
-   * The organization that issued the certificate.
+   * Indicate the organization that issued the certificate (read-only).
    */
   issuer_org?: string;
 
   /**
-   * The entire issuer field of the certificate.
+   * Provide the entire issuer field of the certificate (read-only).
    */
   issuer_raw?: string;
 
   /**
-   * The type of certificate, either BYO-PKI (custom) or Gateway-managed.
+   * Indicate the read-only certificate type, BYO-PKI (custom) or Gateway-managed.
    */
   type?: 'custom' | 'gateway_managed';
 
@@ -370,19 +440,19 @@ export interface CertificateDeactivateResponse {
 
 export interface CertificateGetResponse {
   /**
-   * Certificate UUID tag.
+   * Identify the certificate with a UUID.
    */
   id?: string;
 
   /**
-   * The deployment status of the certificate on Cloudflare's edge. Certificates in
-   * the 'available' (previously called 'active') state may be used for Gateway TLS
-   * interception.
+   * Indicate the read-only deployment status of the certificate on Cloudflare's
+   * edge. Gateway TLS interception can use certificates in the 'available'
+   * (previously called 'active') state.
    */
   binding_status?: 'pending_deployment' | 'available' | 'pending_deletion' | 'inactive';
 
   /**
-   * The CA certificate
+   * Provide the CA certificate (read-only).
    */
   certificate?: string;
 
@@ -391,27 +461,29 @@ export interface CertificateGetResponse {
   expires_on?: string;
 
   /**
-   * The SHA256 fingerprint of the certificate.
+   * Provide the SHA256 fingerprint of the certificate (read-only).
    */
   fingerprint?: string;
 
   /**
-   * Use this certificate for Gateway TLS interception
+   * Indicate whether Gateway TLS interception uses this certificate (read-only). You
+   * cannot set this value directly. To configure interception, use the Gateway
+   * configuration setting named `certificate` (read-only).
    */
   in_use?: boolean;
 
   /**
-   * The organization that issued the certificate.
+   * Indicate the organization that issued the certificate (read-only).
    */
   issuer_org?: string;
 
   /**
-   * The entire issuer field of the certificate.
+   * Provide the entire issuer field of the certificate (read-only).
    */
   issuer_raw?: string;
 
   /**
-   * The type of certificate, either BYO-PKI (custom) or Gateway-managed.
+   * Indicate the read-only certificate type, BYO-PKI (custom) or Gateway-managed.
    */
   type?: 'custom' | 'gateway_managed';
 
@@ -427,8 +499,11 @@ export interface CertificateCreateParams {
   account_id: string;
 
   /**
-   * Body param: Number of days the generated certificate will be valid, minimum 1
-   * day and maximum 30 years. Defaults to 5 years.
+   * Body param: Sets the certificate validity period in days (range: 1-10,950 days /
+   * ~30 years). Defaults to 1,825 days (5 years). **Important**: This field is only
+   * settable during the certificate creation. Certificates becomes immutable after
+   * creation - use the `/activate` and `/deactivate` endpoints to manage certificate
+   * lifecycle.
    */
   validity_period_days?: number;
 }

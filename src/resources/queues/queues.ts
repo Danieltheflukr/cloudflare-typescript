@@ -10,6 +10,7 @@ import {
   ConsumerDeleteParams,
   ConsumerDeleteResponse,
   ConsumerGetParams,
+  ConsumerListParams,
   ConsumerUpdateParams,
   Consumers,
   ConsumersSinglePage,
@@ -18,19 +19,47 @@ import * as MessagesAPI from './messages';
 import {
   MessageAckParams,
   MessageAckResponse,
+  MessageBulkPushParams,
+  MessageBulkPushResponse,
   MessagePullParams,
   MessagePullResponse,
-  MessagePullResponsesSinglePage,
+  MessagePushParams,
+  MessagePushResponse,
   Messages,
 } from './messages';
+import * as PurgeAPI from './purge';
+import { Purge, PurgeStartParams, PurgeStatusParams, PurgeStatusResponse } from './purge';
+import * as SubscriptionsAPI from './subscriptions';
+import {
+  SubscriptionCreateParams,
+  SubscriptionCreateResponse,
+  SubscriptionDeleteParams,
+  SubscriptionDeleteResponse,
+  SubscriptionListParams,
+  SubscriptionListResponse,
+  SubscriptionListResponsesV4PagePaginationArray,
+  SubscriptionUpdateParams,
+  SubscriptionUpdateResponse,
+  Subscriptions,
+} from './subscriptions';
 import { SinglePage } from '../../pagination';
 
 export class Queues extends APIResource {
-  consumers: ConsumersAPI.Consumers = new ConsumersAPI.Consumers(this._client);
   messages: MessagesAPI.Messages = new MessagesAPI.Messages(this._client);
+  purge: PurgeAPI.Purge = new PurgeAPI.Purge(this._client);
+  consumers: ConsumersAPI.Consumers = new ConsumersAPI.Consumers(this._client);
+  subscriptions: SubscriptionsAPI.Subscriptions = new SubscriptionsAPI.Subscriptions(this._client);
 
   /**
    * Create a new queue
+   *
+   * @example
+   * ```ts
+   * const queue = await client.queues.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   queue_name: 'example-queue',
+   * });
+   * ```
    */
   create(params: QueueCreateParams, options?: Core.RequestOptions): Core.APIPromise<Queue> {
     const { account_id, ...body } = params;
@@ -45,6 +74,14 @@ export class Queues extends APIResource {
    * Updates a Queue. Note that this endpoint does not support partial updates. If
    * successful, the Queue's configuration is overwritten with the supplied
    * configuration.
+   *
+   * @example
+   * ```ts
+   * const queue = await client.queues.update(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   update(queueId: string, params: QueueUpdateParams, options?: Core.RequestOptions): Core.APIPromise<Queue> {
     const { account_id, ...body } = params;
@@ -57,6 +94,16 @@ export class Queues extends APIResource {
 
   /**
    * Returns the queues owned by an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const queue of client.queues.list({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * })) {
+   *   // ...
+   * }
+   * ```
    */
   list(params: QueueListParams, options?: Core.RequestOptions): Core.PagePromise<QueuesSinglePage, Queue> {
     const { account_id } = params;
@@ -65,6 +112,14 @@ export class Queues extends APIResource {
 
   /**
    * Deletes a queue
+   *
+   * @example
+   * ```ts
+   * const queue = await client.queues.delete(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     queueId: string,
@@ -76,7 +131,36 @@ export class Queues extends APIResource {
   }
 
   /**
+   * Updates a Queue.
+   *
+   * @example
+   * ```ts
+   * const queue = await client.queues.edit(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
+   */
+  edit(queueId: string, params: QueueEditParams, options?: Core.RequestOptions): Core.APIPromise<Queue> {
+    const { account_id, ...body } = params;
+    return (
+      this._client.patch(`/accounts/${account_id}/queues/${queueId}`, {
+        body,
+        ...options,
+      }) as Core.APIPromise<{ result: Queue }>
+    )._thenUnwrap((obj) => obj.result);
+  }
+
+  /**
    * Get details about a specific queue.
+   *
+   * @example
+   * ```ts
+   * const queue = await client.queues.get(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(queueId: string, params: QueueGetParams, options?: Core.RequestOptions): Core.APIPromise<Queue> {
     const { account_id } = params;
@@ -128,6 +212,11 @@ export namespace Queue {
      * Number of seconds to delay delivery of all messages to consumers.
      */
     delivery_delay?: number;
+
+    /**
+     * Indicates if message delivery to consumers is currently paused.
+     */
+    delivery_paused?: boolean;
 
     /**
      * Number of seconds after which an unconsumed message will be delayed.
@@ -184,6 +273,11 @@ export namespace QueueUpdateParams {
     delivery_delay?: number;
 
     /**
+     * Indicates if message delivery to consumers is currently paused.
+     */
+    delivery_paused?: boolean;
+
+    /**
      * Number of seconds after which an unconsumed message will be delayed.
      */
     message_retention_period?: number;
@@ -204,6 +298,42 @@ export interface QueueDeleteParams {
   account_id: string;
 }
 
+export interface QueueEditParams {
+  /**
+   * Path param: A Resource identifier.
+   */
+  account_id: string;
+
+  /**
+   * Body param:
+   */
+  queue_name?: string;
+
+  /**
+   * Body param:
+   */
+  settings?: QueueEditParams.Settings;
+}
+
+export namespace QueueEditParams {
+  export interface Settings {
+    /**
+     * Number of seconds to delay delivery of all messages to consumers.
+     */
+    delivery_delay?: number;
+
+    /**
+     * Indicates if message delivery to consumers is currently paused.
+     */
+    delivery_paused?: boolean;
+
+    /**
+     * Number of seconds after which an unconsumed message will be delayed.
+     */
+    message_retention_period?: number;
+  }
+}
+
 export interface QueueGetParams {
   /**
    * A Resource identifier.
@@ -211,12 +341,46 @@ export interface QueueGetParams {
   account_id: string;
 }
 
+Queues.QueuesSinglePage = QueuesSinglePage;
+Queues.Messages = Messages;
+Queues.Purge = Purge;
 Queues.Consumers = Consumers;
 Queues.ConsumersSinglePage = ConsumersSinglePage;
-Queues.Messages = Messages;
-Queues.MessagePullResponsesSinglePage = MessagePullResponsesSinglePage;
+Queues.Subscriptions = Subscriptions;
+Queues.SubscriptionListResponsesV4PagePaginationArray = SubscriptionListResponsesV4PagePaginationArray;
 
 export declare namespace Queues {
+  export {
+    type Queue as Queue,
+    type QueueDeleteResponse as QueueDeleteResponse,
+    QueuesSinglePage as QueuesSinglePage,
+    type QueueCreateParams as QueueCreateParams,
+    type QueueUpdateParams as QueueUpdateParams,
+    type QueueListParams as QueueListParams,
+    type QueueDeleteParams as QueueDeleteParams,
+    type QueueEditParams as QueueEditParams,
+    type QueueGetParams as QueueGetParams,
+  };
+
+  export {
+    Messages as Messages,
+    type MessageAckResponse as MessageAckResponse,
+    type MessageBulkPushResponse as MessageBulkPushResponse,
+    type MessagePullResponse as MessagePullResponse,
+    type MessagePushResponse as MessagePushResponse,
+    type MessageAckParams as MessageAckParams,
+    type MessageBulkPushParams as MessageBulkPushParams,
+    type MessagePullParams as MessagePullParams,
+    type MessagePushParams as MessagePushParams,
+  };
+
+  export {
+    Purge as Purge,
+    type PurgeStatusResponse as PurgeStatusResponse,
+    type PurgeStartParams as PurgeStartParams,
+    type PurgeStatusParams as PurgeStatusParams,
+  };
+
   export {
     Consumers as Consumers,
     type Consumer as Consumer,
@@ -224,16 +388,21 @@ export declare namespace Queues {
     ConsumersSinglePage as ConsumersSinglePage,
     type ConsumerCreateParams as ConsumerCreateParams,
     type ConsumerUpdateParams as ConsumerUpdateParams,
+    type ConsumerListParams as ConsumerListParams,
     type ConsumerDeleteParams as ConsumerDeleteParams,
     type ConsumerGetParams as ConsumerGetParams,
   };
 
   export {
-    Messages as Messages,
-    type MessageAckResponse as MessageAckResponse,
-    type MessagePullResponse as MessagePullResponse,
-    MessagePullResponsesSinglePage as MessagePullResponsesSinglePage,
-    type MessageAckParams as MessageAckParams,
-    type MessagePullParams as MessagePullParams,
+    Subscriptions as Subscriptions,
+    type SubscriptionCreateResponse as SubscriptionCreateResponse,
+    type SubscriptionUpdateResponse as SubscriptionUpdateResponse,
+    type SubscriptionListResponse as SubscriptionListResponse,
+    type SubscriptionDeleteResponse as SubscriptionDeleteResponse,
+    SubscriptionListResponsesV4PagePaginationArray as SubscriptionListResponsesV4PagePaginationArray,
+    type SubscriptionCreateParams as SubscriptionCreateParams,
+    type SubscriptionUpdateParams as SubscriptionUpdateParams,
+    type SubscriptionListParams as SubscriptionListParams,
+    type SubscriptionDeleteParams as SubscriptionDeleteParams,
   };
 }

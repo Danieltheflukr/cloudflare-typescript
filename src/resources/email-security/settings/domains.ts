@@ -7,6 +7,16 @@ import { SinglePage, V4PagePaginationArray, type V4PagePaginationArrayParams } f
 export class Domains extends APIResource {
   /**
    * Lists, searches, and sorts an account’s email domains.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const domainListResponse of client.emailSecurity.settings.domains.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: DomainListParams,
@@ -22,6 +32,14 @@ export class Domains extends APIResource {
 
   /**
    * Unprotect an email domain
+   *
+   * @example
+   * ```ts
+   * const domain =
+   *   await client.emailSecurity.settings.domains.delete(2400, {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   delete(
     domainId: number,
@@ -39,6 +57,16 @@ export class Domains extends APIResource {
 
   /**
    * Unprotect multiple email domains
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const domainBulkDeleteResponse of client.emailSecurity.settings.domains.bulkDelete(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   bulkDelete(
     params: DomainBulkDeleteParams,
@@ -54,6 +82,15 @@ export class Domains extends APIResource {
 
   /**
    * Update an email domain
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.emailSecurity.settings.domains.edit(2400, {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     ip_restrictions: ['192.0.2.0/24', '2001:db8::/32'],
+   *   });
+   * ```
    */
   edit(
     domainId: number,
@@ -71,6 +108,14 @@ export class Domains extends APIResource {
 
   /**
    * Get an email domain
+   *
+   * @example
+   * ```ts
+   * const domain =
+   *   await client.emailSecurity.settings.domains.get(2400, {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   get(
     domainId: number,
@@ -122,9 +167,13 @@ export interface DomainListResponse {
 
   lookback_hops: number;
 
+  regions: Array<'GLOBAL' | 'AU' | 'DE' | 'IN' | 'US'>;
+
   transport: string;
 
   authorization?: DomainListResponse.Authorization | null;
+
+  dmarc_status?: 'none' | 'good' | 'invalid' | null;
 
   emails_processed?: DomainListResponse.EmailsProcessed | null;
 
@@ -139,6 +188,8 @@ export interface DomainListResponse {
   require_tls_inbound?: boolean | null;
 
   require_tls_outbound?: boolean | null;
+
+  spf_status?: 'none' | 'good' | 'neutral' | 'open' | 'invalid' | null;
 }
 
 export namespace DomainListResponse {
@@ -204,9 +255,13 @@ export interface DomainEditResponse {
 
   lookback_hops: number;
 
+  regions: Array<'GLOBAL' | 'AU' | 'DE' | 'IN' | 'US'>;
+
   transport: string;
 
   authorization?: DomainEditResponse.Authorization | null;
+
+  dmarc_status?: 'none' | 'good' | 'invalid' | null;
 
   emails_processed?: DomainEditResponse.EmailsProcessed | null;
 
@@ -221,6 +276,8 @@ export interface DomainEditResponse {
   require_tls_inbound?: boolean | null;
 
   require_tls_outbound?: boolean | null;
+
+  spf_status?: 'none' | 'good' | 'neutral' | 'open' | 'invalid' | null;
 }
 
 export namespace DomainEditResponse {
@@ -272,9 +329,13 @@ export interface DomainGetResponse {
 
   lookback_hops: number;
 
+  regions: Array<'GLOBAL' | 'AU' | 'DE' | 'IN' | 'US'>;
+
   transport: string;
 
   authorization?: DomainGetResponse.Authorization | null;
+
+  dmarc_status?: 'none' | 'good' | 'invalid' | null;
 
   emails_processed?: DomainGetResponse.EmailsProcessed | null;
 
@@ -289,6 +350,8 @@ export interface DomainGetResponse {
   require_tls_inbound?: boolean | null;
 
   require_tls_outbound?: boolean | null;
+
+  spf_status?: 'none' | 'good' | 'neutral' | 'open' | 'invalid' | null;
 }
 
 export namespace DomainGetResponse {
@@ -378,7 +441,12 @@ export interface DomainEditParams {
   /**
    * Body param:
    */
-  domain?: string | null;
+  allowed_delivery_modes?: Array<'DIRECT' | 'BCC' | 'JOURNAL' | 'API' | 'RETRO_SCAN'>;
+
+  /**
+   * Body param:
+   */
+  domain?: string;
 
   /**
    * Body param:
@@ -404,12 +472,17 @@ export interface DomainEditParams {
   /**
    * Body param:
    */
-  integration_id?: string | null;
+  integration_id?: string;
 
   /**
    * Body param:
    */
-  lookback_hops?: number | null;
+  lookback_hops?: number;
+
+  /**
+   * Body param:
+   */
+  regions?: Array<'GLOBAL' | 'AU' | 'DE' | 'IN' | 'US'>;
 
   /**
    * Body param:

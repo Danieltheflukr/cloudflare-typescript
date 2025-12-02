@@ -3,6 +3,7 @@
 export { Infrastructure } from './infrastructure';
 export {
   TargetListResponsesV4PagePaginationArray,
+  TargetBulkUpdateResponsesSinglePage,
   Targets,
   type TargetCreateResponse,
   type TargetUpdateResponse,
@@ -14,6 +15,7 @@ export {
   type TargetListParams,
   type TargetDeleteParams,
   type TargetBulkDeleteParams,
+  type TargetBulkDeleteV2Params,
   type TargetBulkUpdateParams,
   type TargetGetParams,
 } from './targets';

@@ -7,6 +7,8 @@ import * as SettingsAPI from './settings';
 export class SchemaValidation extends APIResource {
   /**
    * Updates zone level schema validation settings on the zone
+   *
+   * @deprecated Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead.
    */
   update(
     params: SchemaValidationUpdateParams,
@@ -18,6 +20,8 @@ export class SchemaValidation extends APIResource {
 
   /**
    * Updates zone level schema validation settings on the zone
+   *
+   * @deprecated Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead.
    */
   edit(
     params: SchemaValidationEditParams,
@@ -32,6 +36,8 @@ export class SchemaValidation extends APIResource {
 
   /**
    * Retrieves zone level schema validation settings currently set on the zone
+   *
+   * @deprecated Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead.
    */
   get(
     params: SchemaValidationGetParams,
@@ -44,7 +50,7 @@ export class SchemaValidation extends APIResource {
 
 export interface SchemaValidationUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -76,7 +82,7 @@ export interface SchemaValidationUpdateParams {
 
 export interface SchemaValidationEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -109,7 +115,7 @@ export interface SchemaValidationEditParams {
 
 export interface SchemaValidationGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

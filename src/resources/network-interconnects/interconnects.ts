@@ -6,6 +6,17 @@ import * as Core from '../../core';
 export class Interconnects extends APIResource {
   /**
    * Create a new interconnect
+   *
+   * @example
+   * ```ts
+   * const interconnect =
+   *   await client.networkInterconnects.interconnects.create({
+   *     account_id: 'account_id',
+   *     account: 'account',
+   *     slot_id: '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     type: 'type',
+   *   });
+   * ```
    */
   create(
     params: InterconnectCreateParams,
@@ -17,6 +28,14 @@ export class Interconnects extends APIResource {
 
   /**
    * List existing interconnects
+   *
+   * @example
+   * ```ts
+   * const interconnects =
+   *   await client.networkInterconnects.interconnects.list({
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   list(
     params: InterconnectListParams,
@@ -28,6 +47,14 @@ export class Interconnects extends APIResource {
 
   /**
    * Delete an interconnect object
+   *
+   * @example
+   * ```ts
+   * await client.networkInterconnects.interconnects.delete(
+   *   'icon',
+   *   { account_id: 'account_id' },
+   * );
+   * ```
    */
   delete(
     icon: string,
@@ -43,6 +70,15 @@ export class Interconnects extends APIResource {
 
   /**
    * Get information about an interconnect object
+   *
+   * @example
+   * ```ts
+   * const interconnect =
+   *   await client.networkInterconnects.interconnects.get(
+   *     'icon',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   get(
     icon: string,
@@ -55,6 +91,14 @@ export class Interconnects extends APIResource {
 
   /**
    * Generate the Letter of Authorization (LOA) for a given interconnect
+   *
+   * @example
+   * ```ts
+   * await client.networkInterconnects.interconnects.loa(
+   *   'icon',
+   *   { account_id: 'account_id' },
+   * );
+   * ```
    */
   loa(icon: string, params: InterconnectLOAParams, options?: Core.RequestOptions): Core.APIPromise<void> {
     const { account_id } = params;
@@ -66,6 +110,15 @@ export class Interconnects extends APIResource {
 
   /**
    * Get the current status of an interconnect object
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.networkInterconnects.interconnects.status(
+   *     'icon',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   status(
     icon: string,
@@ -121,6 +174,11 @@ export namespace InterconnectCreateResponse {
     type: string;
 
     owner?: string;
+
+    /**
+     * Bandwidth structure as visible through the customer-facing API.
+     */
+    speed?: '50M' | '100M' | '200M' | '300M' | '400M' | '500M' | '1G' | '2G' | '5G' | '10G' | '20G' | '50G';
   }
 }
 
@@ -173,6 +231,11 @@ export namespace InterconnectListResponse {
     type: string;
 
     owner?: string;
+
+    /**
+     * Bandwidth structure as visible through the customer-facing API.
+     */
+    speed?: '50M' | '100M' | '200M' | '300M' | '400M' | '500M' | '1G' | '2G' | '5G' | '10G' | '20G' | '50G';
   }
 }
 
@@ -220,6 +283,11 @@ export namespace InterconnectGetResponse {
     type: string;
 
     owner?: string;
+
+    /**
+     * Bandwidth structure as visible through the customer-facing API.
+     */
+    speed?: '50M' | '100M' | '200M' | '300M' | '400M' | '500M' | '1G' | '2G' | '5G' | '10G' | '20G' | '50G';
   }
 }
 

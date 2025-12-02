@@ -32,11 +32,10 @@ export interface StatusEditResponse {
     | 'terminated'
     | 'complete'
     | 'waitingForPause'
-    | 'waiting'
-    | 'unknown';
+    | 'waiting';
 
   /**
-   * In ISO 8601 with no timezone offsets and in UTC.
+   * Accepts ISO 8601 with no timezone offsets and in UTC.
    */
   timestamp: string;
 }
@@ -48,7 +47,7 @@ export interface StatusEditParams {
   account_id: string;
 
   /**
-   * Body param: Possible actions to apply to instance
+   * Body param: Apply action to instance.
    */
   status: 'resume' | 'pause' | 'terminate';
 }

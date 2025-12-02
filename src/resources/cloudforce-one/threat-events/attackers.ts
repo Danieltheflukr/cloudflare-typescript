@@ -6,6 +6,14 @@ import * as Core from '../../../core';
 export class Attackers extends APIResource {
   /**
    * Lists attackers
+   *
+   * @example
+   * ```ts
+   * const attackers =
+   *   await client.cloudforceOne.threatEvents.attackers.list({
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   list(params: AttackerListParams, options?: Core.RequestOptions): Core.APIPromise<AttackerListResponse> {
     const { account_id } = params;
@@ -27,9 +35,9 @@ export namespace AttackerListResponse {
 
 export interface AttackerListParams {
   /**
-   * Account ID
+   * Account ID.
    */
-  account_id: number;
+  account_id: string;
 }
 
 export declare namespace Attackers {

@@ -15,7 +15,7 @@ describe('resource uaRules', () => {
     const responsePromise = client.firewall.uaRules.create({
       zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
       configuration: {},
-      mode: 'block',
+      mode: 'challenge',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -30,8 +30,10 @@ describe('resource uaRules', () => {
   test.skip('create: required and optional params', async () => {
     const response = await client.firewall.uaRules.create({
       zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
-      configuration: { target: 'ip', value: '198.51.100.4' },
-      mode: 'block',
+      configuration: { target: 'ua', value: 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)' },
+      mode: 'challenge',
+      description: 'Prevent multiple login failures to mitigate brute force attacks',
+      paused: false,
     });
   });
 
@@ -40,7 +42,7 @@ describe('resource uaRules', () => {
     const responsePromise = client.firewall.uaRules.update('372e67954025e0ba6aaa6d586b9e0b59', {
       zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
       configuration: {},
-      mode: 'block',
+      mode: 'challenge',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -56,7 +58,9 @@ describe('resource uaRules', () => {
     const response = await client.firewall.uaRules.update('372e67954025e0ba6aaa6d586b9e0b59', {
       zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
       configuration: { target: 'ip', value: '198.51.100.4' },
-      mode: 'block',
+      mode: 'challenge',
+      description: 'Prevent multiple login failures to mitigate brute force attacks',
+      paused: false,
     });
   });
 
@@ -75,10 +79,10 @@ describe('resource uaRules', () => {
     const response = await client.firewall.uaRules.list({
       zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
       description: 'abusive',
-      description_search: 'abusive',
       page: 1,
+      paused: false,
       per_page: 1,
-      ua_search: 'Safari',
+      user_agent: 'Safari',
     });
   });
 

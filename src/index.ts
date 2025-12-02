@@ -8,6 +8,8 @@ import * as Pagination from './pagination';
 import {
   type CursorLimitPaginationParams,
   CursorLimitPaginationResponse,
+  type CursorPaginationAfterParams,
+  CursorPaginationAfterResponse,
   type CursorPaginationParams,
   CursorPaginationResponse,
   SinglePageResponse,
@@ -21,7 +23,6 @@ import * as API from './resources/index';
 import { AbuseReports } from './resources/abuse-reports';
 import { AuditLogs } from './resources/audit-logs';
 import { BotManagement } from './resources/bot-management';
-import { BrandProtection } from './resources/brand-protection';
 import { ClientCertificates } from './resources/client-certificates';
 import { CustomNameservers } from './resources/custom-nameservers';
 import { CustomPages } from './resources/custom-pages';
@@ -34,6 +35,7 @@ import { Memberships } from './resources/memberships';
 import { OriginCACertificates } from './resources/origin-ca-certificates';
 import { OriginPostQuantumEncryption } from './resources/origin-post-quantum-encryption';
 import { PageRules } from './resources/page-rules';
+import { Pipelines } from './resources/pipelines';
 import { RateLimits } from './resources/rate-limits';
 import { SecurityTXT } from './resources/security-txt';
 import { URLNormalization } from './resources/url-normalization';
@@ -47,6 +49,7 @@ import { APIGateway } from './resources/api-gateway/api-gateway';
 import { Argo } from './resources/argo/argo';
 import { Billing } from './resources/billing/billing';
 import { BotnetFeed } from './resources/botnet-feed/botnet-feed';
+import { BrandProtection } from './resources/brand-protection/brand-protection';
 import { BrowserRendering } from './resources/browser-rendering/browser-rendering';
 import { Cache } from './resources/cache/cache';
 import { Calls } from './resources/calls/calls';
@@ -92,6 +95,8 @@ import { ResourceSharing } from './resources/resource-sharing/resource-sharing';
 import { Rules } from './resources/rules/rules';
 import { Rulesets } from './resources/rulesets/rulesets';
 import { RUM } from './resources/rum/rum';
+import { SchemaValidation } from './resources/schema-validation/schema-validation';
+import { SecretsStore } from './resources/secrets-store/secrets-store';
 import { SecurityCenter } from './resources/security-center/security-center';
 import { Snippets } from './resources/snippets/snippets';
 import { Spectrum } from './resources/spectrum/spectrum';
@@ -140,11 +145,18 @@ export interface ClientOptions {
   baseURL?: string | null | undefined;
 
   /**
+   * Define the API version to target for the requests, e.g., "2025-01-01"
+   */
+  apiVersion?: string | null;
+
+  /**
    * The maximum amount of time (in milliseconds) that the client should wait for a response
    * from the server before timing out a single request.
    *
    * Note that request timeouts are retried by default, so in a worst-case scenario you may wait
    * much longer than this timeout before the promise succeeds or fails.
+   *
+   * @unit milliseconds
    */
   timeout?: number | undefined;
 
@@ -208,6 +220,7 @@ export class Cloudflare extends Core.APIClient {
    * @param {string | null | undefined} [opts.apiEmail=process.env['CLOUDFLARE_EMAIL'] ?? null]
    * @param {string | null | undefined} [opts.userServiceKey=process.env['CLOUDFLARE_API_USER_SERVICE_KEY'] ?? null]
    * @param {string} [opts.baseURL=process.env['CLOUDFLARE_BASE_URL'] ?? https://api.cloudflare.com/client/v4] - Override the default base URL for the API.
+   * @param {string | null} [opts.apiVersion] - Define the version to target for the API.
    * @param {number} [opts.timeout=1 minute] - The maximum amount of time (in milliseconds) the client will wait for a response before timing out.
    * @param {number} [opts.httpAgent] - An HTTP agent used to manage HTTP(s) connections.
    * @param {Core.Fetch} [opts.fetch] - Specify a custom `fetch` function implementation.
@@ -217,6 +230,7 @@ export class Cloudflare extends Core.APIClient {
    */
   constructor({
     baseURL = Core.readEnv('CLOUDFLARE_BASE_URL'),
+    apiVersion = null,
     apiToken = Core.readEnv('CLOUDFLARE_API_TOKEN') ?? null,
     apiKey = Core.readEnv('CLOUDFLARE_API_KEY') ?? null,
     apiEmail = Core.readEnv('CLOUDFLARE_EMAIL') ?? null,
@@ -230,10 +244,13 @@ export class Cloudflare extends Core.APIClient {
       userServiceKey,
       ...opts,
       baseURL: baseURL || `https://api.cloudflare.com/client/v4`,
+      apiVersion: apiVersion || new Date().toISOString().slice(0, 10),
     };
 
     super({
       baseURL: options.baseURL!,
+      apiVersion: options.apiVersion!,
+      baseURLOverridden: baseURL ? baseURL !== 'https://api.cloudflare.com/client/v4' : false,
       timeout: options.timeout ?? 60000 /* 1 minute */,
       httpAgent: options.httpAgent,
       maxRetries: options.maxRetries,
@@ -340,6 +357,16 @@ export class Cloudflare extends Core.APIClient {
   securityCenter: API.SecurityCenter = new API.SecurityCenter(this);
   browserRendering: API.BrowserRendering = new API.BrowserRendering(this);
   customPages: API.CustomPages = new API.CustomPages(this);
+  secretsStore: API.SecretsStore = new API.SecretsStore(this);
+  pipelines: API.Pipelines = new API.Pipelines(this);
+  schemaValidation: API.SchemaValidation = new API.SchemaValidation(this);
+
+  /**
+   * Check whether the base URL is set to its default.
+   */
+  #baseURLOverridden(): boolean {
+    return this.baseURL !== 'https://api.cloudflare.com/client/v4';
+  }
 
   protected override defaultQuery(): Core.DefaultQuery | undefined {
     return this._options.defaultQuery;
@@ -354,7 +381,11 @@ export class Cloudflare extends Core.APIClient {
     };
   }
 
-  protected override validateHeaders(headers: Core.Headers, customHeaders: Core.Headers) {
+  protected override validateHeaders(
+    headers: Core.Headers,
+    customHeaders: Core.Headers,
+    usingCustomFetch: boolean,
+  ) {
     if (this.apiEmail && headers['x-auth-email']) {
       return;
     }
@@ -380,6 +411,11 @@ export class Cloudflare extends Core.APIClient {
       return;
     }
     if (customHeaders['x-auth-user-service-key'] === null) {
+      return;
+    }
+
+    // we can't check for the presence of the headers with a custom fetch implementation, so we shouldn't throw an error
+    if (usingCustomFetch) {
       return;
     }
 
@@ -558,6 +594,10 @@ Cloudflare.AI = AI;
 Cloudflare.SecurityCenter = SecurityCenter;
 Cloudflare.BrowserRendering = BrowserRendering;
 Cloudflare.CustomPages = CustomPages;
+Cloudflare.SecretsStore = SecretsStore;
+Cloudflare.Pipelines = Pipelines;
+Cloudflare.SchemaValidation = SchemaValidation;
+
 export declare namespace Cloudflare {
   export type RequestOptions = Core.RequestOptions;
 
@@ -577,6 +617,12 @@ export declare namespace Cloudflare {
   export {
     type CursorPaginationParams as CursorPaginationParams,
     type CursorPaginationResponse as CursorPaginationResponse,
+  };
+
+  export import CursorPaginationAfter = Pagination.CursorPaginationAfter;
+  export {
+    type CursorPaginationAfterParams as CursorPaginationAfterParams,
+    type CursorPaginationAfterResponse as CursorPaginationAfterResponse,
   };
 
   export import CursorLimitPagination = Pagination.CursorLimitPagination;
@@ -771,6 +817,12 @@ export declare namespace Cloudflare {
   export { BrowserRendering as BrowserRendering };
 
   export { CustomPages as CustomPages };
+
+  export { SecretsStore as SecretsStore };
+
+  export { Pipelines as Pipelines };
+
+  export { SchemaValidation as SchemaValidation };
 
   export type ASN = API.ASN;
   export type AuditLog = API.AuditLog;

@@ -17,7 +17,7 @@ export class CatalogSyncs extends APIResource {
   );
 
   /**
-   * Create a new Catalog Sync (Closed Beta)
+   * Create a new Catalog Sync (Closed Beta).
    */
   create(
     params: CatalogSyncCreateParams,
@@ -34,7 +34,7 @@ export class CatalogSyncs extends APIResource {
   }
 
   /**
-   * Update a Catalog Sync (Closed Beta)
+   * Update a Catalog Sync (Closed Beta).
    */
   update(
     syncId: string,
@@ -51,7 +51,7 @@ export class CatalogSyncs extends APIResource {
   }
 
   /**
-   * List Catalog Syncs (Closed Beta)
+   * List Catalog Syncs (Closed Beta).
    */
   list(
     params: CatalogSyncListParams,
@@ -66,7 +66,7 @@ export class CatalogSyncs extends APIResource {
   }
 
   /**
-   * Delete a Catalog Sync (Closed Beta)
+   * Delete a Catalog Sync (Closed Beta).
    */
   delete(
     syncId: string,
@@ -83,7 +83,7 @@ export class CatalogSyncs extends APIResource {
   }
 
   /**
-   * Update a Catalog Sync (Closed Beta)
+   * Update a Catalog Sync (Closed Beta).
    */
   edit(
     syncId: string,
@@ -100,7 +100,7 @@ export class CatalogSyncs extends APIResource {
   }
 
   /**
-   * Read a Catalog Sync (Closed Beta)
+   * Read a Catalog Sync (Closed Beta).
    */
   get(
     syncId: string,
@@ -118,7 +118,7 @@ export class CatalogSyncs extends APIResource {
 
   /**
    * Refresh a Catalog Sync's destination by running the sync policy against latest
-   * resource catalog (Closed Beta)
+   * resource catalog (Closed Beta).
    */
   refresh(
     syncId: string,
@@ -154,7 +154,7 @@ export interface CatalogSyncCreateResponse {
 
   update_mode: 'AUTO' | 'MANUAL';
 
-  errors?: Record<string, CatalogSyncCreateResponse.Errors>;
+  errors?: { [key: string]: CatalogSyncCreateResponse.Errors };
 
   includes_discoveries_until?: string;
 
@@ -362,7 +362,7 @@ export interface CatalogSyncUpdateResponse {
 
   update_mode: 'AUTO' | 'MANUAL';
 
-  errors?: Record<string, CatalogSyncUpdateResponse.Errors>;
+  errors?: { [key: string]: CatalogSyncUpdateResponse.Errors };
 
   includes_discoveries_until?: string;
 
@@ -570,7 +570,7 @@ export interface CatalogSyncListResponse {
 
   update_mode: 'AUTO' | 'MANUAL';
 
-  errors?: Record<string, CatalogSyncListResponse.Errors>;
+  errors?: { [key: string]: CatalogSyncListResponse.Errors };
 
   includes_discoveries_until?: string;
 
@@ -782,7 +782,7 @@ export interface CatalogSyncEditResponse {
 
   update_mode: 'AUTO' | 'MANUAL';
 
-  errors?: Record<string, CatalogSyncEditResponse.Errors>;
+  errors?: { [key: string]: CatalogSyncEditResponse.Errors };
 
   includes_discoveries_until?: string;
 
@@ -990,7 +990,7 @@ export interface CatalogSyncGetResponse {
 
   update_mode: 'AUTO' | 'MANUAL';
 
-  errors?: Record<string, CatalogSyncGetResponse.Errors>;
+  errors?: { [key: string]: CatalogSyncGetResponse.Errors };
 
   includes_discoveries_until?: string;
 

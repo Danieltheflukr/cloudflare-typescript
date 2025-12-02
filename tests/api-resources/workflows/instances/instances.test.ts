@@ -25,6 +25,7 @@ describe('resource instances', () => {
     const response = await client.workflows.instances.create('x', {
       account_id: 'account_id',
       instance_id: 'instance_id',
+      instance_retention: {},
       params: {},
     });
   });
@@ -43,8 +44,10 @@ describe('resource instances', () => {
   test('list: required and optional params', async () => {
     const response = await client.workflows.instances.list('x', {
       account_id: 'account_id',
+      cursor: 'cursor',
       date_end: '2019-12-27T18:11:19.117Z',
       date_start: '2019-12-27T18:11:19.117Z',
+      direction: 'asc',
       page: 1,
       per_page: 1,
       status: 'queued',
@@ -65,7 +68,7 @@ describe('resource instances', () => {
   test('bulk: required and optional params', async () => {
     const response = await client.workflows.instances.bulk('x', {
       account_id: 'account_id',
-      body: [{ instance_id: 'instance_id', params: {} }],
+      body: [{ instance_id: 'instance_id', instance_retention: {}, params: {} }],
     });
   });
 

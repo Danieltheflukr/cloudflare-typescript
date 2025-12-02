@@ -9,6 +9,12 @@ export class Summary extends APIResource {
   /**
    * Retrieves the distribution of emails by ARC (Authenticated Received Chain)
    * validation.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.arc();
+   * ```
    */
   arc(query?: SummaryARCParams, options?: Core.RequestOptions): Core.APIPromise<SummaryARCResponse>;
   arc(options?: Core.RequestOptions): Core.APIPromise<SummaryARCResponse>;
@@ -29,6 +35,12 @@ export class Summary extends APIResource {
   /**
    * Retrieves the distribution of emails by DKIM (DomainKeys Identified Mail)
    * validation.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.dkim();
+   * ```
    */
   dkim(query?: SummaryDKIMParams, options?: Core.RequestOptions): Core.APIPromise<SummaryDKIMResponse>;
   dkim(options?: Core.RequestOptions): Core.APIPromise<SummaryDKIMResponse>;
@@ -49,6 +61,12 @@ export class Summary extends APIResource {
   /**
    * Retrieves the distribution of emails by DMARC (Domain-based Message
    * Authentication, Reporting and Conformance) validation.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.dmarc();
+   * ```
    */
   dmarc(query?: SummaryDMARCParams, options?: Core.RequestOptions): Core.APIPromise<SummaryDMARCResponse>;
   dmarc(options?: Core.RequestOptions): Core.APIPromise<SummaryDMARCResponse>;
@@ -68,6 +86,12 @@ export class Summary extends APIResource {
 
   /**
    * Retrieves the distribution of emails by malicious classification.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.malicious();
+   * ```
    */
   malicious(
     query?: SummaryMaliciousParams,
@@ -90,6 +114,12 @@ export class Summary extends APIResource {
 
   /**
    * Retrieves the proportion of emails by spam classification (spam vs. non-spam).
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.spam();
+   * ```
    */
   spam(query?: SummarySpamParams, options?: Core.RequestOptions): Core.APIPromise<SummarySpamResponse>;
   spam(options?: Core.RequestOptions): Core.APIPromise<SummarySpamResponse>;
@@ -110,6 +140,12 @@ export class Summary extends APIResource {
   /**
    * Retrieves the distribution of emails by SPF (Sender Policy Framework)
    * validation.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.spf();
+   * ```
    */
   spf(query?: SummarySPFParams, options?: Core.RequestOptions): Core.APIPromise<SummarySPFResponse>;
   spf(options?: Core.RequestOptions): Core.APIPromise<SummarySPFResponse>;
@@ -130,6 +166,12 @@ export class Summary extends APIResource {
   /**
    * Retrieves the proportion of emails by spoof classification (spoof vs.
    * non-spoof).
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.spoof();
+   * ```
    */
   spoof(query?: SummarySpoofParams, options?: Core.RequestOptions): Core.APIPromise<SummarySpoofResponse>;
   spoof(options?: Core.RequestOptions): Core.APIPromise<SummarySpoofResponse>;
@@ -149,6 +191,12 @@ export class Summary extends APIResource {
 
   /**
    * Retrieves the distribution of emails by threat categories.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.threatCategory();
+   * ```
    */
   threatCategory(
     query?: SummaryThreatCategoryParams,
@@ -172,6 +220,12 @@ export class Summary extends APIResource {
 
   /**
    * Retrieves the distribution of emails by TLS version.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.security.summary.tlsVersion();
+   * ```
    */
   tlsVersion(
     query?: SummaryTLSVersionParams,
@@ -195,23 +249,82 @@ export class Summary extends APIResource {
 }
 
 export interface SummaryARCResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummaryARCResponse.Meta;
 
   summary_0: EmailAPI.RadarEmailSummary;
 }
 
 export namespace SummaryARCResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -224,50 +337,91 @@ export namespace SummaryARCResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 }
 
 export interface SummaryDKIMResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummaryDKIMResponse.Meta;
 
   summary_0: EmailAPI.RadarEmailSummary;
 }
 
 export namespace SummaryDKIMResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -280,50 +434,91 @@ export namespace SummaryDKIMResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 }
 
 export interface SummaryDMARCResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummaryDMARCResponse.Meta;
 
   summary_0: EmailAPI.RadarEmailSummary;
 }
 
 export namespace SummaryDMARCResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -336,50 +531,91 @@ export namespace SummaryDMARCResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 }
 
 export interface SummaryMaliciousResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummaryMaliciousResponse.Meta;
 
   summary_0: SummaryMaliciousResponse.Summary0;
 }
 
 export namespace SummaryMaliciousResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -392,56 +628,103 @@ export namespace SummaryMaliciousResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
   export interface Summary0 {
+    /**
+     * A numeric string.
+     */
     MALICIOUS: string;
 
+    /**
+     * A numeric string.
+     */
     NOT_MALICIOUS: string;
   }
 }
 
 export interface SummarySpamResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummarySpamResponse.Meta;
 
   summary_0: SummarySpamResponse.Summary0;
 }
 
 export namespace SummarySpamResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -454,56 +737,103 @@ export namespace SummarySpamResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
   export interface Summary0 {
+    /**
+     * A numeric string.
+     */
     NOT_SPAM: string;
 
+    /**
+     * A numeric string.
+     */
     SPAM: string;
   }
 }
 
 export interface SummarySPFResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummarySPFResponse.Meta;
 
   summary_0: EmailAPI.RadarEmailSummary;
 }
 
 export namespace SummarySPFResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -516,50 +846,91 @@ export namespace SummarySPFResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 }
 
 export interface SummarySpoofResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummarySpoofResponse.Meta;
 
   summary_0: SummarySpoofResponse.Summary0;
 }
 
 export namespace SummarySpoofResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -572,56 +943,103 @@ export namespace SummarySpoofResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
   export interface Summary0 {
+    /**
+     * A numeric string.
+     */
     NOT_SPOOF: string;
 
+    /**
+     * A numeric string.
+     */
     SPOOF: string;
   }
 }
 
 export interface SummaryThreatCategoryResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummaryThreatCategoryResponse.Meta;
 
   summary_0: SummaryThreatCategoryResponse.Summary0;
 }
 
 export namespace SummaryThreatCategoryResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -634,60 +1052,113 @@ export namespace SummaryThreatCategoryResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
   export interface Summary0 {
+    /**
+     * A numeric string.
+     */
     BrandImpersonation: string;
 
+    /**
+     * A numeric string.
+     */
     CredentialHarvester: string;
 
+    /**
+     * A numeric string.
+     */
     IdentityDeception: string;
 
+    /**
+     * A numeric string.
+     */
     Link: string;
   }
 }
 
 export interface SummaryTLSVersionResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: SummaryTLSVersionResponse.Meta;
 
   summary_0: SummaryTLSVersionResponse.Summary0;
 }
 
 export namespace SummaryTLSVersionResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    normalization: string;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -700,38 +1171,32 @@ export namespace SummaryTLSVersionResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
   export interface Summary0 {
+    /**
+     * A numeric string.
+     */
     'TLS 1.0': string;
 
+    /**
+     * A numeric string.
+     */
     'TLS 1.1': string;
 
+    /**
+     * A numeric string.
+     */
     'TLS 1.2': string;
 
+    /**
+     * A numeric string.
+     */
     'TLS 1.3': string;
   }
 }
@@ -743,9 +1208,9 @@ export interface SummaryARCParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -798,9 +1263,9 @@ export interface SummaryDKIMParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -848,9 +1313,9 @@ export interface SummaryDMARCParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -897,9 +1362,9 @@ export interface SummaryMaliciousParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -952,9 +1417,9 @@ export interface SummarySpamParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -1007,9 +1472,9 @@ export interface SummarySPFParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -1057,9 +1522,9 @@ export interface SummarySpoofParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -1112,9 +1577,9 @@ export interface SummaryThreatCategoryParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -1167,9 +1632,9 @@ export interface SummaryTLSVersionParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 

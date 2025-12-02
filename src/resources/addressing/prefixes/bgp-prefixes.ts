@@ -9,6 +9,15 @@ export class BGPPrefixes extends APIResource {
    * Create a BGP prefix, controlling the BGP advertisement status of a specific
    * subnet. When created, BGP prefixes are initially withdrawn, and can be
    * advertised with the Update BGP Prefix API.
+   *
+   * @example
+   * ```ts
+   * const bgpPrefix =
+   *   await client.addressing.prefixes.bgpPrefixes.create(
+   *     '2af39739cc4e3b5910c918468bb89828',
+   *     { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   *   );
+   * ```
    */
   create(
     prefixId: string,
@@ -29,6 +38,17 @@ export class BGPPrefixes extends APIResource {
    * control which specific subnets are advertised to the Internet. It is possible to
    * advertise subnets more specific than an IP Prefix by creating more specific BGP
    * Prefixes.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const bgpPrefix of client.addressing.prefixes.bgpPrefixes.list(
+   *   '2af39739cc4e3b5910c918468bb89828',
+   *   { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     prefixId: string,
@@ -46,6 +66,16 @@ export class BGPPrefixes extends APIResource {
   /**
    * Update the properties of a BGP Prefix, such as the on demand advertisement
    * status (advertised or withdrawn).
+   *
+   * @example
+   * ```ts
+   * const bgpPrefix =
+   *   await client.addressing.prefixes.bgpPrefixes.edit(
+   *     '2af39739cc4e3b5910c918468bb89828',
+   *     '7009ba364c7a5760798ceb430e603b74',
+   *     { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   *   );
+   * ```
    */
   edit(
     prefixId: string,
@@ -64,6 +94,16 @@ export class BGPPrefixes extends APIResource {
 
   /**
    * Retrieve a single BGP Prefix according to its identifier
+   *
+   * @example
+   * ```ts
+   * const bgpPrefix =
+   *   await client.addressing.prefixes.bgpPrefixes.get(
+   *     '2af39739cc4e3b5910c918468bb89828',
+   *     '7009ba364c7a5760798ceb430e603b74',
+   *     { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   *   );
+   * ```
    */
   get(
     prefixId: string,
@@ -93,6 +133,19 @@ export interface BGPPrefix {
    * Autonomous System Number (ASN) the prefix will be advertised under.
    */
   asn?: number | null;
+
+  /**
+   * Number of times to prepend the Cloudflare ASN to the BGP AS-Path attribute
+   */
+  asn_prepend_count?: number;
+
+  /**
+   * Determines if Cloudflare advertises a BYOIP BGP prefix even when there is no
+   * matching BGP prefix in the Magic routing table. When true, Cloudflare will
+   * automatically withdraw the BGP prefix when there are no matching BGP routes, and
+   * will resume advertising when there is at least one matching BGP route.
+   */
+  auto_advertise_withdraw?: boolean;
 
   bgp_signal_opts?: BGPPrefix.BGPSignalOpts;
 
@@ -174,6 +227,21 @@ export interface BGPPrefixEditParams {
    * Path param: Identifier of a Cloudflare account.
    */
   account_id: string;
+
+  /**
+   * Body param: Number of times to prepend the Cloudflare ASN to the BGP AS-Path
+   * attribute
+   */
+  asn_prepend_count?: number;
+
+  /**
+   * Body param: Determines if Cloudflare advertises a BYOIP BGP prefix even when
+   * there is no matching BGP prefix in the Magic routing table. When true,
+   * Cloudflare will automatically withdraw the BGP prefix when there are no matching
+   * BGP routes, and will resume advertising when there is at least one matching BGP
+   * route.
+   */
+  auto_advertise_withdraw?: boolean;
 
   /**
    * Body param:

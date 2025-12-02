@@ -8,6 +8,8 @@ import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../.
 export class History extends APIResource {
   /**
    * Accesses your billing history object.
+   *
+   * @deprecated
    */
   list(
     query?: HistoryListParams,

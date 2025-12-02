@@ -38,6 +38,8 @@ export class Packages extends APIResource {
    *
    * **Note:** Applies only to the
    * [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).
+   *
+   * @deprecated
    */
   list(
     params: PackageListParams,
@@ -56,6 +58,8 @@ export class Packages extends APIResource {
    *
    * **Note:** Applies only to the
    * [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).
+   *
+   * @deprecated
    */
   get(
     packageId: string,
@@ -82,7 +86,7 @@ export namespace PackageGetResponse {
     result: unknown | string | null;
 
     /**
-     * Whether the API call was successful
+     * Defines whether the API call was successful.
      */
     success: true;
   }
@@ -94,7 +98,7 @@ export namespace PackageGetResponse {
 
 export interface PackageListParams extends V4PagePaginationArrayParams {
   /**
-   * Path param: Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
 
@@ -122,7 +126,7 @@ export interface PackageListParams extends V4PagePaginationArrayParams {
 
 export interface PackageGetParams {
   /**
-   * Identifier
+   * Defines an identifier.
    */
   zone_id: string;
 }

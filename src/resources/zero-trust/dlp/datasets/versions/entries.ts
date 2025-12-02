@@ -8,20 +8,33 @@ export class Entries extends APIResource {
   /**
    * This is used for multi-column EDMv2 datasets. The EDMv2 format can only be
    * created in the Cloudflare dashboard.
+   *
+   * @example
+   * ```ts
+   * const entry =
+   *   await client.zeroTrust.dlp.datasets.versions.entries.create(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     0,
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     fs.createReadStream('path/to/file'),
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   create(
     datasetId: string,
     version: number,
     entryId: string,
+    datasetVersionEntry: string | ArrayBufferView | ArrayBuffer | BlobLike,
     params: EntryCreateParams,
     options?: Core.RequestOptions,
   ): Core.APIPromise<EntryCreateResponse> {
-    const { account_id, body } = params;
+    const { account_id } = params;
     return (
       this._client.post(
         `/accounts/${account_id}/dlp/datasets/${datasetId}/versions/${version}/entries/${entryId}`,
         {
-          body: body,
+          body: datasetVersionEntry,
           ...options,
           headers: { 'Content-Type': 'application/octet-stream', ...options?.headers },
           __binaryRequest: true,
@@ -38,7 +51,7 @@ export interface EntryCreateResponse {
 
   num_cells: number;
 
-  upload_status: 'empty' | 'uploading' | 'processing' | 'failed' | 'complete';
+  upload_status: 'empty' | 'uploading' | 'pending' | 'processing' | 'failed' | 'complete';
 }
 
 export interface EntryCreateParams {
@@ -46,11 +59,6 @@ export interface EntryCreateParams {
    * Path param:
    */
   account_id: string;
-
-  /**
-   * Body param:
-   */
-  body: string | ArrayBufferView | ArrayBuffer | BlobLike;
 }
 
 export declare namespace Entries {

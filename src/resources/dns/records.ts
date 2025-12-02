@@ -4,7 +4,7 @@ import { APIResource } from '../../resource';
 import * as Core from '../../core';
 import * as RecordsAPI from './records';
 import * as Shared from '../shared';
-import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../pagination';
+import { SinglePage, V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../pagination';
 
 export class Records extends APIResource {
   /**
@@ -16,6 +16,16 @@ export class Records extends APIResource {
    * - NS records cannot exist on the same name as any other record type.
    * - Domain names are always represented in Punycode, even if Unicode characters
    *   were used when creating the record.
+   *
+   * @example
+   * ```ts
+   * const recordResponse = await client.dns.records.create({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   name: 'example.com',
+   *   ttl: 3600,
+   *   type: 'A',
+   * });
+   * ```
    */
   create(params: RecordCreateParams, options?: Core.RequestOptions): Core.APIPromise<RecordResponse> {
     const { zone_id, ...body } = params;
@@ -35,6 +45,19 @@ export class Records extends APIResource {
    * - NS records cannot exist on the same name as any other record type.
    * - Domain names are always represented in Punycode, even if Unicode characters
    *   were used when creating the record.
+   *
+   * @example
+   * ```ts
+   * const recordResponse = await client.dns.records.update(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   {
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     name: 'example.com',
+   *     ttl: 3600,
+   *     type: 'A',
+   *   },
+   * );
+   * ```
    */
   update(
     dnsRecordId: string,
@@ -52,6 +75,16 @@ export class Records extends APIResource {
 
   /**
    * List, search, sort, and filter a zones' DNS records.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const recordResponse of client.dns.records.list({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * })) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: RecordListParams,
@@ -66,6 +99,14 @@ export class Records extends APIResource {
 
   /**
    * Delete DNS Record
+   *
+   * @example
+   * ```ts
+   * const record = await client.dns.records.delete(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     dnsRecordId: string,
@@ -98,6 +139,13 @@ export class Records extends APIResource {
    *   - Patches
    *   - Puts
    *   - Posts
+   *
+   * @example
+   * ```ts
+   * const response = await client.dns.records.batch({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   batch(params: RecordBatchParams, options?: Core.RequestOptions): Core.APIPromise<RecordBatchResponse> {
     const { zone_id, ...body } = params;
@@ -117,6 +165,19 @@ export class Records extends APIResource {
    * - NS records cannot exist on the same name as any other record type.
    * - Domain names are always represented in Punycode, even if Unicode characters
    *   were used when creating the record.
+   *
+   * @example
+   * ```ts
+   * const recordResponse = await client.dns.records.edit(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   {
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     name: 'example.com',
+   *     ttl: 3600,
+   *     type: 'A',
+   *   },
+   * );
+   * ```
    */
   edit(
     dnsRecordId: string,
@@ -140,6 +201,13 @@ export class Records extends APIResource {
    * See
    * [the documentation](https://developers.cloudflare.com/dns/manage-dns-records/how-to/import-and-export/ "Import and export records")
    * for more information.
+   *
+   * @example
+   * ```ts
+   * const response = await client.dns.records.export({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   export(params: RecordExportParams, options?: Core.RequestOptions): Core.APIPromise<string> {
     const { zone_id } = params;
@@ -151,6 +219,14 @@ export class Records extends APIResource {
 
   /**
    * DNS Record Details
+   *
+   * @example
+   * ```ts
+   * const recordResponse = await client.dns.records.get(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     dnsRecordId: string,
@@ -174,6 +250,14 @@ export class Records extends APIResource {
    * See
    * [the documentation](https://developers.cloudflare.com/dns/manage-dns-records/how-to/import-and-export/ "Import and export records")
    * for more information.
+   *
+   * @example
+   * ```ts
+   * const response = await client.dns.records.import({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   file: 'www.example.com. 300 IN  A 127.0.0.1',
+   * });
+   * ```
    */
   import(params: RecordImportParams, options?: Core.RequestOptions): Core.APIPromise<RecordImportResponse> {
     const { zone_id, ...body } = params;
@@ -188,6 +272,8 @@ export class Records extends APIResource {
   /**
    * Scan for common DNS records on your domain and automatically add them to your
    * zone. Useful if you haven't updated your nameservers yet.
+   *
+   * @deprecated This endpoint is deprecated in favor of a new asynchronous version. Please use the [/scan/trigger](https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/scan/trigger) and [/scan/review](https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/scan/review) endpoints instead.
    */
   scan(params: RecordScanParams, options?: Core.RequestOptions): Core.APIPromise<RecordScanResponse> {
     const { zone_id, body } = params;
@@ -197,11 +283,104 @@ export class Records extends APIResource {
       }>
     )._thenUnwrap((obj) => obj.result);
   }
+
+  /**
+   * Retrieves the list of DNS records discovered up to this point by the
+   * asynchronous scan. These records are temporary until explicitly accepted or
+   * rejected via `POST /scan/review`. Additional records may be discovered by the
+   * scan later.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const recordResponse of client.dns.records.scanList(
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
+   */
+  scanList(
+    params: RecordScanListParams,
+    options?: Core.RequestOptions,
+  ): Core.PagePromise<RecordResponsesSinglePage, RecordResponse> {
+    const { zone_id } = params;
+    return this._client.getAPIList(
+      `/zones/${zone_id}/dns_records/scan/review`,
+      RecordResponsesSinglePage,
+      options,
+    );
+  }
+
+  /**
+   * Accept or reject DNS records found by the DNS records scan. Accepted records
+   * will be permanently added to the zone, while rejected records will be
+   * permanently deleted.
+   *
+   * @example
+   * ```ts
+   * const response = await client.dns.records.scanReview({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
+   */
+  scanReview(
+    params: RecordScanReviewParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<RecordScanReviewResponse> {
+    const { zone_id, ...body } = params;
+    return (
+      this._client.post(`/zones/${zone_id}/dns_records/scan/review`, {
+        body,
+        ...options,
+      }) as Core.APIPromise<{ result: RecordScanReviewResponse }>
+    )._thenUnwrap((obj) => obj.result);
+  }
+
+  /**
+   * Initiates an asynchronous scan for common DNS records on your domain. Note that
+   * this **does not** automatically add records to your zone. The scan runs in the
+   * background, and results can be reviewed later using the `/scan/review`
+   * endpoints. Useful if you haven't updated your nameservers yet.
+   *
+   * @example
+   * ```ts
+   * const response = await client.dns.records.scanTrigger({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
+   */
+  scanTrigger(
+    params: RecordScanTriggerParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<RecordScanTriggerResponse> {
+    const { zone_id } = params;
+    return this._client.post(`/zones/${zone_id}/dns_records/scan/trigger`, options);
+  }
 }
 
 export class RecordResponsesV4PagePaginationArray extends V4PagePaginationArray<RecordResponse> {}
 
+export class RecordResponsesSinglePage extends SinglePage<RecordResponse> {}
+
 export interface ARecord {
+  /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'A';
+
   /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
@@ -212,11 +391,6 @@ export interface ARecord {
    * A valid IPv4 address.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -233,18 +407,6 @@ export interface ARecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'A';
 }
 
 export namespace ARecord {
@@ -272,6 +434,23 @@ export namespace ARecord {
 
 export interface ARecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'A';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -281,11 +460,6 @@ export interface ARecordParam {
    * A valid IPv4 address.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -302,18 +476,6 @@ export interface ARecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'A';
 }
 
 export namespace ARecordParam {
@@ -341,6 +503,23 @@ export namespace ARecordParam {
 
 export interface AAAARecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'AAAA';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -350,11 +529,6 @@ export interface AAAARecord {
    * A valid IPv6 address.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -371,18 +545,6 @@ export interface AAAARecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'AAAA';
 }
 
 export namespace AAAARecord {
@@ -410,6 +572,23 @@ export namespace AAAARecord {
 
 export interface AAAARecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'AAAA';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -419,11 +598,6 @@ export interface AAAARecordParam {
    * A valid IPv6 address.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -440,18 +614,6 @@ export interface AAAARecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'AAAA';
 }
 
 export namespace AAAARecordParam {
@@ -478,118 +640,86 @@ export namespace AAAARecordParam {
 }
 
 export type BatchPatch =
-  | BatchPatch.A
-  | BatchPatch.AAAA
-  | BatchPatch.CAA
-  | BatchPatch.CERT
-  | BatchPatch.CNAME
-  | BatchPatch.DNSKEY
-  | BatchPatch.DS
-  | BatchPatch.HTTPS
-  | BatchPatch.LOC
-  | BatchPatch.MX
-  | BatchPatch.NAPTR
-  | BatchPatch.NS
-  | BatchPatch.Openpgpkey
-  | BatchPatch.PTR
-  | BatchPatch.SMIMEA
-  | BatchPatch.SRV
-  | BatchPatch.SSHFP
-  | BatchPatch.SVCB
-  | BatchPatch.TLSA
-  | BatchPatch.TXT
-  | BatchPatch.URI;
+  | BatchPatch.ARecord
+  | BatchPatch.AAAARecord
+  | BatchPatch.CNAMERecord
+  | BatchPatch.MXRecord
+  | BatchPatch.NSRecord
+  | BatchPatch.OpenpgpkeyRecord
+  | BatchPatch.PTRRecord
+  | BatchPatch.TXTRecord
+  | BatchPatch.CAARecord
+  | BatchPatch.CERTRecord
+  | BatchPatch.DNSKEYRecord
+  | BatchPatch.DSRecord
+  | BatchPatch.HTTPSRecord
+  | BatchPatch.LOCRecord
+  | BatchPatch.NAPTRRecord
+  | BatchPatch.SMIMEARecord
+  | BatchPatch.SRVRecord
+  | BatchPatch.SSHFPRecord
+  | BatchPatch.SVCBRecord
+  | BatchPatch.TLSARecord
+  | BatchPatch.URIRecord;
 
 export namespace BatchPatch {
-  export interface A extends RecordsAPI.ARecord {
+  export interface ARecord extends RecordsAPI.ARecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface AAAA extends RecordsAPI.AAAARecord {
+  export interface AAAARecord extends RecordsAPI.AAAARecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface CAA extends RecordsAPI.CAARecord {
+  export interface CNAMERecord extends RecordsAPI.CNAMERecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface CERT extends RecordsAPI.CERTRecord {
+  export interface MXRecord extends RecordsAPI.MXRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface CNAME extends RecordsAPI.CNAMERecord {
+  export interface NSRecord extends RecordsAPI.NSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface DNSKEY extends RecordsAPI.DNSKEYRecord {
+  export interface OpenpgpkeyRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
-  }
 
-  export interface DS extends RecordsAPI.DSRecord {
     /**
-     * Identifier
+     * Complete DNS record name, including the zone name, in Punycode.
      */
-    id: string;
-  }
+    name: string;
 
-  export interface HTTPS extends RecordsAPI.HTTPSRecord {
     /**
-     * Identifier
+     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+     * Value must be between 60 and 86400, with the minimum reduced to 30 for
+     * Enterprise zones.
      */
-    id: string;
-  }
+    ttl: RecordsAPI.TTL;
 
-  export interface LOC extends RecordsAPI.LOCRecord {
     /**
-     * Identifier
+     * Record type.
      */
-    id: string;
-  }
-
-  export interface MX extends RecordsAPI.MXRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-  }
-
-  export interface NAPTR extends RecordsAPI.NAPTRRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-  }
-
-  export interface NS extends RecordsAPI.NSRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-  }
-
-  export interface Openpgpkey {
-    /**
-     * Identifier
-     */
-    id: string;
+    type: 'OPENPGPKEY';
 
     /**
      * Comments or notes about the DNS record. This field has no effect on DNS
@@ -603,11 +733,6 @@ export namespace BatchPatch {
     content?: string;
 
     /**
-     * DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
      * Whether the record is receiving the performance and security benefits of
      * Cloudflare.
      */
@@ -616,27 +741,15 @@ export namespace BatchPatch {
     /**
      * Settings for the DNS record.
      */
-    settings?: Openpgpkey.Settings;
+    settings?: OpenpgpkeyRecord.Settings;
 
     /**
      * Custom tags for the DNS record. This field has no effect on DNS responses.
      */
     tags?: Array<RecordsAPI.RecordTags>;
-
-    /**
-     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-     * Value must be between 60 and 86400, with the minimum reduced to 30 for
-     * Enterprise zones.
-     */
-    ttl?: RecordsAPI.TTL;
-
-    /**
-     * Record type.
-     */
-    type?: 'OPENPGPKEY';
   }
 
-  export namespace Openpgpkey {
+  export namespace OpenpgpkeyRecord {
     /**
      * Settings for the DNS record.
      */
@@ -659,176 +772,193 @@ export namespace BatchPatch {
     }
   }
 
-  export interface PTR extends RecordsAPI.PTRRecord {
+  export interface PTRRecord extends RecordsAPI.PTRRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SMIMEA extends RecordsAPI.SMIMEARecord {
+  export interface TXTRecord extends RecordsAPI.TXTRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SRV extends RecordsAPI.SRVRecord {
+  export interface CAARecord extends RecordsAPI.CAARecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SSHFP extends RecordsAPI.SSHFPRecord {
+  export interface CERTRecord extends RecordsAPI.CERTRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SVCB extends RecordsAPI.SVCBRecord {
+  export interface DNSKEYRecord extends RecordsAPI.DNSKEYRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface TLSA extends RecordsAPI.TLSARecord {
+  export interface DSRecord extends RecordsAPI.DSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface TXT extends RecordsAPI.TXTRecord {
+  export interface HTTPSRecord extends RecordsAPI.HTTPSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface URI extends RecordsAPI.URIRecord {
+  export interface LOCRecord extends RecordsAPI.LOCRecord {
     /**
-     * Identifier
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface NAPTRRecord extends RecordsAPI.NAPTRRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SMIMEARecord extends RecordsAPI.SMIMEARecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SRVRecord extends RecordsAPI.SRVRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SSHFPRecord extends RecordsAPI.SSHFPRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SVCBRecord extends RecordsAPI.SVCBRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface TLSARecord extends RecordsAPI.TLSARecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface URIRecord extends RecordsAPI.URIRecord {
+    /**
+     * Identifier.
      */
     id: string;
   }
 }
 
 export type BatchPatchParam =
-  | BatchPatchParam.A
-  | BatchPatchParam.AAAA
-  | BatchPatchParam.CAA
-  | BatchPatchParam.CERT
-  | BatchPatchParam.CNAME
-  | BatchPatchParam.DNSKEY
-  | BatchPatchParam.DS
-  | BatchPatchParam.HTTPS
-  | BatchPatchParam.LOC
-  | BatchPatchParam.MX
-  | BatchPatchParam.NAPTR
-  | BatchPatchParam.NS
-  | BatchPatchParam.Openpgpkey
-  | BatchPatchParam.PTR
-  | BatchPatchParam.SMIMEA
-  | BatchPatchParam.SRV
-  | BatchPatchParam.SSHFP
-  | BatchPatchParam.SVCB
-  | BatchPatchParam.TLSA
-  | BatchPatchParam.TXT
-  | BatchPatchParam.URI;
+  | BatchPatchParam.ARecord
+  | BatchPatchParam.AAAARecord
+  | BatchPatchParam.CNAMERecord
+  | BatchPatchParam.MXRecord
+  | BatchPatchParam.NSRecord
+  | BatchPatchParam.OpenpgpkeyRecord
+  | BatchPatchParam.PTRRecord
+  | BatchPatchParam.TXTRecord
+  | BatchPatchParam.CAARecord
+  | BatchPatchParam.CERTRecord
+  | BatchPatchParam.DNSKEYRecord
+  | BatchPatchParam.DSRecord
+  | BatchPatchParam.HTTPSRecord
+  | BatchPatchParam.LOCRecord
+  | BatchPatchParam.NAPTRRecord
+  | BatchPatchParam.SMIMEARecord
+  | BatchPatchParam.SRVRecord
+  | BatchPatchParam.SSHFPRecord
+  | BatchPatchParam.SVCBRecord
+  | BatchPatchParam.TLSARecord
+  | BatchPatchParam.URIRecord;
 
 export namespace BatchPatchParam {
-  export interface A extends RecordsAPI.ARecordParam {
+  export interface ARecord extends RecordsAPI.ARecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface AAAA extends RecordsAPI.AAAARecordParam {
+  export interface AAAARecord extends RecordsAPI.AAAARecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface CAA extends RecordsAPI.CAARecordParam {
+  export interface CNAMERecord extends RecordsAPI.CNAMERecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface CERT extends RecordsAPI.CERTRecordParam {
+  export interface MXRecord extends RecordsAPI.MXRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface CNAME extends RecordsAPI.CNAMERecordParam {
+  export interface NSRecord extends RecordsAPI.NSRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface DNSKEY extends RecordsAPI.DNSKEYRecordParam {
+  export interface OpenpgpkeyRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
-  }
 
-  export interface DS extends RecordsAPI.DSRecordParam {
     /**
-     * Identifier
+     * Complete DNS record name, including the zone name, in Punycode.
      */
-    id: string;
-  }
+    name: string;
 
-  export interface HTTPS extends RecordsAPI.HTTPSRecordParam {
     /**
-     * Identifier
+     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+     * Value must be between 60 and 86400, with the minimum reduced to 30 for
+     * Enterprise zones.
      */
-    id: string;
-  }
+    ttl: RecordsAPI.TTLParam;
 
-  export interface LOC extends RecordsAPI.LOCRecordParam {
     /**
-     * Identifier
+     * Record type.
      */
-    id: string;
-  }
-
-  export interface MX extends RecordsAPI.MXRecordParam {
-    /**
-     * Identifier
-     */
-    id: string;
-  }
-
-  export interface NAPTR extends RecordsAPI.NAPTRRecordParam {
-    /**
-     * Identifier
-     */
-    id: string;
-  }
-
-  export interface NS extends RecordsAPI.NSRecordParam {
-    /**
-     * Identifier
-     */
-    id: string;
-  }
-
-  export interface Openpgpkey {
-    /**
-     * Identifier
-     */
-    id: string;
+    type: 'OPENPGPKEY';
 
     /**
      * Comments or notes about the DNS record. This field has no effect on DNS
@@ -842,11 +972,6 @@ export namespace BatchPatchParam {
     content?: string;
 
     /**
-     * DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
      * Whether the record is receiving the performance and security benefits of
      * Cloudflare.
      */
@@ -855,27 +980,15 @@ export namespace BatchPatchParam {
     /**
      * Settings for the DNS record.
      */
-    settings?: Openpgpkey.Settings;
+    settings?: OpenpgpkeyRecord.Settings;
 
     /**
      * Custom tags for the DNS record. This field has no effect on DNS responses.
      */
     tags?: Array<RecordsAPI.RecordTagsParam>;
-
-    /**
-     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-     * Value must be between 60 and 86400, with the minimum reduced to 30 for
-     * Enterprise zones.
-     */
-    ttl?: RecordsAPI.TTLParam;
-
-    /**
-     * Record type.
-     */
-    type?: 'OPENPGPKEY';
   }
 
-  export namespace Openpgpkey {
+  export namespace OpenpgpkeyRecord {
     /**
      * Settings for the DNS record.
      */
@@ -898,181 +1011,188 @@ export namespace BatchPatchParam {
     }
   }
 
-  export interface PTR extends RecordsAPI.PTRRecordParam {
+  export interface PTRRecord extends RecordsAPI.PTRRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SMIMEA extends RecordsAPI.SMIMEARecordParam {
+  export interface TXTRecord extends RecordsAPI.TXTRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SRV extends RecordsAPI.SRVRecordParam {
+  export interface CAARecord extends RecordsAPI.CAARecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SSHFP extends RecordsAPI.SSHFPRecordParam {
+  export interface CERTRecord extends RecordsAPI.CERTRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface SVCB extends RecordsAPI.SVCBRecordParam {
+  export interface DNSKEYRecord extends RecordsAPI.DNSKEYRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface TLSA extends RecordsAPI.TLSARecordParam {
+  export interface DSRecord extends RecordsAPI.DSRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface TXT extends RecordsAPI.TXTRecordParam {
+  export interface HTTPSRecord extends RecordsAPI.HTTPSRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
   }
 
-  export interface URI extends RecordsAPI.URIRecordParam {
+  export interface LOCRecord extends RecordsAPI.LOCRecordParam {
     /**
-     * Identifier
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface NAPTRRecord extends RecordsAPI.NAPTRRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SMIMEARecord extends RecordsAPI.SMIMEARecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SRVRecord extends RecordsAPI.SRVRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SSHFPRecord extends RecordsAPI.SSHFPRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SVCBRecord extends RecordsAPI.SVCBRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface TLSARecord extends RecordsAPI.TLSARecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface URIRecord extends RecordsAPI.URIRecordParam {
+    /**
+     * Identifier.
      */
     id: string;
   }
 }
 
 export type BatchPut =
-  | BatchPut.A
-  | BatchPut.AAAA
-  | BatchPut.CAA
-  | BatchPut.CERT
-  | BatchPut.CNAME
-  | BatchPut.DNSKEY
-  | BatchPut.DS
-  | BatchPut.HTTPS
-  | BatchPut.LOC
-  | BatchPut.MX
-  | BatchPut.NAPTR
-  | BatchPut.NS
-  | BatchPut.Openpgpkey
-  | BatchPut.PTR
-  | BatchPut.SMIMEA
-  | BatchPut.SRV
-  | BatchPut.SSHFP
-  | BatchPut.SVCB
-  | BatchPut.TLSA
-  | BatchPut.TXT
-  | BatchPut.URI;
+  | BatchPut.ARecord
+  | BatchPut.AAAARecord
+  | BatchPut.CNAMERecord
+  | BatchPut.MXRecord
+  | BatchPut.NSRecord
+  | BatchPut.OpenpgpkeyRecord
+  | BatchPut.PTRRecord
+  | BatchPut.TXTRecord
+  | BatchPut.CAARecord
+  | BatchPut.CERTRecord
+  | BatchPut.DNSKEYRecord
+  | BatchPut.DSRecord
+  | BatchPut.HTTPSRecord
+  | BatchPut.LOCRecord
+  | BatchPut.NAPTRRecord
+  | BatchPut.SMIMEARecord
+  | BatchPut.SRVRecord
+  | BatchPut.SSHFPRecord
+  | BatchPut.SVCBRecord
+  | BatchPut.TLSARecord
+  | BatchPut.URIRecord;
 
 export namespace BatchPut {
-  export interface A extends RecordsAPI.ARecord {
+  export interface ARecord extends RecordsAPI.ARecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface AAAA extends RecordsAPI.AAAARecord {
+  export interface AAAARecord extends RecordsAPI.AAAARecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface CAA extends RecordsAPI.CAARecord {
+  export interface CNAMERecord extends RecordsAPI.CNAMERecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface CERT extends RecordsAPI.CERTRecord {
+  export interface MXRecord extends RecordsAPI.MXRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface CNAME extends RecordsAPI.CNAMERecord {
+  export interface NSRecord extends RecordsAPI.NSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface DNSKEY extends RecordsAPI.DNSKEYRecord {
+  export interface OpenpgpkeyRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
-  }
-
-  export interface DS extends RecordsAPI.DSRecord {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface HTTPS extends RecordsAPI.HTTPSRecord {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface LOC extends RecordsAPI.LOCRecord {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface MX extends RecordsAPI.MXRecord {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface NAPTR extends RecordsAPI.NAPTRRecord {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface NS extends RecordsAPI.NSRecord {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface Openpgpkey {
-    /**
-     * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
-     */
-    content: string;
+    id: string;
 
     /**
-     * DNS record name (or @ for the zone apex) in Punycode.
+     * Complete DNS record name, including the zone name, in Punycode.
      */
     name: string;
+
+    /**
+     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+     * Value must be between 60 and 86400, with the minimum reduced to 30 for
+     * Enterprise zones.
+     */
+    ttl: RecordsAPI.TTL;
 
     /**
      * Record type.
@@ -1080,15 +1200,15 @@ export namespace BatchPut {
     type: 'OPENPGPKEY';
 
     /**
-     * Identifier
-     */
-    id?: string;
-
-    /**
      * Comments or notes about the DNS record. This field has no effect on DNS
      * responses.
      */
     comment?: string;
+
+    /**
+     * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
+     */
+    content?: string;
 
     /**
      * Whether the record is receiving the performance and security benefits of
@@ -1099,22 +1219,15 @@ export namespace BatchPut {
     /**
      * Settings for the DNS record.
      */
-    settings?: Openpgpkey.Settings;
+    settings?: OpenpgpkeyRecord.Settings;
 
     /**
      * Custom tags for the DNS record. This field has no effect on DNS responses.
      */
     tags?: Array<RecordsAPI.RecordTags>;
-
-    /**
-     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-     * Value must be between 60 and 86400, with the minimum reduced to 30 for
-     * Enterprise zones.
-     */
-    ttl?: RecordsAPI.TTL;
   }
 
-  export namespace Openpgpkey {
+  export namespace OpenpgpkeyRecord {
     /**
      * Settings for the DNS record.
      */
@@ -1137,181 +1250,188 @@ export namespace BatchPut {
     }
   }
 
-  export interface PTR extends RecordsAPI.PTRRecord {
+  export interface PTRRecord extends RecordsAPI.PTRRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SMIMEA extends RecordsAPI.SMIMEARecord {
+  export interface TXTRecord extends RecordsAPI.TXTRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SRV extends RecordsAPI.SRVRecord {
+  export interface CAARecord extends RecordsAPI.CAARecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SSHFP extends RecordsAPI.SSHFPRecord {
+  export interface CERTRecord extends RecordsAPI.CERTRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SVCB extends RecordsAPI.SVCBRecord {
+  export interface DNSKEYRecord extends RecordsAPI.DNSKEYRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface TLSA extends RecordsAPI.TLSARecord {
+  export interface DSRecord extends RecordsAPI.DSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface TXT extends RecordsAPI.TXTRecord {
+  export interface HTTPSRecord extends RecordsAPI.HTTPSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface URI extends RecordsAPI.URIRecord {
+  export interface LOCRecord extends RecordsAPI.LOCRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
+  }
+
+  export interface NAPTRRecord extends RecordsAPI.NAPTRRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SMIMEARecord extends RecordsAPI.SMIMEARecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SRVRecord extends RecordsAPI.SRVRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SSHFPRecord extends RecordsAPI.SSHFPRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SVCBRecord extends RecordsAPI.SVCBRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface TLSARecord extends RecordsAPI.TLSARecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface URIRecord extends RecordsAPI.URIRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
   }
 }
 
 export type BatchPutParam =
-  | BatchPutParam.A
-  | BatchPutParam.AAAA
-  | BatchPutParam.CAA
-  | BatchPutParam.CERT
-  | BatchPutParam.CNAME
-  | BatchPutParam.DNSKEY
-  | BatchPutParam.DS
-  | BatchPutParam.HTTPS
-  | BatchPutParam.LOC
-  | BatchPutParam.MX
-  | BatchPutParam.NAPTR
-  | BatchPutParam.NS
-  | BatchPutParam.Openpgpkey
-  | BatchPutParam.PTR
-  | BatchPutParam.SMIMEA
-  | BatchPutParam.SRV
-  | BatchPutParam.SSHFP
-  | BatchPutParam.SVCB
-  | BatchPutParam.TLSA
-  | BatchPutParam.TXT
-  | BatchPutParam.URI;
+  | BatchPutParam.ARecord
+  | BatchPutParam.AAAARecord
+  | BatchPutParam.CNAMERecord
+  | BatchPutParam.MXRecord
+  | BatchPutParam.NSRecord
+  | BatchPutParam.OpenpgpkeyRecord
+  | BatchPutParam.PTRRecord
+  | BatchPutParam.TXTRecord
+  | BatchPutParam.CAARecord
+  | BatchPutParam.CERTRecord
+  | BatchPutParam.DNSKEYRecord
+  | BatchPutParam.DSRecord
+  | BatchPutParam.HTTPSRecord
+  | BatchPutParam.LOCRecord
+  | BatchPutParam.NAPTRRecord
+  | BatchPutParam.SMIMEARecord
+  | BatchPutParam.SRVRecord
+  | BatchPutParam.SSHFPRecord
+  | BatchPutParam.SVCBRecord
+  | BatchPutParam.TLSARecord
+  | BatchPutParam.URIRecord;
 
 export namespace BatchPutParam {
-  export interface A extends RecordsAPI.ARecordParam {
+  export interface ARecord extends RecordsAPI.ARecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface AAAA extends RecordsAPI.AAAARecordParam {
+  export interface AAAARecord extends RecordsAPI.AAAARecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface CAA extends RecordsAPI.CAARecordParam {
+  export interface CNAMERecord extends RecordsAPI.CNAMERecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface CERT extends RecordsAPI.CERTRecordParam {
+  export interface MXRecord extends RecordsAPI.MXRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface CNAME extends RecordsAPI.CNAMERecordParam {
+  export interface NSRecord extends RecordsAPI.NSRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface DNSKEY extends RecordsAPI.DNSKEYRecordParam {
+  export interface OpenpgpkeyRecord {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
-  }
-
-  export interface DS extends RecordsAPI.DSRecordParam {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface HTTPS extends RecordsAPI.HTTPSRecordParam {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface LOC extends RecordsAPI.LOCRecordParam {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface MX extends RecordsAPI.MXRecordParam {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface NAPTR extends RecordsAPI.NAPTRRecordParam {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface NS extends RecordsAPI.NSRecordParam {
-    /**
-     * Identifier
-     */
-    id?: string;
-  }
-
-  export interface Openpgpkey {
-    /**
-     * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
-     */
-    content: string;
+    id: string;
 
     /**
-     * DNS record name (or @ for the zone apex) in Punycode.
+     * Complete DNS record name, including the zone name, in Punycode.
      */
     name: string;
+
+    /**
+     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+     * Value must be between 60 and 86400, with the minimum reduced to 30 for
+     * Enterprise zones.
+     */
+    ttl: RecordsAPI.TTLParam;
 
     /**
      * Record type.
@@ -1319,15 +1439,15 @@ export namespace BatchPutParam {
     type: 'OPENPGPKEY';
 
     /**
-     * Identifier
-     */
-    id?: string;
-
-    /**
      * Comments or notes about the DNS record. This field has no effect on DNS
      * responses.
      */
     comment?: string;
+
+    /**
+     * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
+     */
+    content?: string;
 
     /**
      * Whether the record is receiving the performance and security benefits of
@@ -1338,22 +1458,15 @@ export namespace BatchPutParam {
     /**
      * Settings for the DNS record.
      */
-    settings?: Openpgpkey.Settings;
+    settings?: OpenpgpkeyRecord.Settings;
 
     /**
      * Custom tags for the DNS record. This field has no effect on DNS responses.
      */
     tags?: Array<RecordsAPI.RecordTagsParam>;
-
-    /**
-     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-     * Value must be between 60 and 86400, with the minimum reduced to 30 for
-     * Enterprise zones.
-     */
-    ttl?: RecordsAPI.TTLParam;
   }
 
-  export namespace Openpgpkey {
+  export namespace OpenpgpkeyRecord {
     /**
      * Settings for the DNS record.
      */
@@ -1376,64 +1489,130 @@ export namespace BatchPutParam {
     }
   }
 
-  export interface PTR extends RecordsAPI.PTRRecordParam {
+  export interface PTRRecord extends RecordsAPI.PTRRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SMIMEA extends RecordsAPI.SMIMEARecordParam {
+  export interface TXTRecord extends RecordsAPI.TXTRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SRV extends RecordsAPI.SRVRecordParam {
+  export interface CAARecord extends RecordsAPI.CAARecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SSHFP extends RecordsAPI.SSHFPRecordParam {
+  export interface CERTRecord extends RecordsAPI.CERTRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface SVCB extends RecordsAPI.SVCBRecordParam {
+  export interface DNSKEYRecord extends RecordsAPI.DNSKEYRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface TLSA extends RecordsAPI.TLSARecordParam {
+  export interface DSRecord extends RecordsAPI.DSRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface TXT extends RecordsAPI.TXTRecordParam {
+  export interface HTTPSRecord extends RecordsAPI.HTTPSRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
   }
 
-  export interface URI extends RecordsAPI.URIRecordParam {
+  export interface LOCRecord extends RecordsAPI.LOCRecordParam {
     /**
-     * Identifier
+     * Identifier.
      */
-    id?: string;
+    id: string;
+  }
+
+  export interface NAPTRRecord extends RecordsAPI.NAPTRRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SMIMEARecord extends RecordsAPI.SMIMEARecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SRVRecord extends RecordsAPI.SRVRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SSHFPRecord extends RecordsAPI.SSHFPRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface SVCBRecord extends RecordsAPI.SVCBRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface TLSARecord extends RecordsAPI.TLSARecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+
+  export interface URIRecord extends RecordsAPI.URIRecordParam {
+    /**
+     * Identifier.
+     */
+    id: string;
   }
 }
 
 export interface CAARecord {
+  /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'CAA';
+
   /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
@@ -1451,11 +1630,6 @@ export interface CAARecord {
   data?: CAARecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -1470,18 +1644,6 @@ export interface CAARecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'CAA';
 }
 
 export namespace CAARecord {
@@ -1529,6 +1691,23 @@ export namespace CAARecord {
 
 export interface CAARecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'CAA';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -1538,11 +1717,6 @@ export interface CAARecordParam {
    * Components of a CAA record.
    */
   data?: CAARecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -1559,18 +1733,6 @@ export interface CAARecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'CAA';
 }
 
 export namespace CAARecordParam {
@@ -1618,6 +1780,23 @@ export namespace CAARecordParam {
 
 export interface CERTRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'CERT';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -1634,11 +1813,6 @@ export interface CERTRecord {
   data?: CERTRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -1653,18 +1827,6 @@ export interface CERTRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'CERT';
 }
 
 export namespace CERTRecord {
@@ -1717,6 +1879,23 @@ export namespace CERTRecord {
 
 export interface CERTRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'CERT';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -1726,11 +1905,6 @@ export interface CERTRecordParam {
    * Components of a CERT record.
    */
   data?: CERTRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -1747,18 +1921,6 @@ export interface CERTRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'CERT';
 }
 
 export namespace CERTRecordParam {
@@ -1811,6 +1973,23 @@ export namespace CERTRecordParam {
 
 export interface CNAMERecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'CNAME';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -1820,11 +1999,6 @@ export interface CNAMERecord {
    * A valid hostname. Must not match the record's name.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -1841,18 +2015,6 @@ export interface CNAMERecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'CNAME';
 }
 
 export namespace CNAMERecord {
@@ -1888,6 +2050,23 @@ export namespace CNAMERecord {
 
 export interface CNAMERecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'CNAME';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -1897,11 +2076,6 @@ export interface CNAMERecordParam {
    * A valid hostname. Must not match the record's name.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -1918,18 +2092,6 @@ export interface CNAMERecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'CNAME';
 }
 
 export namespace CNAMERecordParam {
@@ -1965,6 +2127,23 @@ export namespace CNAMERecordParam {
 
 export interface DNSKEYRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'DNSKEY';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -1981,11 +2160,6 @@ export interface DNSKEYRecord {
   data?: DNSKEYRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -2000,18 +2174,6 @@ export interface DNSKEYRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'DNSKEY';
 }
 
 export namespace DNSKEYRecord {
@@ -2064,6 +2226,23 @@ export namespace DNSKEYRecord {
 
 export interface DNSKEYRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'DNSKEY';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2073,11 +2252,6 @@ export interface DNSKEYRecordParam {
    * Components of a DNSKEY record.
    */
   data?: DNSKEYRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -2094,18 +2268,6 @@ export interface DNSKEYRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'DNSKEY';
 }
 
 export namespace DNSKEYRecordParam {
@@ -2158,6 +2320,23 @@ export namespace DNSKEYRecordParam {
 
 export interface DSRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'DS';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2174,11 +2353,6 @@ export interface DSRecord {
   data?: DSRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -2193,18 +2367,6 @@ export interface DSRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'DS';
 }
 
 export namespace DSRecord {
@@ -2257,6 +2419,23 @@ export namespace DSRecord {
 
 export interface DSRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'DS';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2266,11 +2445,6 @@ export interface DSRecordParam {
    * Components of a DS record.
    */
   data?: DSRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -2287,18 +2461,6 @@ export interface DSRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'DS';
 }
 
 export namespace DSRecordParam {
@@ -2351,6 +2513,23 @@ export namespace DSRecordParam {
 
 export interface HTTPSRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'HTTPS';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2367,11 +2546,6 @@ export interface HTTPSRecord {
   data?: HTTPSRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -2386,18 +2560,6 @@ export interface HTTPSRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'HTTPS';
 }
 
 export namespace HTTPSRecord {
@@ -2406,17 +2568,17 @@ export namespace HTTPSRecord {
    */
   export interface Data {
     /**
-     * priority.
+     * Priority.
      */
     priority?: number;
 
     /**
-     * target.
+     * Target.
      */
     target?: string;
 
     /**
-     * value.
+     * Value.
      */
     value?: string;
   }
@@ -2445,6 +2607,23 @@ export namespace HTTPSRecord {
 
 export interface HTTPSRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'HTTPS';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2454,11 +2633,6 @@ export interface HTTPSRecordParam {
    * Components of a HTTPS record.
    */
   data?: HTTPSRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -2475,18 +2649,6 @@ export interface HTTPSRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'HTTPS';
 }
 
 export namespace HTTPSRecordParam {
@@ -2495,17 +2657,17 @@ export namespace HTTPSRecordParam {
    */
   export interface Data {
     /**
-     * priority.
+     * Priority.
      */
     priority?: number;
 
     /**
-     * target.
+     * Target.
      */
     target?: string;
 
     /**
-     * value.
+     * Value.
      */
     value?: string;
   }
@@ -2534,6 +2696,23 @@ export namespace HTTPSRecordParam {
 
 export interface LOCRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'LOC';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2550,11 +2729,6 @@ export interface LOCRecord {
   data?: LOCRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -2569,18 +2743,6 @@ export interface LOCRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'LOC';
 }
 
 export namespace LOCRecord {
@@ -2673,6 +2835,23 @@ export namespace LOCRecord {
 
 export interface LOCRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'LOC';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2682,11 +2861,6 @@ export interface LOCRecordParam {
    * Components of a LOC record.
    */
   data?: LOCRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -2703,18 +2877,6 @@ export interface LOCRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'LOC';
 }
 
 export namespace LOCRecordParam {
@@ -2807,6 +2969,23 @@ export namespace LOCRecordParam {
 
 export interface MXRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'MX';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2816,11 +2995,6 @@ export interface MXRecord {
    * A valid mail server hostname.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Required for MX, SRV and URI records; unused by other record types. Records with
@@ -2843,18 +3017,6 @@ export interface MXRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'MX';
 }
 
 export namespace MXRecord {
@@ -2882,6 +3044,23 @@ export namespace MXRecord {
 
 export interface MXRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'MX';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2891,11 +3070,6 @@ export interface MXRecordParam {
    * A valid mail server hostname.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Required for MX, SRV and URI records; unused by other record types. Records with
@@ -2918,18 +3092,6 @@ export interface MXRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'MX';
 }
 
 export namespace MXRecordParam {
@@ -2957,6 +3119,23 @@ export namespace MXRecordParam {
 
 export interface NAPTRRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'NAPTR';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -2973,11 +3152,6 @@ export interface NAPTRRecord {
   data?: NAPTRRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -2992,18 +3166,6 @@ export interface NAPTRRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'NAPTR';
 }
 
 export namespace NAPTRRecord {
@@ -3066,6 +3228,23 @@ export namespace NAPTRRecord {
 
 export interface NAPTRRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'NAPTR';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -3075,11 +3254,6 @@ export interface NAPTRRecordParam {
    * Components of a NAPTR record.
    */
   data?: NAPTRRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -3096,18 +3270,6 @@ export interface NAPTRRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'NAPTR';
 }
 
 export namespace NAPTRRecordParam {
@@ -3170,6 +3332,23 @@ export namespace NAPTRRecordParam {
 
 export interface NSRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'NS';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -3179,11 +3358,6 @@ export interface NSRecord {
    * A valid name server host name.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -3200,18 +3374,6 @@ export interface NSRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'NS';
 }
 
 export namespace NSRecord {
@@ -3239,6 +3401,23 @@ export namespace NSRecord {
 
 export interface NSRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'NS';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -3248,11 +3427,6 @@ export interface NSRecordParam {
    * A valid name server host name.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -3269,18 +3443,6 @@ export interface NSRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'NS';
 }
 
 export namespace NSRecordParam {
@@ -3308,6 +3470,23 @@ export namespace NSRecordParam {
 
 export interface PTRRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'PTR';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -3317,11 +3496,6 @@ export interface PTRRecord {
    * Domain name pointing to the address.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -3338,18 +3512,6 @@ export interface PTRRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'PTR';
 }
 
 export namespace PTRRecord {
@@ -3377,6 +3539,23 @@ export namespace PTRRecord {
 
 export interface PTRRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'PTR';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -3386,11 +3565,6 @@ export interface PTRRecordParam {
    * Domain name pointing to the address.
    */
   content?: string;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -3407,18 +3581,6 @@ export interface PTRRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'PTR';
 }
 
 export namespace PTRRecordParam {
@@ -3447,28 +3609,45 @@ export namespace PTRRecordParam {
 export type Record =
   | ARecord
   | AAAARecord
+  | CNAMERecord
+  | MXRecord
+  | NSRecord
+  | Record.Openpgpkey
+  | PTRRecord
+  | TXTRecord
   | CAARecord
   | CERTRecord
-  | CNAMERecord
   | DNSKEYRecord
   | DSRecord
   | HTTPSRecord
   | LOCRecord
-  | MXRecord
   | NAPTRRecord
-  | NSRecord
-  | Record.Openpgpkey
-  | PTRRecord
   | SMIMEARecord
   | SRVRecord
   | SSHFPRecord
   | SVCBRecord
   | TLSARecord
-  | TXTRecord
   | URIRecord;
 
 export namespace Record {
   export interface Openpgpkey {
+    /**
+     * Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+     * Value must be between 60 and 86400, with the minimum reduced to 30 for
+     * Enterprise zones.
+     */
+    ttl: RecordsAPI.TTL;
+
+    /**
+     * Record type.
+     */
+    type: 'OPENPGPKEY';
+
     /**
      * Comments or notes about the DNS record. This field has no effect on DNS
      * responses.
@@ -3479,11 +3658,6 @@ export namespace Record {
      * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
      */
     content?: string;
-
-    /**
-     * DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Whether the record is receiving the performance and security benefits of
@@ -3500,112 +3674,6 @@ export namespace Record {
      * Custom tags for the DNS record. This field has no effect on DNS responses.
      */
     tags?: Array<RecordsAPI.RecordTags>;
-
-    /**
-     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-     * Value must be between 60 and 86400, with the minimum reduced to 30 for
-     * Enterprise zones.
-     */
-    ttl?: RecordsAPI.TTL;
-
-    /**
-     * Record type.
-     */
-    type?: 'OPENPGPKEY';
-  }
-
-  export namespace Openpgpkey {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-}
-
-export type RecordParam =
-  | ARecordParam
-  | AAAARecordParam
-  | CAARecordParam
-  | CERTRecordParam
-  | CNAMERecordParam
-  | DNSKEYRecordParam
-  | DSRecordParam
-  | HTTPSRecordParam
-  | LOCRecordParam
-  | MXRecordParam
-  | NAPTRRecordParam
-  | NSRecordParam
-  | RecordParam.Openpgpkey
-  | PTRRecordParam
-  | SMIMEARecordParam
-  | SRVRecordParam
-  | SSHFPRecordParam
-  | SVCBRecordParam
-  | TLSARecordParam
-  | TXTRecordParam
-  | URIRecordParam;
-
-export namespace RecordParam {
-  export interface Openpgpkey {
-    /**
-     * Comments or notes about the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    comment?: string;
-
-    /**
-     * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
-     */
-    content?: string;
-
-    /**
-     * DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Whether the record is receiving the performance and security benefits of
-     * Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Settings for the DNS record.
-     */
-    settings?: Openpgpkey.Settings;
-
-    /**
-     * Custom tags for the DNS record. This field has no effect on DNS responses.
-     */
-    tags?: Array<RecordsAPI.RecordTagsParam>;
-
-    /**
-     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-     * Value must be between 60 and 86400, with the minimum reduced to 30 for
-     * Enterprise zones.
-     */
-    ttl?: RecordsAPI.TTLParam;
-
-    /**
-     * Record type.
-     */
-    type?: 'OPENPGPKEY';
   }
 
   export namespace Openpgpkey {
@@ -3633,32 +3701,32 @@ export namespace RecordParam {
 }
 
 export type RecordResponse =
-  | RecordResponse.A
-  | RecordResponse.AAAA
-  | RecordResponse.CAA
-  | RecordResponse.CERT
-  | RecordResponse.CNAME
-  | RecordResponse.DNSKEY
-  | RecordResponse.DS
-  | RecordResponse.HTTPS
-  | RecordResponse.LOC
-  | RecordResponse.MX
-  | RecordResponse.NAPTR
-  | RecordResponse.NS
-  | RecordResponse.Openpgpkey
-  | RecordResponse.PTR
-  | RecordResponse.SMIMEA
-  | RecordResponse.SRV
-  | RecordResponse.SSHFP
-  | RecordResponse.SVCB
-  | RecordResponse.TLSA
-  | RecordResponse.TXT
-  | RecordResponse.URI;
+  | RecordResponse.ARecord
+  | RecordResponse.AAAARecord
+  | RecordResponse.CNAMERecord
+  | RecordResponse.MXRecord
+  | RecordResponse.NSRecord
+  | RecordResponse.OpenpgpkeyRecord
+  | RecordResponse.PTRRecord
+  | RecordResponse.TXTRecord
+  | RecordResponse.CAARecord
+  | RecordResponse.CERTRecord
+  | RecordResponse.DNSKEYRecord
+  | RecordResponse.DSRecord
+  | RecordResponse.HTTPSRecord
+  | RecordResponse.LOCRecord
+  | RecordResponse.NAPTRRecord
+  | RecordResponse.SMIMEARecord
+  | RecordResponse.SRVRecord
+  | RecordResponse.SSHFPRecord
+  | RecordResponse.SVCBRecord
+  | RecordResponse.TLSARecord
+  | RecordResponse.URIRecord;
 
 export namespace RecordResponse {
-  export interface A extends RecordsAPI.ARecord {
+  export interface ARecord extends RecordsAPI.ARecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -3693,9 +3761,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface AAAA extends RecordsAPI.AAAARecord {
+  export interface AAAARecord extends RecordsAPI.AAAARecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -3730,9 +3798,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface CAA extends RecordsAPI.CAARecord {
+  export interface CNAMERecord extends RecordsAPI.CNAMERecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -3767,9 +3835,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface CERT extends RecordsAPI.CERTRecord {
+  export interface MXRecord extends RecordsAPI.MXRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -3804,9 +3872,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface CNAME extends RecordsAPI.CNAMERecord {
+  export interface NSRecord extends RecordsAPI.NSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -3841,268 +3909,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface DNSKEY extends RecordsAPI.DNSKEYRecord {
+  export interface OpenpgpkeyRecord {
     /**
-     * Identifier
-     */
-    id: string;
-
-    /**
-     * When the record was created.
-     */
-    created_on: string;
-
-    /**
-     * Extra Cloudflare-specific information about the record.
-     */
-    meta: unknown;
-
-    /**
-     * When the record was last modified.
-     */
-    modified_on: string;
-
-    /**
-     * Whether the record can be proxied by Cloudflare or not.
-     */
-    proxiable: boolean;
-
-    /**
-     * When the record comment was last modified. Omitted if there is no comment.
-     */
-    comment_modified_on?: string;
-
-    /**
-     * When the record tags were last modified. Omitted if there are no tags.
-     */
-    tags_modified_on?: string;
-  }
-
-  export interface DS extends RecordsAPI.DSRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-
-    /**
-     * When the record was created.
-     */
-    created_on: string;
-
-    /**
-     * Extra Cloudflare-specific information about the record.
-     */
-    meta: unknown;
-
-    /**
-     * When the record was last modified.
-     */
-    modified_on: string;
-
-    /**
-     * Whether the record can be proxied by Cloudflare or not.
-     */
-    proxiable: boolean;
-
-    /**
-     * When the record comment was last modified. Omitted if there is no comment.
-     */
-    comment_modified_on?: string;
-
-    /**
-     * When the record tags were last modified. Omitted if there are no tags.
-     */
-    tags_modified_on?: string;
-  }
-
-  export interface HTTPS extends RecordsAPI.HTTPSRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-
-    /**
-     * When the record was created.
-     */
-    created_on: string;
-
-    /**
-     * Extra Cloudflare-specific information about the record.
-     */
-    meta: unknown;
-
-    /**
-     * When the record was last modified.
-     */
-    modified_on: string;
-
-    /**
-     * Whether the record can be proxied by Cloudflare or not.
-     */
-    proxiable: boolean;
-
-    /**
-     * When the record comment was last modified. Omitted if there is no comment.
-     */
-    comment_modified_on?: string;
-
-    /**
-     * When the record tags were last modified. Omitted if there are no tags.
-     */
-    tags_modified_on?: string;
-  }
-
-  export interface LOC extends RecordsAPI.LOCRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-
-    /**
-     * When the record was created.
-     */
-    created_on: string;
-
-    /**
-     * Extra Cloudflare-specific information about the record.
-     */
-    meta: unknown;
-
-    /**
-     * When the record was last modified.
-     */
-    modified_on: string;
-
-    /**
-     * Whether the record can be proxied by Cloudflare or not.
-     */
-    proxiable: boolean;
-
-    /**
-     * When the record comment was last modified. Omitted if there is no comment.
-     */
-    comment_modified_on?: string;
-
-    /**
-     * When the record tags were last modified. Omitted if there are no tags.
-     */
-    tags_modified_on?: string;
-  }
-
-  export interface MX extends RecordsAPI.MXRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-
-    /**
-     * When the record was created.
-     */
-    created_on: string;
-
-    /**
-     * Extra Cloudflare-specific information about the record.
-     */
-    meta: unknown;
-
-    /**
-     * When the record was last modified.
-     */
-    modified_on: string;
-
-    /**
-     * Whether the record can be proxied by Cloudflare or not.
-     */
-    proxiable: boolean;
-
-    /**
-     * When the record comment was last modified. Omitted if there is no comment.
-     */
-    comment_modified_on?: string;
-
-    /**
-     * When the record tags were last modified. Omitted if there are no tags.
-     */
-    tags_modified_on?: string;
-  }
-
-  export interface NAPTR extends RecordsAPI.NAPTRRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-
-    /**
-     * When the record was created.
-     */
-    created_on: string;
-
-    /**
-     * Extra Cloudflare-specific information about the record.
-     */
-    meta: unknown;
-
-    /**
-     * When the record was last modified.
-     */
-    modified_on: string;
-
-    /**
-     * Whether the record can be proxied by Cloudflare or not.
-     */
-    proxiable: boolean;
-
-    /**
-     * When the record comment was last modified. Omitted if there is no comment.
-     */
-    comment_modified_on?: string;
-
-    /**
-     * When the record tags were last modified. Omitted if there are no tags.
-     */
-    tags_modified_on?: string;
-  }
-
-  export interface NS extends RecordsAPI.NSRecord {
-    /**
-     * Identifier
-     */
-    id: string;
-
-    /**
-     * When the record was created.
-     */
-    created_on: string;
-
-    /**
-     * Extra Cloudflare-specific information about the record.
-     */
-    meta: unknown;
-
-    /**
-     * When the record was last modified.
-     */
-    modified_on: string;
-
-    /**
-     * Whether the record can be proxied by Cloudflare or not.
-     */
-    proxiable: boolean;
-
-    /**
-     * When the record comment was last modified. Omitted if there is no comment.
-     */
-    comment_modified_on?: string;
-
-    /**
-     * When the record tags were last modified. Omitted if there are no tags.
-     */
-    tags_modified_on?: string;
-  }
-
-  export interface Openpgpkey {
-    /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4133,7 +3942,7 @@ export namespace RecordResponse {
     modified_on: string;
 
     /**
-     * DNS record name (or @ for the zone apex) in Punycode.
+     * Complete DNS record name, including the zone name, in Punycode.
      */
     name: string;
 
@@ -4151,7 +3960,7 @@ export namespace RecordResponse {
     /**
      * Settings for the DNS record.
      */
-    settings: Openpgpkey.Settings;
+    settings: OpenpgpkeyRecord.Settings;
 
     /**
      * Custom tags for the DNS record. This field has no effect on DNS responses.
@@ -4181,7 +3990,7 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export namespace Openpgpkey {
+  export namespace OpenpgpkeyRecord {
     /**
      * Settings for the DNS record.
      */
@@ -4204,9 +4013,9 @@ export namespace RecordResponse {
     }
   }
 
-  export interface PTR extends RecordsAPI.PTRRecord {
+  export interface PTRRecord extends RecordsAPI.PTRRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4241,9 +4050,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface SMIMEA extends RecordsAPI.SMIMEARecord {
+  export interface TXTRecord extends RecordsAPI.TXTRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4278,9 +4087,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface SRV extends RecordsAPI.SRVRecord {
+  export interface CAARecord extends RecordsAPI.CAARecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4315,9 +4124,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface SSHFP extends RecordsAPI.SSHFPRecord {
+  export interface CERTRecord extends RecordsAPI.CERTRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4352,9 +4161,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface SVCB extends RecordsAPI.SVCBRecord {
+  export interface DNSKEYRecord extends RecordsAPI.DNSKEYRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4389,9 +4198,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface TLSA extends RecordsAPI.TLSARecord {
+  export interface DSRecord extends RecordsAPI.DSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4426,9 +4235,9 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface TXT extends RecordsAPI.TXTRecord {
+  export interface HTTPSRecord extends RecordsAPI.HTTPSRecord {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
 
@@ -4463,9 +4272,268 @@ export namespace RecordResponse {
     tags_modified_on?: string;
   }
 
-  export interface URI extends RecordsAPI.URIRecord {
+  export interface LOCRecord extends RecordsAPI.LOCRecord {
     /**
-     * Identifier
+     * Identifier.
+     */
+    id: string;
+
+    /**
+     * When the record was created.
+     */
+    created_on: string;
+
+    /**
+     * Extra Cloudflare-specific information about the record.
+     */
+    meta: unknown;
+
+    /**
+     * When the record was last modified.
+     */
+    modified_on: string;
+
+    /**
+     * Whether the record can be proxied by Cloudflare or not.
+     */
+    proxiable: boolean;
+
+    /**
+     * When the record comment was last modified. Omitted if there is no comment.
+     */
+    comment_modified_on?: string;
+
+    /**
+     * When the record tags were last modified. Omitted if there are no tags.
+     */
+    tags_modified_on?: string;
+  }
+
+  export interface NAPTRRecord extends RecordsAPI.NAPTRRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+
+    /**
+     * When the record was created.
+     */
+    created_on: string;
+
+    /**
+     * Extra Cloudflare-specific information about the record.
+     */
+    meta: unknown;
+
+    /**
+     * When the record was last modified.
+     */
+    modified_on: string;
+
+    /**
+     * Whether the record can be proxied by Cloudflare or not.
+     */
+    proxiable: boolean;
+
+    /**
+     * When the record comment was last modified. Omitted if there is no comment.
+     */
+    comment_modified_on?: string;
+
+    /**
+     * When the record tags were last modified. Omitted if there are no tags.
+     */
+    tags_modified_on?: string;
+  }
+
+  export interface SMIMEARecord extends RecordsAPI.SMIMEARecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+
+    /**
+     * When the record was created.
+     */
+    created_on: string;
+
+    /**
+     * Extra Cloudflare-specific information about the record.
+     */
+    meta: unknown;
+
+    /**
+     * When the record was last modified.
+     */
+    modified_on: string;
+
+    /**
+     * Whether the record can be proxied by Cloudflare or not.
+     */
+    proxiable: boolean;
+
+    /**
+     * When the record comment was last modified. Omitted if there is no comment.
+     */
+    comment_modified_on?: string;
+
+    /**
+     * When the record tags were last modified. Omitted if there are no tags.
+     */
+    tags_modified_on?: string;
+  }
+
+  export interface SRVRecord extends RecordsAPI.SRVRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+
+    /**
+     * When the record was created.
+     */
+    created_on: string;
+
+    /**
+     * Extra Cloudflare-specific information about the record.
+     */
+    meta: unknown;
+
+    /**
+     * When the record was last modified.
+     */
+    modified_on: string;
+
+    /**
+     * Whether the record can be proxied by Cloudflare or not.
+     */
+    proxiable: boolean;
+
+    /**
+     * When the record comment was last modified. Omitted if there is no comment.
+     */
+    comment_modified_on?: string;
+
+    /**
+     * When the record tags were last modified. Omitted if there are no tags.
+     */
+    tags_modified_on?: string;
+  }
+
+  export interface SSHFPRecord extends RecordsAPI.SSHFPRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+
+    /**
+     * When the record was created.
+     */
+    created_on: string;
+
+    /**
+     * Extra Cloudflare-specific information about the record.
+     */
+    meta: unknown;
+
+    /**
+     * When the record was last modified.
+     */
+    modified_on: string;
+
+    /**
+     * Whether the record can be proxied by Cloudflare or not.
+     */
+    proxiable: boolean;
+
+    /**
+     * When the record comment was last modified. Omitted if there is no comment.
+     */
+    comment_modified_on?: string;
+
+    /**
+     * When the record tags were last modified. Omitted if there are no tags.
+     */
+    tags_modified_on?: string;
+  }
+
+  export interface SVCBRecord extends RecordsAPI.SVCBRecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+
+    /**
+     * When the record was created.
+     */
+    created_on: string;
+
+    /**
+     * Extra Cloudflare-specific information about the record.
+     */
+    meta: unknown;
+
+    /**
+     * When the record was last modified.
+     */
+    modified_on: string;
+
+    /**
+     * Whether the record can be proxied by Cloudflare or not.
+     */
+    proxiable: boolean;
+
+    /**
+     * When the record comment was last modified. Omitted if there is no comment.
+     */
+    comment_modified_on?: string;
+
+    /**
+     * When the record tags were last modified. Omitted if there are no tags.
+     */
+    tags_modified_on?: string;
+  }
+
+  export interface TLSARecord extends RecordsAPI.TLSARecord {
+    /**
+     * Identifier.
+     */
+    id: string;
+
+    /**
+     * When the record was created.
+     */
+    created_on: string;
+
+    /**
+     * Extra Cloudflare-specific information about the record.
+     */
+    meta: unknown;
+
+    /**
+     * When the record was last modified.
+     */
+    modified_on: string;
+
+    /**
+     * Whether the record can be proxied by Cloudflare or not.
+     */
+    proxiable: boolean;
+
+    /**
+     * When the record comment was last modified. Omitted if there is no comment.
+     */
+    comment_modified_on?: string;
+
+    /**
+     * When the record tags were last modified. Omitted if there are no tags.
+     */
+    tags_modified_on?: string;
+  }
+
+  export interface URIRecord extends RecordsAPI.URIRecord {
+    /**
+     * Identifier.
      */
     id: string;
 
@@ -4515,6 +4583,23 @@ export type RecordTagsParam = string;
 
 export interface SMIMEARecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'SMIMEA';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -4531,11 +4616,6 @@ export interface SMIMEARecord {
   data?: SMIMEARecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -4550,18 +4630,6 @@ export interface SMIMEARecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'SMIMEA';
 }
 
 export namespace SMIMEARecord {
@@ -4614,6 +4682,23 @@ export namespace SMIMEARecord {
 
 export interface SMIMEARecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'SMIMEA';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -4623,11 +4708,6 @@ export interface SMIMEARecordParam {
    * Components of a SMIMEA record.
    */
   data?: SMIMEARecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -4644,18 +4724,6 @@ export interface SMIMEARecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'SMIMEA';
 }
 
 export namespace SMIMEARecordParam {
@@ -4708,6 +4776,23 @@ export namespace SMIMEARecordParam {
 
 export interface SRVRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'SRV';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -4725,11 +4810,6 @@ export interface SRVRecord {
   data?: SRVRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -4744,18 +4824,6 @@ export interface SRVRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'SRV';
 }
 
 export namespace SRVRecord {
@@ -4809,6 +4877,23 @@ export namespace SRVRecord {
 
 export interface SRVRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'SRV';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -4818,11 +4903,6 @@ export interface SRVRecordParam {
    * Components of a SRV record.
    */
   data?: SRVRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -4839,18 +4919,6 @@ export interface SRVRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'SRV';
 }
 
 export namespace SRVRecordParam {
@@ -4904,6 +4972,23 @@ export namespace SRVRecordParam {
 
 export interface SSHFPRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'SSHFP';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -4920,11 +5005,6 @@ export interface SSHFPRecord {
   data?: SSHFPRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -4939,18 +5019,6 @@ export interface SSHFPRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'SSHFP';
 }
 
 export namespace SSHFPRecord {
@@ -4959,17 +5027,17 @@ export namespace SSHFPRecord {
    */
   export interface Data {
     /**
-     * algorithm.
+     * Algorithm.
      */
     algorithm?: number;
 
     /**
-     * fingerprint.
+     * Fingerprint.
      */
     fingerprint?: string;
 
     /**
-     * type.
+     * Type.
      */
     type?: number;
   }
@@ -4998,6 +5066,23 @@ export namespace SSHFPRecord {
 
 export interface SSHFPRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'SSHFP';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5007,11 +5092,6 @@ export interface SSHFPRecordParam {
    * Components of a SSHFP record.
    */
   data?: SSHFPRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -5028,18 +5108,6 @@ export interface SSHFPRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'SSHFP';
 }
 
 export namespace SSHFPRecordParam {
@@ -5048,17 +5116,17 @@ export namespace SSHFPRecordParam {
    */
   export interface Data {
     /**
-     * algorithm.
+     * Algorithm.
      */
     algorithm?: number;
 
     /**
-     * fingerprint.
+     * Fingerprint.
      */
     fingerprint?: string;
 
     /**
-     * type.
+     * Type.
      */
     type?: number;
   }
@@ -5087,6 +5155,23 @@ export namespace SSHFPRecordParam {
 
 export interface SVCBRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'SVCB';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5103,11 +5188,6 @@ export interface SVCBRecord {
   data?: SVCBRecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -5122,18 +5202,6 @@ export interface SVCBRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'SVCB';
 }
 
 export namespace SVCBRecord {
@@ -5142,17 +5210,17 @@ export namespace SVCBRecord {
    */
   export interface Data {
     /**
-     * priority.
+     * Priority.
      */
     priority?: number;
 
     /**
-     * target.
+     * Target.
      */
     target?: string;
 
     /**
-     * value.
+     * Value.
      */
     value?: string;
   }
@@ -5181,6 +5249,23 @@ export namespace SVCBRecord {
 
 export interface SVCBRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'SVCB';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5190,11 +5275,6 @@ export interface SVCBRecordParam {
    * Components of a SVCB record.
    */
   data?: SVCBRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -5211,18 +5291,6 @@ export interface SVCBRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'SVCB';
 }
 
 export namespace SVCBRecordParam {
@@ -5231,17 +5299,17 @@ export namespace SVCBRecordParam {
    */
   export interface Data {
     /**
-     * priority.
+     * Priority.
      */
     priority?: number;
 
     /**
-     * target.
+     * Target.
      */
     target?: string;
 
     /**
-     * value.
+     * Value.
      */
     value?: string;
   }
@@ -5270,6 +5338,23 @@ export namespace SVCBRecordParam {
 
 export interface TLSARecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'TLSA';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5286,11 +5371,6 @@ export interface TLSARecord {
   data?: TLSARecord.Data;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -5305,18 +5385,6 @@ export interface TLSARecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'TLSA';
 }
 
 export namespace TLSARecord {
@@ -5325,7 +5393,7 @@ export namespace TLSARecord {
    */
   export interface Data {
     /**
-     * certificate.
+     * Certificate.
      */
     certificate?: string;
 
@@ -5369,6 +5437,23 @@ export namespace TLSARecord {
 
 export interface TLSARecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'TLSA';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5378,11 +5463,6 @@ export interface TLSARecordParam {
    * Components of a TLSA record.
    */
   data?: TLSARecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Whether the record is receiving the performance and security benefits of
@@ -5399,18 +5479,6 @@ export interface TLSARecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'TLSA';
 }
 
 export namespace TLSARecordParam {
@@ -5419,7 +5487,7 @@ export namespace TLSARecordParam {
    */
   export interface Data {
     /**
-     * certificate.
+     * Certificate.
      */
     certificate?: string;
 
@@ -5477,6 +5545,23 @@ export type TTLParam = number | 1;
 
 export interface TXTRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'TXT';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5493,11 +5578,6 @@ export interface TXTRecord {
   content?: string;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -5512,18 +5592,6 @@ export interface TXTRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'TXT';
 }
 
 export namespace TXTRecord {
@@ -5551,6 +5619,23 @@ export namespace TXTRecord {
 
 export interface TXTRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'TXT';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5567,11 +5652,6 @@ export interface TXTRecordParam {
   content?: string;
 
   /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
-
-  /**
    * Whether the record is receiving the performance and security benefits of
    * Cloudflare.
    */
@@ -5586,18 +5666,6 @@ export interface TXTRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'TXT';
 }
 
 export namespace TXTRecordParam {
@@ -5625,6 +5693,23 @@ export namespace TXTRecordParam {
 
 export interface URIRecord {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTL;
+
+  /**
+   * Record type.
+   */
+  type: 'URI';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5639,11 +5724,6 @@ export interface URIRecord {
    * Components of a URI record.
    */
   data?: URIRecord.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Required for MX, SRV and URI records; unused by other record types. Records with
@@ -5666,18 +5746,6 @@ export interface URIRecord {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTags>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTL;
-
-  /**
-   * Record type.
-   */
-  type?: 'URI';
 }
 
 export namespace URIRecord {
@@ -5720,6 +5788,23 @@ export namespace URIRecord {
 
 export interface URIRecordParam {
   /**
+   * Complete DNS record name, including the zone name, in Punycode.
+   */
+  name: string;
+
+  /**
+   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+   * Value must be between 60 and 86400, with the minimum reduced to 30 for
+   * Enterprise zones.
+   */
+  ttl: TTLParam;
+
+  /**
+   * Record type.
+   */
+  type: 'URI';
+
+  /**
    * Comments or notes about the DNS record. This field has no effect on DNS
    * responses.
    */
@@ -5729,11 +5814,6 @@ export interface URIRecordParam {
    * Components of a URI record.
    */
   data?: URIRecordParam.Data;
-
-  /**
-   * DNS record name (or @ for the zone apex) in Punycode.
-   */
-  name?: string;
 
   /**
    * Required for MX, SRV and URI records; unused by other record types. Records with
@@ -5756,18 +5836,6 @@ export interface URIRecordParam {
    * Custom tags for the DNS record. This field has no effect on DNS responses.
    */
   tags?: Array<RecordTagsParam>;
-
-  /**
-   * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
-   * Value must be between 60 and 86400, with the minimum reduced to 30 for
-   * Enterprise zones.
-   */
-  ttl?: TTLParam;
-
-  /**
-   * Record type.
-   */
-  type?: 'URI';
 }
 
 export namespace URIRecordParam {
@@ -5810,7 +5878,7 @@ export namespace URIRecordParam {
 
 export interface RecordDeleteResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id?: string;
 }
@@ -5854,35 +5922,103 @@ export interface RecordScanResponse {
   total_records_parsed?: number;
 }
 
+export interface RecordScanReviewResponse {
+  accepts?: Array<RecordResponse>;
+
+  rejects?: Array<string>;
+}
+
+export interface RecordScanTriggerResponse {
+  errors: Array<RecordScanTriggerResponse.Error>;
+
+  messages: Array<RecordScanTriggerResponse.Message>;
+
+  /**
+   * Whether the API call was successful.
+   */
+  success: true;
+}
+
+export namespace RecordScanTriggerResponse {
+  export interface Error {
+    code: number;
+
+    message: string;
+
+    documentation_url?: string;
+
+    source?: Error.Source;
+  }
+
+  export namespace Error {
+    export interface Source {
+      pointer?: string;
+    }
+  }
+
+  export interface Message {
+    code: number;
+
+    message: string;
+
+    documentation_url?: string;
+
+    source?: Message.Source;
+  }
+
+  export namespace Message {
+    export interface Source {
+      pointer?: string;
+    }
+  }
+}
+
 export type RecordCreateParams =
   | RecordCreateParams.ARecord
   | RecordCreateParams.AAAARecord
+  | RecordCreateParams.CNAMERecord
+  | RecordCreateParams.MXRecord
+  | RecordCreateParams.NSRecord
+  | RecordCreateParams.DNSRecordsOpenpgpkeyRecord
+  | RecordCreateParams.PTRRecord
+  | RecordCreateParams.TXTRecord
   | RecordCreateParams.CAARecord
   | RecordCreateParams.CERTRecord
-  | RecordCreateParams.CNAMERecord
   | RecordCreateParams.DNSKEYRecord
   | RecordCreateParams.DSRecord
   | RecordCreateParams.HTTPSRecord
   | RecordCreateParams.LOCRecord
-  | RecordCreateParams.MXRecord
   | RecordCreateParams.NAPTRRecord
-  | RecordCreateParams.NSRecord
-  | RecordCreateParams.DNSRecordsOpenpgpkeyRecord
-  | RecordCreateParams.PTRRecord
   | RecordCreateParams.SMIMEARecord
   | RecordCreateParams.SRVRecord
   | RecordCreateParams.SSHFPRecord
   | RecordCreateParams.SVCBRecord
   | RecordCreateParams.TLSARecord
-  | RecordCreateParams.TXTRecord
   | RecordCreateParams.URIRecord;
 
 export declare namespace RecordCreateParams {
   export interface ARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'A';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -5894,11 +6030,6 @@ export declare namespace RecordCreateParams {
      * Body param: A valid IPv4 address.
      */
     content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -5916,18 +6047,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'A';
   }
 
   export namespace ARecord {
@@ -5955,9 +6074,26 @@ export declare namespace RecordCreateParams {
 
   export interface AAAARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'AAAA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -5969,11 +6105,6 @@ export declare namespace RecordCreateParams {
      * Body param: A valid IPv6 address.
      */
     content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -5991,18 +6122,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'AAAA';
   }
 
   export namespace AAAARecord {
@@ -6028,11 +6147,498 @@ export declare namespace RecordCreateParams {
     }
   }
 
-  export interface CAARecord {
+  export interface CNAMERecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CNAME';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid hostname. Must not match the record's name.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: CNAMERecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace CNAMERecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * If enabled, causes the CNAME record to be resolved externally and the resulting
+       * address records (e.g., A and AAAA) to be returned instead of the CNAME record
+       * itself. This setting is unavailable for proxied records, since they are always
+       * flattened.
+       */
+      flatten_cname?: boolean;
+
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface MXRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'MX';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid mail server hostname.
+     */
+    content?: string;
+
+    /**
+     * Body param: Required for MX, SRV and URI records; unused by other record types.
+     * Records with lower priorities are preferred.
+     */
+    priority?: number;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: MXRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace MXRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface NSRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'NS';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid name server host name.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: NSRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace NSRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'OPENPGPKEY';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880
+     * Section 11.1)
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface PTRRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'PTR';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: Domain name pointing to the address.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: PTRRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace PTRRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface TXTRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'TXT';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: Text content for the record. The content must consist of quoted
+     * "character strings" (RFC 1035), each with a length of up to 255 bytes. Strings
+     * exceeding this allowed maximum length are automatically split.
+     *
+     * Learn more at
+     * <https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/>.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: TXTRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace TXTRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface CAARecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CAA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -6044,11 +6650,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a CAA record.
      */
     data?: CAARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -6066,18 +6667,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'CAA';
   }
 
   export namespace CAARecord {
@@ -6125,9 +6714,26 @@ export declare namespace RecordCreateParams {
 
   export interface CERTRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CERT';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -6139,11 +6745,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a CERT record.
      */
     data?: CERTRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -6161,18 +6762,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'CERT';
   }
 
   export namespace CERTRecord {
@@ -6223,94 +6812,28 @@ export declare namespace RecordCreateParams {
     }
   }
 
-  export interface CNAMERecord {
+  export interface DNSKEYRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: A valid hostname. Must not match the record's name.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: CNAMERecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'CNAME';
-  }
-
-  export namespace CNAMERecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * If enabled, causes the CNAME record to be resolved externally and the resulting
-       * address records (e.g., A and AAAA) to be returned instead of the CNAME record
-       * itself. This setting is unavailable for proxied records, since they are always
-       * flattened.
-       */
-      flatten_cname?: boolean;
-
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface DNSKEYRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'DNSKEY';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -6322,11 +6845,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a DNSKEY record.
      */
     data?: DNSKEYRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -6344,18 +6862,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'DNSKEY';
   }
 
   export namespace DNSKEYRecord {
@@ -6408,9 +6914,26 @@ export declare namespace RecordCreateParams {
 
   export interface DSRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'DS';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -6422,11 +6945,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a DS record.
      */
     data?: DSRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -6444,18 +6962,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'DS';
   }
 
   export namespace DSRecord {
@@ -6508,9 +7014,26 @@ export declare namespace RecordCreateParams {
 
   export interface HTTPSRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'HTTPS';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -6522,11 +7045,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a HTTPS record.
      */
     data?: HTTPSRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -6544,18 +7062,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'HTTPS';
   }
 
   export namespace HTTPSRecord {
@@ -6564,17 +7070,17 @@ export declare namespace RecordCreateParams {
      */
     export interface Data {
       /**
-       * priority.
+       * Priority.
        */
       priority?: number;
 
       /**
-       * target.
+       * Target.
        */
       target?: string;
 
       /**
-       * value.
+       * Value.
        */
       value?: string;
     }
@@ -6603,9 +7109,26 @@ export declare namespace RecordCreateParams {
 
   export interface LOCRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'LOC';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -6617,11 +7140,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a LOC record.
      */
     data?: LOCRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -6639,18 +7157,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'LOC';
   }
 
   export namespace LOCRecord {
@@ -6741,92 +7247,28 @@ export declare namespace RecordCreateParams {
     }
   }
 
-  export interface MXRecord {
+  export interface NAPTRRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: A valid mail server hostname.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Required for MX, SRV and URI records; unused by other record types.
-     * Records with lower priorities are preferred.
-     */
-    priority?: number;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: MXRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'MX';
-  }
-
-  export namespace MXRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface NAPTRRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'NAPTR';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -6838,11 +7280,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a NAPTR record.
      */
     data?: NAPTRRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -6860,18 +7297,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'NAPTR';
   }
 
   export namespace NAPTRRecord {
@@ -6932,237 +7357,28 @@ export declare namespace RecordCreateParams {
     }
   }
 
-  export interface NSRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: A valid name server host name.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: NSRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'NS';
-  }
-
-  export namespace NSRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface DNSRecordsOpenpgpkeyRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880
-     * Section 11.1)
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'OPENPGPKEY';
-  }
-
-  export namespace DNSRecordsOpenpgpkeyRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface PTRRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: Domain name pointing to the address.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: PTRRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'PTR';
-  }
-
-  export namespace PTRRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
   export interface SMIMEARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SMIMEA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7174,11 +7390,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a SMIMEA record.
      */
     data?: SMIMEARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -7196,18 +7407,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SMIMEA';
   }
 
   export namespace SMIMEARecord {
@@ -7260,9 +7459,26 @@ export declare namespace RecordCreateParams {
 
   export interface SRVRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SRV';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7274,11 +7490,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a SRV record.
      */
     data?: SRVRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -7296,18 +7507,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SRV';
   }
 
   export namespace SRVRecord {
@@ -7361,9 +7560,26 @@ export declare namespace RecordCreateParams {
 
   export interface SSHFPRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SSHFP';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7375,11 +7591,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a SSHFP record.
      */
     data?: SSHFPRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -7397,18 +7608,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SSHFP';
   }
 
   export namespace SSHFPRecord {
@@ -7417,17 +7616,17 @@ export declare namespace RecordCreateParams {
      */
     export interface Data {
       /**
-       * algorithm.
+       * Algorithm.
        */
       algorithm?: number;
 
       /**
-       * fingerprint.
+       * Fingerprint.
        */
       fingerprint?: string;
 
       /**
-       * type.
+       * Type.
        */
       type?: number;
     }
@@ -7456,9 +7655,26 @@ export declare namespace RecordCreateParams {
 
   export interface SVCBRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SVCB';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7470,11 +7686,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a SVCB record.
      */
     data?: SVCBRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -7492,18 +7703,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SVCB';
   }
 
   export namespace SVCBRecord {
@@ -7512,17 +7711,17 @@ export declare namespace RecordCreateParams {
      */
     export interface Data {
       /**
-       * priority.
+       * Priority.
        */
       priority?: number;
 
       /**
-       * target.
+       * Target.
        */
       target?: string;
 
       /**
-       * value.
+       * Value.
        */
       value?: string;
     }
@@ -7551,9 +7750,26 @@ export declare namespace RecordCreateParams {
 
   export interface TLSARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'TLSA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7565,11 +7781,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a TLSA record.
      */
     data?: TLSARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -7587,18 +7798,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'TLSA';
   }
 
   export namespace TLSARecord {
@@ -7607,7 +7806,7 @@ export declare namespace RecordCreateParams {
      */
     export interface Data {
       /**
-       * certificate.
+       * Certificate.
        */
       certificate?: string;
 
@@ -7649,91 +7848,28 @@ export declare namespace RecordCreateParams {
     }
   }
 
-  export interface TXTRecord {
+  export interface URIRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: Text content for the record. The content must consist of quoted
-     * "character strings" (RFC 1035), each with a length of up to 255 bytes. Strings
-     * exceeding this allowed maximum length are automatically split.
-     *
-     * Learn more at
-     * <https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/>.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: TXTRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'TXT';
-  }
-
-  export namespace TXTRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface URIRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'URI';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7745,11 +7881,6 @@ export declare namespace RecordCreateParams {
      * Body param: Components of a URI record.
      */
     data?: URIRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Required for MX, SRV and URI records; unused by other record types.
@@ -7773,18 +7904,6 @@ export declare namespace RecordCreateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'URI';
   }
 
   export namespace URIRecord {
@@ -7829,32 +7948,49 @@ export declare namespace RecordCreateParams {
 export type RecordUpdateParams =
   | RecordUpdateParams.ARecord
   | RecordUpdateParams.AAAARecord
+  | RecordUpdateParams.CNAMERecord
+  | RecordUpdateParams.MXRecord
+  | RecordUpdateParams.NSRecord
+  | RecordUpdateParams.DNSRecordsOpenpgpkeyRecord
+  | RecordUpdateParams.PTRRecord
+  | RecordUpdateParams.TXTRecord
   | RecordUpdateParams.CAARecord
   | RecordUpdateParams.CERTRecord
-  | RecordUpdateParams.CNAMERecord
   | RecordUpdateParams.DNSKEYRecord
   | RecordUpdateParams.DSRecord
   | RecordUpdateParams.HTTPSRecord
   | RecordUpdateParams.LOCRecord
-  | RecordUpdateParams.MXRecord
   | RecordUpdateParams.NAPTRRecord
-  | RecordUpdateParams.NSRecord
-  | RecordUpdateParams.DNSRecordsOpenpgpkeyRecord
-  | RecordUpdateParams.PTRRecord
   | RecordUpdateParams.SMIMEARecord
   | RecordUpdateParams.SRVRecord
   | RecordUpdateParams.SSHFPRecord
   | RecordUpdateParams.SVCBRecord
   | RecordUpdateParams.TLSARecord
-  | RecordUpdateParams.TXTRecord
   | RecordUpdateParams.URIRecord;
 
 export declare namespace RecordUpdateParams {
   export interface ARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'A';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7866,11 +8002,6 @@ export declare namespace RecordUpdateParams {
      * Body param: A valid IPv4 address.
      */
     content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -7888,18 +8019,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'A';
   }
 
   export namespace ARecord {
@@ -7927,9 +8046,26 @@ export declare namespace RecordUpdateParams {
 
   export interface AAAARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'AAAA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -7941,11 +8077,6 @@ export declare namespace RecordUpdateParams {
      * Body param: A valid IPv6 address.
      */
     content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -7963,18 +8094,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'AAAA';
   }
 
   export namespace AAAARecord {
@@ -8000,11 +8119,498 @@ export declare namespace RecordUpdateParams {
     }
   }
 
-  export interface CAARecord {
+  export interface CNAMERecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CNAME';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid hostname. Must not match the record's name.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: CNAMERecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace CNAMERecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * If enabled, causes the CNAME record to be resolved externally and the resulting
+       * address records (e.g., A and AAAA) to be returned instead of the CNAME record
+       * itself. This setting is unavailable for proxied records, since they are always
+       * flattened.
+       */
+      flatten_cname?: boolean;
+
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface MXRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'MX';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid mail server hostname.
+     */
+    content?: string;
+
+    /**
+     * Body param: Required for MX, SRV and URI records; unused by other record types.
+     * Records with lower priorities are preferred.
+     */
+    priority?: number;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: MXRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace MXRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface NSRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'NS';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid name server host name.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: NSRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace NSRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'OPENPGPKEY';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880
+     * Section 11.1)
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface PTRRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'PTR';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: Domain name pointing to the address.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: PTRRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace PTRRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface TXTRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'TXT';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: Text content for the record. The content must consist of quoted
+     * "character strings" (RFC 1035), each with a length of up to 255 bytes. Strings
+     * exceeding this allowed maximum length are automatically split.
+     *
+     * Learn more at
+     * <https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/>.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: TXTRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace TXTRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface CAARecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CAA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -8016,11 +8622,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a CAA record.
      */
     data?: CAARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -8038,18 +8639,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'CAA';
   }
 
   export namespace CAARecord {
@@ -8097,9 +8686,26 @@ export declare namespace RecordUpdateParams {
 
   export interface CERTRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CERT';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -8111,11 +8717,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a CERT record.
      */
     data?: CERTRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -8133,18 +8734,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'CERT';
   }
 
   export namespace CERTRecord {
@@ -8195,94 +8784,28 @@ export declare namespace RecordUpdateParams {
     }
   }
 
-  export interface CNAMERecord {
+  export interface DNSKEYRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: A valid hostname. Must not match the record's name.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: CNAMERecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'CNAME';
-  }
-
-  export namespace CNAMERecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * If enabled, causes the CNAME record to be resolved externally and the resulting
-       * address records (e.g., A and AAAA) to be returned instead of the CNAME record
-       * itself. This setting is unavailable for proxied records, since they are always
-       * flattened.
-       */
-      flatten_cname?: boolean;
-
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface DNSKEYRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'DNSKEY';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -8294,11 +8817,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a DNSKEY record.
      */
     data?: DNSKEYRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -8316,18 +8834,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'DNSKEY';
   }
 
   export namespace DNSKEYRecord {
@@ -8380,9 +8886,26 @@ export declare namespace RecordUpdateParams {
 
   export interface DSRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'DS';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -8394,11 +8917,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a DS record.
      */
     data?: DSRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -8416,18 +8934,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'DS';
   }
 
   export namespace DSRecord {
@@ -8480,9 +8986,26 @@ export declare namespace RecordUpdateParams {
 
   export interface HTTPSRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'HTTPS';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -8494,11 +9017,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a HTTPS record.
      */
     data?: HTTPSRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -8516,18 +9034,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'HTTPS';
   }
 
   export namespace HTTPSRecord {
@@ -8536,17 +9042,17 @@ export declare namespace RecordUpdateParams {
      */
     export interface Data {
       /**
-       * priority.
+       * Priority.
        */
       priority?: number;
 
       /**
-       * target.
+       * Target.
        */
       target?: string;
 
       /**
-       * value.
+       * Value.
        */
       value?: string;
     }
@@ -8575,9 +9081,26 @@ export declare namespace RecordUpdateParams {
 
   export interface LOCRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'LOC';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -8589,11 +9112,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a LOC record.
      */
     data?: LOCRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -8611,18 +9129,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'LOC';
   }
 
   export namespace LOCRecord {
@@ -8713,92 +9219,28 @@ export declare namespace RecordUpdateParams {
     }
   }
 
-  export interface MXRecord {
+  export interface NAPTRRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: A valid mail server hostname.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Required for MX, SRV and URI records; unused by other record types.
-     * Records with lower priorities are preferred.
-     */
-    priority?: number;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: MXRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'MX';
-  }
-
-  export namespace MXRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface NAPTRRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'NAPTR';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -8810,11 +9252,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a NAPTR record.
      */
     data?: NAPTRRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -8832,18 +9269,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'NAPTR';
   }
 
   export namespace NAPTRRecord {
@@ -8904,237 +9329,28 @@ export declare namespace RecordUpdateParams {
     }
   }
 
-  export interface NSRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: A valid name server host name.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: NSRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'NS';
-  }
-
-  export namespace NSRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface DNSRecordsOpenpgpkeyRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880
-     * Section 11.1)
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'OPENPGPKEY';
-  }
-
-  export namespace DNSRecordsOpenpgpkeyRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface PTRRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: Domain name pointing to the address.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: PTRRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'PTR';
-  }
-
-  export namespace PTRRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
   export interface SMIMEARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SMIMEA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -9146,11 +9362,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a SMIMEA record.
      */
     data?: SMIMEARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -9168,18 +9379,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SMIMEA';
   }
 
   export namespace SMIMEARecord {
@@ -9232,9 +9431,26 @@ export declare namespace RecordUpdateParams {
 
   export interface SRVRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SRV';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -9246,11 +9462,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a SRV record.
      */
     data?: SRVRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -9268,18 +9479,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SRV';
   }
 
   export namespace SRVRecord {
@@ -9333,9 +9532,26 @@ export declare namespace RecordUpdateParams {
 
   export interface SSHFPRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SSHFP';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -9347,11 +9563,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a SSHFP record.
      */
     data?: SSHFPRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -9369,18 +9580,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SSHFP';
   }
 
   export namespace SSHFPRecord {
@@ -9389,17 +9588,17 @@ export declare namespace RecordUpdateParams {
      */
     export interface Data {
       /**
-       * algorithm.
+       * Algorithm.
        */
       algorithm?: number;
 
       /**
-       * fingerprint.
+       * Fingerprint.
        */
       fingerprint?: string;
 
       /**
-       * type.
+       * Type.
        */
       type?: number;
     }
@@ -9428,9 +9627,26 @@ export declare namespace RecordUpdateParams {
 
   export interface SVCBRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SVCB';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -9442,11 +9658,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a SVCB record.
      */
     data?: SVCBRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -9464,18 +9675,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SVCB';
   }
 
   export namespace SVCBRecord {
@@ -9484,17 +9683,17 @@ export declare namespace RecordUpdateParams {
      */
     export interface Data {
       /**
-       * priority.
+       * Priority.
        */
       priority?: number;
 
       /**
-       * target.
+       * Target.
        */
       target?: string;
 
       /**
-       * value.
+       * Value.
        */
       value?: string;
     }
@@ -9523,9 +9722,26 @@ export declare namespace RecordUpdateParams {
 
   export interface TLSARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'TLSA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -9537,11 +9753,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a TLSA record.
      */
     data?: TLSARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -9559,18 +9770,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'TLSA';
   }
 
   export namespace TLSARecord {
@@ -9579,7 +9778,7 @@ export declare namespace RecordUpdateParams {
      */
     export interface Data {
       /**
-       * certificate.
+       * Certificate.
        */
       certificate?: string;
 
@@ -9621,91 +9820,28 @@ export declare namespace RecordUpdateParams {
     }
   }
 
-  export interface TXTRecord {
+  export interface URIRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: Text content for the record. The content must consist of quoted
-     * "character strings" (RFC 1035), each with a length of up to 255 bytes. Strings
-     * exceeding this allowed maximum length are automatically split.
-     *
-     * Learn more at
-     * <https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/>.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: TXTRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'TXT';
-  }
-
-  export namespace TXTRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface URIRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'URI';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -9717,11 +9853,6 @@ export declare namespace RecordUpdateParams {
      * Body param: Components of a URI record.
      */
     data?: URIRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Required for MX, SRV and URI records; unused by other record types.
@@ -9745,18 +9876,6 @@ export declare namespace RecordUpdateParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'URI';
   }
 
   export namespace URIRecord {
@@ -9800,7 +9919,7 @@ export declare namespace RecordUpdateParams {
 
 export interface RecordListParams extends V4PagePaginationArrayParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -10015,14 +10134,14 @@ export namespace RecordListParams {
 
 export interface RecordDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }
 
 export interface RecordBatchParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -10039,7 +10158,29 @@ export interface RecordBatchParams {
   /**
    * Body param:
    */
-  posts?: Array<RecordParam>;
+  posts?: Array<
+    | ARecordParam
+    | AAAARecordParam
+    | CNAMERecordParam
+    | MXRecordParam
+    | NSRecordParam
+    | RecordBatchParams.DNSRecordsOpenpgpkeyRecord
+    | PTRRecordParam
+    | TXTRecordParam
+    | CAARecordParam
+    | CERTRecordParam
+    | DNSKEYRecordParam
+    | DSRecordParam
+    | HTTPSRecordParam
+    | LOCRecordParam
+    | NAPTRRecordParam
+    | SMIMEARecordParam
+    | SRVRecordParam
+    | SSHFPRecordParam
+    | SVCBRecordParam
+    | TLSARecordParam
+    | URIRecordParam
+  >;
 
   /**
    * Body param:
@@ -10050,41 +10191,127 @@ export interface RecordBatchParams {
 export namespace RecordBatchParams {
   export interface Delete {
     /**
-     * Identifier
+     * Identifier.
      */
     id: string;
+  }
+
+  export interface DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+     * Value must be between 60 and 86400, with the minimum reduced to 30 for
+     * Enterprise zones.
+     */
+    ttl: RecordsAPI.TTLParam;
+
+    /**
+     * Record type.
+     */
+    type: 'OPENPGPKEY';
+
+    /**
+     * Comments or notes about the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    comment?: string;
+
+    /**
+     * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
+     */
+    content?: string;
+
+    /**
+     * Whether the record is receiving the performance and security benefits of
+     * Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Settings for the DNS record.
+     */
+    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
+
+    /**
+     * Custom tags for the DNS record. This field has no effect on DNS responses.
+     */
+    tags?: Array<RecordsAPI.RecordTagsParam>;
+  }
+
+  export namespace DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
   }
 }
 
 export type RecordEditParams =
   | RecordEditParams.ARecord
   | RecordEditParams.AAAARecord
+  | RecordEditParams.CNAMERecord
+  | RecordEditParams.MXRecord
+  | RecordEditParams.NSRecord
+  | RecordEditParams.DNSRecordsOpenpgpkeyRecord
+  | RecordEditParams.PTRRecord
+  | RecordEditParams.TXTRecord
   | RecordEditParams.CAARecord
   | RecordEditParams.CERTRecord
-  | RecordEditParams.CNAMERecord
   | RecordEditParams.DNSKEYRecord
   | RecordEditParams.DSRecord
   | RecordEditParams.HTTPSRecord
   | RecordEditParams.LOCRecord
-  | RecordEditParams.MXRecord
   | RecordEditParams.NAPTRRecord
-  | RecordEditParams.NSRecord
-  | RecordEditParams.DNSRecordsOpenpgpkeyRecord
-  | RecordEditParams.PTRRecord
   | RecordEditParams.SMIMEARecord
   | RecordEditParams.SRVRecord
   | RecordEditParams.SSHFPRecord
   | RecordEditParams.SVCBRecord
   | RecordEditParams.TLSARecord
-  | RecordEditParams.TXTRecord
   | RecordEditParams.URIRecord;
 
 export declare namespace RecordEditParams {
   export interface ARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'A';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10096,11 +10323,6 @@ export declare namespace RecordEditParams {
      * Body param: A valid IPv4 address.
      */
     content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10118,18 +10340,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'A';
   }
 
   export namespace ARecord {
@@ -10157,9 +10367,26 @@ export declare namespace RecordEditParams {
 
   export interface AAAARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'AAAA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10171,11 +10398,6 @@ export declare namespace RecordEditParams {
      * Body param: A valid IPv6 address.
      */
     content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10193,18 +10415,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'AAAA';
   }
 
   export namespace AAAARecord {
@@ -10230,11 +10440,498 @@ export declare namespace RecordEditParams {
     }
   }
 
-  export interface CAARecord {
+  export interface CNAMERecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CNAME';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid hostname. Must not match the record's name.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: CNAMERecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace CNAMERecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * If enabled, causes the CNAME record to be resolved externally and the resulting
+       * address records (e.g., A and AAAA) to be returned instead of the CNAME record
+       * itself. This setting is unavailable for proxied records, since they are always
+       * flattened.
+       */
+      flatten_cname?: boolean;
+
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface MXRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'MX';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid mail server hostname.
+     */
+    content?: string;
+
+    /**
+     * Body param: Required for MX, SRV and URI records; unused by other record types.
+     * Records with lower priorities are preferred.
+     */
+    priority?: number;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: MXRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace MXRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface NSRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'NS';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A valid name server host name.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: NSRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace NSRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'OPENPGPKEY';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880
+     * Section 11.1)
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface PTRRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'PTR';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: Domain name pointing to the address.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: PTRRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace PTRRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface TXTRecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'TXT';
+
+    /**
+     * Body param: Comments or notes about the DNS record. This field has no effect on
+     * DNS responses.
+     */
+    comment?: string;
+
+    /**
+     * Body param: Text content for the record. The content must consist of quoted
+     * "character strings" (RFC 1035), each with a length of up to 255 bytes. Strings
+     * exceeding this allowed maximum length are automatically split.
+     *
+     * Learn more at
+     * <https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/>.
+     */
+    content?: string;
+
+    /**
+     * Body param: Whether the record is receiving the performance and security
+     * benefits of Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Body param: Settings for the DNS record.
+     */
+    settings?: TXTRecord.Settings;
+
+    /**
+     * Body param: Custom tags for the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    tags?: Array<RecordTagsParam>;
+  }
+
+  export namespace TXTRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface CAARecord {
+    /**
+     * Path param: Identifier.
+     */
+    zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CAA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10246,11 +10943,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a CAA record.
      */
     data?: CAARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10268,18 +10960,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'CAA';
   }
 
   export namespace CAARecord {
@@ -10327,9 +11007,26 @@ export declare namespace RecordEditParams {
 
   export interface CERTRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'CERT';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10341,11 +11038,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a CERT record.
      */
     data?: CERTRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10363,18 +11055,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'CERT';
   }
 
   export namespace CERTRecord {
@@ -10425,94 +11105,28 @@ export declare namespace RecordEditParams {
     }
   }
 
-  export interface CNAMERecord {
+  export interface DNSKEYRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: A valid hostname. Must not match the record's name.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: CNAMERecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'CNAME';
-  }
-
-  export namespace CNAMERecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * If enabled, causes the CNAME record to be resolved externally and the resulting
-       * address records (e.g., A and AAAA) to be returned instead of the CNAME record
-       * itself. This setting is unavailable for proxied records, since they are always
-       * flattened.
-       */
-      flatten_cname?: boolean;
-
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface DNSKEYRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'DNSKEY';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10524,11 +11138,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a DNSKEY record.
      */
     data?: DNSKEYRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10546,18 +11155,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'DNSKEY';
   }
 
   export namespace DNSKEYRecord {
@@ -10610,9 +11207,26 @@ export declare namespace RecordEditParams {
 
   export interface DSRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'DS';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10624,11 +11238,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a DS record.
      */
     data?: DSRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10646,18 +11255,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'DS';
   }
 
   export namespace DSRecord {
@@ -10710,9 +11307,26 @@ export declare namespace RecordEditParams {
 
   export interface HTTPSRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'HTTPS';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10724,11 +11338,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a HTTPS record.
      */
     data?: HTTPSRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10746,18 +11355,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'HTTPS';
   }
 
   export namespace HTTPSRecord {
@@ -10766,17 +11363,17 @@ export declare namespace RecordEditParams {
      */
     export interface Data {
       /**
-       * priority.
+       * Priority.
        */
       priority?: number;
 
       /**
-       * target.
+       * Target.
        */
       target?: string;
 
       /**
-       * value.
+       * Value.
        */
       value?: string;
     }
@@ -10805,9 +11402,26 @@ export declare namespace RecordEditParams {
 
   export interface LOCRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'LOC';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -10819,11 +11433,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a LOC record.
      */
     data?: LOCRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -10841,18 +11450,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'LOC';
   }
 
   export namespace LOCRecord {
@@ -10943,92 +11540,28 @@ export declare namespace RecordEditParams {
     }
   }
 
-  export interface MXRecord {
+  export interface NAPTRRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: A valid mail server hostname.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Required for MX, SRV and URI records; unused by other record types.
-     * Records with lower priorities are preferred.
-     */
-    priority?: number;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: MXRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'MX';
-  }
-
-  export namespace MXRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface NAPTRRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'NAPTR';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -11040,11 +11573,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a NAPTR record.
      */
     data?: NAPTRRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -11062,18 +11590,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'NAPTR';
   }
 
   export namespace NAPTRRecord {
@@ -11134,237 +11650,28 @@ export declare namespace RecordEditParams {
     }
   }
 
-  export interface NSRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: A valid name server host name.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: NSRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'NS';
-  }
-
-  export namespace NSRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface DNSRecordsOpenpgpkeyRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880
-     * Section 11.1)
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'OPENPGPKEY';
-  }
-
-  export namespace DNSRecordsOpenpgpkeyRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface PTRRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
-
-    /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
-     */
-    comment?: string;
-
-    /**
-     * Body param: Domain name pointing to the address.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: PTRRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'PTR';
-  }
-
-  export namespace PTRRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
   export interface SMIMEARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SMIMEA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -11376,11 +11683,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a SMIMEA record.
      */
     data?: SMIMEARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -11398,18 +11700,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SMIMEA';
   }
 
   export namespace SMIMEARecord {
@@ -11462,9 +11752,26 @@ export declare namespace RecordEditParams {
 
   export interface SRVRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SRV';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -11476,11 +11783,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a SRV record.
      */
     data?: SRVRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -11498,18 +11800,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SRV';
   }
 
   export namespace SRVRecord {
@@ -11563,9 +11853,26 @@ export declare namespace RecordEditParams {
 
   export interface SSHFPRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SSHFP';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -11577,11 +11884,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a SSHFP record.
      */
     data?: SSHFPRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -11599,18 +11901,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SSHFP';
   }
 
   export namespace SSHFPRecord {
@@ -11619,17 +11909,17 @@ export declare namespace RecordEditParams {
      */
     export interface Data {
       /**
-       * algorithm.
+       * Algorithm.
        */
       algorithm?: number;
 
       /**
-       * fingerprint.
+       * Fingerprint.
        */
       fingerprint?: string;
 
       /**
-       * type.
+       * Type.
        */
       type?: number;
     }
@@ -11658,9 +11948,26 @@ export declare namespace RecordEditParams {
 
   export interface SVCBRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'SVCB';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -11672,11 +11979,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a SVCB record.
      */
     data?: SVCBRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -11694,18 +11996,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'SVCB';
   }
 
   export namespace SVCBRecord {
@@ -11714,17 +12004,17 @@ export declare namespace RecordEditParams {
      */
     export interface Data {
       /**
-       * priority.
+       * Priority.
        */
       priority?: number;
 
       /**
-       * target.
+       * Target.
        */
       target?: string;
 
       /**
-       * value.
+       * Value.
        */
       value?: string;
     }
@@ -11753,9 +12043,26 @@ export declare namespace RecordEditParams {
 
   export interface TLSARecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
+
+    /**
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
+     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
+     * for Enterprise zones.
+     */
+    ttl: TTLParam;
+
+    /**
+     * Body param: Record type.
+     */
+    type: 'TLSA';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -11767,11 +12074,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a TLSA record.
      */
     data?: TLSARecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Whether the record is receiving the performance and security
@@ -11789,18 +12091,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'TLSA';
   }
 
   export namespace TLSARecord {
@@ -11809,7 +12099,7 @@ export declare namespace RecordEditParams {
      */
     export interface Data {
       /**
-       * certificate.
+       * Certificate.
        */
       certificate?: string;
 
@@ -11851,91 +12141,28 @@ export declare namespace RecordEditParams {
     }
   }
 
-  export interface TXTRecord {
+  export interface URIRecord {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Comments or notes about the DNS record. This field has no effect on
-     * DNS responses.
+     * Body param: Complete DNS record name, including the zone name, in Punycode.
      */
-    comment?: string;
-
-    /**
-     * Body param: Text content for the record. The content must consist of quoted
-     * "character strings" (RFC 1035), each with a length of up to 255 bytes. Strings
-     * exceeding this allowed maximum length are automatically split.
-     *
-     * Learn more at
-     * <https://www.cloudflare.com/learning/dns/dns-records/dns-txt-record/>.
-     */
-    content?: string;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
-
-    /**
-     * Body param: Whether the record is receiving the performance and security
-     * benefits of Cloudflare.
-     */
-    proxied?: boolean;
-
-    /**
-     * Body param: Settings for the DNS record.
-     */
-    settings?: TXTRecord.Settings;
-
-    /**
-     * Body param: Custom tags for the DNS record. This field has no effect on DNS
-     * responses.
-     */
-    tags?: Array<RecordTagsParam>;
+    name: string;
 
     /**
      * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
      * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
      * for Enterprise zones.
      */
-    ttl?: TTLParam;
+    ttl: TTLParam;
 
     /**
      * Body param: Record type.
      */
-    type?: 'TXT';
-  }
-
-  export namespace TXTRecord {
-    /**
-     * Settings for the DNS record.
-     */
-    export interface Settings {
-      /**
-       * When enabled, only A records will be generated, and AAAA records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv4_only?: boolean;
-
-      /**
-       * When enabled, only AAAA records will be generated, and A records will not be
-       * created. This setting is intended for exceptional cases. Note that this option
-       * only applies to proxied records and it has no effect on whether Cloudflare
-       * communicates with the origin using IPv4 or IPv6.
-       */
-      ipv6_only?: boolean;
-    }
-  }
-
-  export interface URIRecord {
-    /**
-     * Path param: Identifier
-     */
-    zone_id: string;
+    type: 'URI';
 
     /**
      * Body param: Comments or notes about the DNS record. This field has no effect on
@@ -11947,11 +12174,6 @@ export declare namespace RecordEditParams {
      * Body param: Components of a URI record.
      */
     data?: URIRecord.Data;
-
-    /**
-     * Body param: DNS record name (or @ for the zone apex) in Punycode.
-     */
-    name?: string;
 
     /**
      * Body param: Required for MX, SRV and URI records; unused by other record types.
@@ -11975,18 +12197,6 @@ export declare namespace RecordEditParams {
      * responses.
      */
     tags?: Array<RecordTagsParam>;
-
-    /**
-     * Body param: Time To Live (TTL) of the DNS record in seconds. Setting to 1 means
-     * 'automatic'. Value must be between 60 and 86400, with the minimum reduced to 30
-     * for Enterprise zones.
-     */
-    ttl?: TTLParam;
-
-    /**
-     * Body param: Record type.
-     */
-    type?: 'URI';
   }
 
   export namespace URIRecord {
@@ -12030,21 +12240,21 @@ export declare namespace RecordEditParams {
 
 export interface RecordExportParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }
 
 export interface RecordGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }
 
 export interface RecordImportParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -12067,7 +12277,7 @@ export interface RecordImportParams {
 
 export interface RecordScanParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -12077,7 +12287,139 @@ export interface RecordScanParams {
   body: unknown;
 }
 
+export interface RecordScanListParams {
+  /**
+   * Identifier.
+   */
+  zone_id: string;
+}
+
+export interface RecordScanReviewParams {
+  /**
+   * Path param: Identifier.
+   */
+  zone_id: string;
+
+  /**
+   * Body param:
+   */
+  accepts?: Array<
+    | ARecordParam
+    | AAAARecordParam
+    | CNAMERecordParam
+    | MXRecordParam
+    | NSRecordParam
+    | RecordScanReviewParams.DNSRecordsOpenpgpkeyRecord
+    | PTRRecordParam
+    | TXTRecordParam
+    | CAARecordParam
+    | CERTRecordParam
+    | DNSKEYRecordParam
+    | DSRecordParam
+    | HTTPSRecordParam
+    | LOCRecordParam
+    | NAPTRRecordParam
+    | SMIMEARecordParam
+    | SRVRecordParam
+    | SSHFPRecordParam
+    | SVCBRecordParam
+    | TLSARecordParam
+    | URIRecordParam
+  >;
+
+  /**
+   * Body param:
+   */
+  rejects?: Array<RecordScanReviewParams.Reject>;
+}
+
+export namespace RecordScanReviewParams {
+  export interface DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Complete DNS record name, including the zone name, in Punycode.
+     */
+    name: string;
+
+    /**
+     * Time To Live (TTL) of the DNS record in seconds. Setting to 1 means 'automatic'.
+     * Value must be between 60 and 86400, with the minimum reduced to 30 for
+     * Enterprise zones.
+     */
+    ttl: RecordsAPI.TTLParam;
+
+    /**
+     * Record type.
+     */
+    type: 'OPENPGPKEY';
+
+    /**
+     * Comments or notes about the DNS record. This field has no effect on DNS
+     * responses.
+     */
+    comment?: string;
+
+    /**
+     * A single Base64-encoded OpenPGP Transferable Public Key (RFC 4880 Section 11.1)
+     */
+    content?: string;
+
+    /**
+     * Whether the record is receiving the performance and security benefits of
+     * Cloudflare.
+     */
+    proxied?: boolean;
+
+    /**
+     * Settings for the DNS record.
+     */
+    settings?: DNSRecordsOpenpgpkeyRecord.Settings;
+
+    /**
+     * Custom tags for the DNS record. This field has no effect on DNS responses.
+     */
+    tags?: Array<RecordsAPI.RecordTagsParam>;
+  }
+
+  export namespace DNSRecordsOpenpgpkeyRecord {
+    /**
+     * Settings for the DNS record.
+     */
+    export interface Settings {
+      /**
+       * When enabled, only A records will be generated, and AAAA records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv4_only?: boolean;
+
+      /**
+       * When enabled, only AAAA records will be generated, and A records will not be
+       * created. This setting is intended for exceptional cases. Note that this option
+       * only applies to proxied records and it has no effect on whether Cloudflare
+       * communicates with the origin using IPv4 or IPv6.
+       */
+      ipv6_only?: boolean;
+    }
+  }
+
+  export interface Reject {
+    /**
+     * Identifier.
+     */
+    id: string;
+  }
+}
+
+export interface RecordScanTriggerParams {
+  /**
+   * Identifier.
+   */
+  zone_id: string;
+}
+
 Records.RecordResponsesV4PagePaginationArray = RecordResponsesV4PagePaginationArray;
+Records.RecordResponsesSinglePage = RecordResponsesSinglePage;
 
 export declare namespace Records {
   export {
@@ -12112,7 +12454,10 @@ export declare namespace Records {
     type RecordExportResponse as RecordExportResponse,
     type RecordImportResponse as RecordImportResponse,
     type RecordScanResponse as RecordScanResponse,
+    type RecordScanReviewResponse as RecordScanReviewResponse,
+    type RecordScanTriggerResponse as RecordScanTriggerResponse,
     RecordResponsesV4PagePaginationArray as RecordResponsesV4PagePaginationArray,
+    RecordResponsesSinglePage as RecordResponsesSinglePage,
     type RecordCreateParams as RecordCreateParams,
     type RecordUpdateParams as RecordUpdateParams,
     type RecordListParams as RecordListParams,
@@ -12123,5 +12468,8 @@ export declare namespace Records {
     type RecordGetParams as RecordGetParams,
     type RecordImportParams as RecordImportParams,
     type RecordScanParams as RecordScanParams,
+    type RecordScanListParams as RecordScanListParams,
+    type RecordScanReviewParams as RecordScanReviewParams,
+    type RecordScanTriggerParams as RecordScanTriggerParams,
   };
 }

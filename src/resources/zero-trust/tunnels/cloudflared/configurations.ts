@@ -6,6 +6,15 @@ import * as Core from '../../../../core';
 export class Configurations extends APIResource {
   /**
    * Adds or updates the configuration for a remotely-managed tunnel.
+   *
+   * @example
+   * ```ts
+   * const configuration =
+   *   await client.zeroTrust.tunnels.cloudflared.configurations.update(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   update(
     tunnelId: string,
@@ -23,6 +32,15 @@ export class Configurations extends APIResource {
 
   /**
    * Gets the configuration for a remotely-managed tunnel
+   *
+   * @example
+   * ```ts
+   * const configuration =
+   *   await client.zeroTrust.tunnels.cloudflared.configurations.get(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     tunnelId: string,
@@ -44,7 +62,7 @@ export class Configurations extends APIResource {
  */
 export interface ConfigurationUpdateResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id?: string;
 
@@ -89,12 +107,6 @@ export namespace ConfigurationUpdateResponse {
      * between cloudflared and origin server.
      */
     originRequest?: Config.OriginRequest;
-
-    /**
-     * Enable private network access from WARP users to private network routes. This is
-     * enabled if the tunnel has an assigned route.
-     */
-    'warp-routing'?: Config.WARPRouting;
   }
 
   export namespace Config {
@@ -345,14 +357,6 @@ export namespace ConfigurationUpdateResponse {
         required?: boolean;
       }
     }
-
-    /**
-     * Enable private network access from WARP users to private network routes. This is
-     * enabled if the tunnel has an assigned route.
-     */
-    export interface WARPRouting {
-      enabled?: boolean;
-    }
   }
 }
 
@@ -361,7 +365,7 @@ export namespace ConfigurationUpdateResponse {
  */
 export interface ConfigurationGetResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id?: string;
 
@@ -406,12 +410,6 @@ export namespace ConfigurationGetResponse {
      * between cloudflared and origin server.
      */
     originRequest?: Config.OriginRequest;
-
-    /**
-     * Enable private network access from WARP users to private network routes. This is
-     * enabled if the tunnel has an assigned route.
-     */
-    'warp-routing'?: Config.WARPRouting;
   }
 
   export namespace Config {
@@ -662,20 +660,12 @@ export namespace ConfigurationGetResponse {
         required?: boolean;
       }
     }
-
-    /**
-     * Enable private network access from WARP users to private network routes. This is
-     * enabled if the tunnel has an assigned route.
-     */
-    export interface WARPRouting {
-      enabled?: boolean;
-    }
   }
 }
 
 export interface ConfigurationUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -956,7 +946,7 @@ export namespace ConfigurationUpdateParams {
 
 export interface ConfigurationGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }

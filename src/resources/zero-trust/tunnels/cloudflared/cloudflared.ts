@@ -37,6 +37,15 @@ export class Cloudflared extends APIResource {
 
   /**
    * Creates a new Cloudflare Tunnel in an account.
+   *
+   * @example
+   * ```ts
+   * const cloudflared =
+   *   await client.zeroTrust.tunnels.cloudflared.create({
+   *     account_id: '699d98642c564d2e855e9661899b7252',
+   *     name: 'blog',
+   *   });
+   * ```
    */
   create(
     params: CloudflaredCreateParams,
@@ -52,6 +61,16 @@ export class Cloudflared extends APIResource {
 
   /**
    * Lists and filters Cloudflare Tunnels in an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const cloudflaredListResponse of client.zeroTrust.tunnels.cloudflared.list(
+   *   { account_id: '699d98642c564d2e855e9661899b7252' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: CloudflaredListParams,
@@ -67,6 +86,15 @@ export class Cloudflared extends APIResource {
 
   /**
    * Deletes a Cloudflare Tunnel from an account.
+   *
+   * @example
+   * ```ts
+   * const cloudflared =
+   *   await client.zeroTrust.tunnels.cloudflared.delete(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   delete(
     tunnelId: string,
@@ -83,6 +111,15 @@ export class Cloudflared extends APIResource {
 
   /**
    * Updates an existing Cloudflare Tunnel.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.zeroTrust.tunnels.cloudflared.edit(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   edit(
     tunnelId: string,
@@ -100,6 +137,15 @@ export class Cloudflared extends APIResource {
 
   /**
    * Fetches a single Cloudflare Tunnel.
+   *
+   * @example
+   * ```ts
+   * const cloudflared =
+   *   await client.zeroTrust.tunnels.cloudflared.get(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   get(
     tunnelId: string,
@@ -140,7 +186,9 @@ export namespace CloudflaredCreateResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -262,7 +310,9 @@ export namespace CloudflaredListResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -384,7 +434,9 @@ export namespace CloudflaredDeleteResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -506,7 +558,9 @@ export namespace CloudflaredEditResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -628,7 +682,9 @@ export namespace CloudflaredGetResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 

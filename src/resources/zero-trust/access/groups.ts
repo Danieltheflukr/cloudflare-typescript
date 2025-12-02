@@ -5,11 +5,24 @@ import { isRequestOptions } from '../../../core';
 import * as Core from '../../../core';
 import * as PoliciesAPI from './applications/policies';
 import { CloudflareError } from '../../../error';
-import { SinglePage } from '../../../pagination';
+import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../../pagination';
 
 export class Groups extends APIResource {
   /**
    * Creates a new Access group.
+   *
+   * @example
+   * ```ts
+   * const group = await client.zeroTrust.access.groups.create({
+   *   include: [
+   *     {
+   *       group: { id: 'aa0a4aab-672b-4bdb-bc33-a59f1130a11f' },
+   *     },
+   *   ],
+   *   name: 'Allow devs',
+   *   account_id: 'account_id',
+   * });
+   * ```
    */
   create(params: GroupCreateParams, options?: Core.RequestOptions): Core.APIPromise<GroupCreateResponse> {
     const { account_id, zone_id, ...body } = params;
@@ -39,6 +52,24 @@ export class Groups extends APIResource {
 
   /**
    * Updates a configured Access group.
+   *
+   * @example
+   * ```ts
+   * const group = await client.zeroTrust.access.groups.update(
+   *   'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *   {
+   *     include: [
+   *       {
+   *         group: {
+   *           id: 'aa0a4aab-672b-4bdb-bc33-a59f1130a11f',
+   *         },
+   *       },
+   *     ],
+   *     name: 'Allow devs',
+   *     account_id: 'account_id',
+   *   },
+   * );
+   * ```
    */
   update(
     groupId: string,
@@ -72,16 +103,28 @@ export class Groups extends APIResource {
 
   /**
    * Lists all Access groups.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const groupListResponse of client.zeroTrust.access.groups.list(
+   *   { account_id: 'account_id' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params?: GroupListParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<GroupListResponsesSinglePage, GroupListResponse>;
-  list(options?: Core.RequestOptions): Core.PagePromise<GroupListResponsesSinglePage, GroupListResponse>;
+  ): Core.PagePromise<GroupListResponsesV4PagePaginationArray, GroupListResponse>;
+  list(
+    options?: Core.RequestOptions,
+  ): Core.PagePromise<GroupListResponsesV4PagePaginationArray, GroupListResponse>;
   list(
     params: GroupListParams | Core.RequestOptions = {},
     options?: Core.RequestOptions,
-  ): Core.PagePromise<GroupListResponsesSinglePage, GroupListResponse> {
+  ): Core.PagePromise<GroupListResponsesV4PagePaginationArray, GroupListResponse> {
     if (isRequestOptions(params)) {
       return this.list({}, params);
     }
@@ -104,13 +147,21 @@ export class Groups extends APIResource {
         };
     return this._client.getAPIList(
       `/${accountOrZone}/${accountOrZoneId}/access/groups`,
-      GroupListResponsesSinglePage,
+      GroupListResponsesV4PagePaginationArray,
       { query, ...options },
     );
   }
 
   /**
    * Deletes an Access group.
+   *
+   * @example
+   * ```ts
+   * const group = await client.zeroTrust.access.groups.delete(
+   *   'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *   { account_id: 'account_id' },
+   * );
+   * ```
    */
   delete(
     groupId: string,
@@ -153,6 +204,14 @@ export class Groups extends APIResource {
 
   /**
    * Fetches a single Access group.
+   *
+   * @example
+   * ```ts
+   * const group = await client.zeroTrust.access.groups.get(
+   *   'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *   { account_id: 'account_id' },
+   * );
+   * ```
    */
   get(
     groupId: string,
@@ -194,9 +253,9 @@ export class Groups extends APIResource {
   }
 }
 
-export class GroupListResponsesSinglePage extends SinglePage<GroupListResponse> {}
+export class GroupListResponsesV4PagePaginationArray extends V4PagePaginationArray<GroupListResponse> {}
 
-export class ZeroTrustGroupsSinglePage extends SinglePage<ZeroTrustGroup> {}
+export class ZeroTrustGroupsV4PagePaginationArray extends V4PagePaginationArray<ZeroTrustGroup> {}
 
 export interface ZeroTrustGroup {
   /**
@@ -244,11 +303,9 @@ export namespace ZeroTrustGroup {
 
 export interface GroupCreateResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
-
-  created_at?: string;
 
   /**
    * Rules evaluated with a NOT logical operator. To match a policy, a user cannot
@@ -278,17 +335,13 @@ export interface GroupCreateResponse {
    * meet all of the Require rules.
    */
   require?: Array<PoliciesAPI.AccessRule>;
-
-  updated_at?: string;
 }
 
 export interface GroupUpdateResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
-
-  created_at?: string;
 
   /**
    * Rules evaluated with a NOT logical operator. To match a policy, a user cannot
@@ -318,17 +371,13 @@ export interface GroupUpdateResponse {
    * meet all of the Require rules.
    */
   require?: Array<PoliciesAPI.AccessRule>;
-
-  updated_at?: string;
 }
 
 export interface GroupListResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
-
-  created_at?: string;
 
   /**
    * Rules evaluated with a NOT logical operator. To match a policy, a user cannot
@@ -358,24 +407,20 @@ export interface GroupListResponse {
    * meet all of the Require rules.
    */
   require?: Array<PoliciesAPI.AccessRule>;
-
-  updated_at?: string;
 }
 
 export interface GroupDeleteResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 }
 
 export interface GroupGetResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
-
-  created_at?: string;
 
   /**
    * Rules evaluated with a NOT logical operator. To match a policy, a user cannot
@@ -405,8 +450,6 @@ export interface GroupGetResponse {
    * meet all of the Require rules.
    */
   require?: Array<PoliciesAPI.AccessRule>;
-
-  updated_at?: string;
 }
 
 export interface GroupCreateParams {
@@ -493,7 +536,7 @@ export interface GroupUpdateParams {
   require?: Array<PoliciesAPI.AccessRuleParam>;
 }
 
-export interface GroupListParams {
+export interface GroupListParams extends V4PagePaginationArrayParams {
   /**
    * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
    * Zone ID.
@@ -541,7 +584,7 @@ export interface GroupGetParams {
   zone_id?: string;
 }
 
-Groups.GroupListResponsesSinglePage = GroupListResponsesSinglePage;
+Groups.GroupListResponsesV4PagePaginationArray = GroupListResponsesV4PagePaginationArray;
 
 export declare namespace Groups {
   export {
@@ -551,7 +594,7 @@ export declare namespace Groups {
     type GroupListResponse as GroupListResponse,
     type GroupDeleteResponse as GroupDeleteResponse,
     type GroupGetResponse as GroupGetResponse,
-    GroupListResponsesSinglePage as GroupListResponsesSinglePage,
+    GroupListResponsesV4PagePaginationArray as GroupListResponsesV4PagePaginationArray,
     type GroupCreateParams as GroupCreateParams,
     type GroupUpdateParams as GroupUpdateParams,
     type GroupListParams as GroupListParams,

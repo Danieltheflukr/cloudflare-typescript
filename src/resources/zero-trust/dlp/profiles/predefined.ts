@@ -7,7 +7,41 @@ import * as ProfilesAPI from './profiles';
 
 export class Predefined extends APIResource {
   /**
+   * Creates a DLP predefined profile. Only supports enabling/disabling entries.
+   *
+   * @example
+   * ```ts
+   * const profile =
+   *   await client.zeroTrust.dlp.profiles.predefined.create({
+   *     account_id: 'account_id',
+   *     profile_id: '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *   });
+   * ```
+   */
+  create(
+    params: PredefinedCreateParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<ProfilesAPI.Profile> {
+    const { account_id, ...body } = params;
+    return (
+      this._client.post(`/accounts/${account_id}/dlp/profiles/predefined`, {
+        body,
+        ...options,
+      }) as Core.APIPromise<{ result: ProfilesAPI.Profile }>
+    )._thenUnwrap((obj) => obj.result);
+  }
+
+  /**
    * Updates a DLP predefined profile. Only supports enabling/disabling entries.
+   *
+   * @example
+   * ```ts
+   * const profile =
+   *   await client.zeroTrust.dlp.profiles.predefined.update(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   update(
     profileId: string,
@@ -24,7 +58,43 @@ export class Predefined extends APIResource {
   }
 
   /**
+   * This is a no-op as predefined profiles can't be deleted but is needed for our
+   * generated terraform API
+   *
+   * @example
+   * ```ts
+   * const predefined =
+   *   await client.zeroTrust.dlp.profiles.predefined.delete(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
+   */
+  delete(
+    profileId: string,
+    params: PredefinedDeleteParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<PredefinedDeleteResponse | null> {
+    const { account_id } = params;
+    return (
+      this._client.delete(
+        `/accounts/${account_id}/dlp/profiles/predefined/${profileId}`,
+        options,
+      ) as Core.APIPromise<{ result: PredefinedDeleteResponse | null }>
+    )._thenUnwrap((obj) => obj.result);
+  }
+
+  /**
    * Fetches a predefined DLP profile by id.
+   *
+   * @example
+   * ```ts
+   * const profile =
+   *   await client.zeroTrust.dlp.profiles.predefined.get(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   get(
     profileId: string,
@@ -43,7 +113,7 @@ export class Predefined extends APIResource {
 
 export interface PredefinedProfile {
   /**
-   * The id of the predefined profile (uuid)
+   * The id of the predefined profile (uuid).
    */
   id: string;
 
@@ -54,11 +124,12 @@ export interface PredefinedProfile {
     | PredefinedProfile.PredefinedEntry
     | PredefinedProfile.IntegrationEntry
     | PredefinedProfile.ExactDataEntry
+    | PredefinedProfile.DocumentFingerprintEntry
     | PredefinedProfile.WordListEntry
   >;
 
   /**
-   * The name of the predefined profile
+   * The name of the predefined profile.
    */
   name: string;
 
@@ -67,15 +138,15 @@ export interface PredefinedProfile {
   confidence_threshold?: 'low' | 'medium' | 'high' | 'very_high';
 
   /**
-   * Scan the context of predefined entries to only return matches surrounded by
-   * keywords.
+   * @deprecated Scan the context of predefined entries to only return matches
+   * surrounded by keywords.
    */
   context_awareness?: ProfilesAPI.ContextAwareness;
 
   ocr_enabled?: boolean;
 
   /**
-   * Whether this profile can be accessed by anyone
+   * Whether this profile can be accessed by anyone.
    */
   open_access?: boolean;
 }
@@ -111,20 +182,30 @@ export namespace PredefinedProfile {
     type: 'predefined';
 
     profile_id?: string | null;
+
+    variant?: PredefinedEntry.Variant;
   }
 
   export namespace PredefinedEntry {
     export interface Confidence {
       /**
-       * Indicates whether this entry has AI remote service validation
+       * Indicates whether this entry has AI remote service validation.
        */
       ai_context_available: boolean;
 
       /**
        * Indicates whether this entry has any form of validation that is not an AI remote
-       * service
+       * service.
        */
       available: boolean;
+    }
+
+    export interface Variant {
+      topic_type: 'Intent' | 'Content';
+
+      type: 'PromptTopic';
+
+      description?: string | null;
     }
   }
 
@@ -147,6 +228,12 @@ export namespace PredefinedProfile {
   export interface ExactDataEntry {
     id: string;
 
+    /**
+     * Only applies to custom word lists. Determines if the words should be matched in
+     * a case-sensitive manner Cannot be set to false if secret is true
+     */
+    case_sensitive: boolean;
+
     created_at: string;
 
     enabled: boolean;
@@ -156,6 +243,20 @@ export namespace PredefinedProfile {
     secret: boolean;
 
     type: 'exact_data';
+
+    updated_at: string;
+  }
+
+  export interface DocumentFingerprintEntry {
+    id: string;
+
+    created_at: string;
+
+    enabled: boolean;
+
+    name: string;
+
+    type: 'document_fingerprint';
 
     updated_at: string;
   }
@@ -179,7 +280,9 @@ export namespace PredefinedProfile {
   }
 }
 
-export interface PredefinedUpdateParams {
+export type PredefinedDeleteResponse = unknown;
+
+export interface PredefinedCreateParams {
   /**
    * Path param:
    */
@@ -188,7 +291,7 @@ export interface PredefinedUpdateParams {
   /**
    * Body param:
    */
-  entries: Array<PredefinedUpdateParams.Entry>;
+  profile_id: string;
 
   /**
    * Body param:
@@ -206,10 +309,61 @@ export interface PredefinedUpdateParams {
   confidence_threshold?: string | null;
 
   /**
-   * Body param: Scan the context of predefined entries to only return matches
-   * surrounded by keywords.
+   * @deprecated Body param: Scan the context of predefined entries to only return
+   * matches surrounded by keywords.
    */
   context_awareness?: ProfilesAPI.ContextAwarenessParam;
+
+  /**
+   * @deprecated Body param:
+   */
+  entries?: Array<PredefinedCreateParams.Entry>;
+
+  /**
+   * Body param:
+   */
+  ocr_enabled?: boolean;
+}
+
+export namespace PredefinedCreateParams {
+  export interface Entry {
+    id: string;
+
+    enabled: boolean;
+  }
+}
+
+export interface PredefinedUpdateParams {
+  /**
+   * Path param:
+   */
+  account_id: string;
+
+  /**
+   * Body param:
+   */
+  ai_context_enabled?: boolean;
+
+  /**
+   * Body param:
+   */
+  allowed_match_count?: number | null;
+
+  /**
+   * Body param:
+   */
+  confidence_threshold?: string | null;
+
+  /**
+   * @deprecated Body param: Scan the context of predefined entries to only return
+   * matches surrounded by keywords.
+   */
+  context_awareness?: ProfilesAPI.ContextAwarenessParam;
+
+  /**
+   * @deprecated Body param:
+   */
+  entries?: Array<PredefinedUpdateParams.Entry>;
 
   /**
    * Body param:
@@ -225,6 +379,10 @@ export namespace PredefinedUpdateParams {
   }
 }
 
+export interface PredefinedDeleteParams {
+  account_id: string;
+}
+
 export interface PredefinedGetParams {
   account_id: string;
 }
@@ -232,7 +390,10 @@ export interface PredefinedGetParams {
 export declare namespace Predefined {
   export {
     type PredefinedProfile as PredefinedProfile,
+    type PredefinedDeleteResponse as PredefinedDeleteResponse,
+    type PredefinedCreateParams as PredefinedCreateParams,
     type PredefinedUpdateParams as PredefinedUpdateParams,
+    type PredefinedDeleteParams as PredefinedDeleteParams,
     type PredefinedGetParams as PredefinedGetParams,
   };
 }

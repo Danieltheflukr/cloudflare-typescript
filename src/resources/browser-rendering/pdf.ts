@@ -33,6 +33,14 @@ export interface PDFCreateParams {
   cacheTTL?: number;
 
   /**
+   * Body param: The maximum duration allowed for the browser action to complete
+   * after the page has loaded (such as taking screenshots, extracting content, or
+   * generating PDFs). If this time limit is exceeded, the action stops and returns a
+   * timeout error.
+   */
+  actionTimeout?: number;
+
+  /**
    * Body param: Adds a `<script>` tag into the page with the desired URL or content.
    */
   addScriptTag?: Array<PDFCreateParams.AddScriptTag>;
@@ -106,6 +114,11 @@ export interface PDFCreateParams {
   html?: string;
 
   /**
+   * Body param: Check [options](https://pptr.dev/api/puppeteer.pdfoptions).
+   */
+  pdfOptions?: PDFCreateParams.PDFOptions;
+
+  /**
    * Body param: Block undesired requests that match the provided regex patterns, eg.
    * '/^.\*\.(css)'.
    */
@@ -139,7 +152,7 @@ export interface PDFCreateParams {
   /**
    * Body param:
    */
-  setExtraHTTPHeaders?: Record<string, string>;
+  setExtraHTTPHeaders?: { [key: string]: string };
 
   /**
    * Body param:
@@ -245,6 +258,106 @@ export namespace PDFCreateParams {
       | 'networkidle0'
       | 'networkidle2'
       | Array<'load' | 'domcontentloaded' | 'networkidle0' | 'networkidle2'>;
+  }
+
+  /**
+   * Check [options](https://pptr.dev/api/puppeteer.pdfoptions).
+   */
+  export interface PDFOptions {
+    /**
+     * Whether to show the header and footer.
+     */
+    displayHeaderFooter?: boolean;
+
+    /**
+     * HTML template for the print footer.
+     */
+    footerTemplate?: string;
+
+    /**
+     * Paper format. Takes priority over width and height if set.
+     */
+    format?: 'letter' | 'legal' | 'tabloid' | 'ledger' | 'a0' | 'a1' | 'a2' | 'a3' | 'a4' | 'a5' | 'a6';
+
+    /**
+     * HTML template for the print header.
+     */
+    headerTemplate?: string;
+
+    /**
+     * Sets the height of paper. Can be a number or string with unit.
+     */
+    height?: string | number;
+
+    /**
+     * Whether to print in landscape orientation.
+     */
+    landscape?: boolean;
+
+    /**
+     * Set the PDF margins. Useful when setting header and footer.
+     */
+    margin?: PDFOptions.Margin;
+
+    /**
+     * Hides default white background and allows generating pdfs with transparency.
+     */
+    omitBackground?: boolean;
+
+    /**
+     * Generate document outline.
+     */
+    outline?: boolean;
+
+    /**
+     * Paper ranges to print, e.g. '1-5, 8, 11-13'.
+     */
+    pageRanges?: string;
+
+    /**
+     * Give CSS @page size priority over other size declarations.
+     */
+    preferCSSPageSize?: boolean;
+
+    /**
+     * Set to true to print background graphics.
+     */
+    printBackground?: boolean;
+
+    /**
+     * Scales the rendering of the web page. Amount must be between 0.1 and 2.
+     */
+    scale?: number;
+
+    /**
+     * Generate tagged (accessible) PDF.
+     */
+    tagged?: boolean;
+
+    /**
+     * Timeout in milliseconds.
+     */
+    timeout?: number;
+
+    /**
+     * Sets the width of paper. Can be a number or string with unit.
+     */
+    width?: string | number;
+  }
+
+  export namespace PDFOptions {
+    /**
+     * Set the PDF margins. Useful when setting header and footer.
+     */
+    export interface Margin {
+      bottom?: string | number;
+
+      left?: string | number;
+
+      right?: string | number;
+
+      top?: string | number;
+    }
   }
 
   /**

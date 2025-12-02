@@ -4,6 +4,8 @@ import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
 import * as ASNsAPI from './asns';
 import {
+  ASNAsSetParams,
+  ASNAsSetResponse,
   ASNGetParams,
   ASNGetResponse,
   ASNIPParams,
@@ -29,6 +31,13 @@ export class Entities extends APIResource {
 
   /**
    * Retrieves IP address information.
+   *
+   * @example
+   * ```ts
+   * const entity = await client.radar.entities.get({
+   *   ip: '8.8.8.8',
+   * });
+   * ```
    */
   get(query: EntityGetParams, options?: Core.RequestOptions): Core.APIPromise<EntityGetResponse> {
     return (
@@ -84,10 +93,12 @@ export declare namespace Entities {
   export {
     ASNs as ASNs,
     type ASNListResponse as ASNListResponse,
+    type ASNAsSetResponse as ASNAsSetResponse,
     type ASNGetResponse as ASNGetResponse,
     type ASNIPResponse as ASNIPResponse,
     type ASNRelResponse as ASNRelResponse,
     type ASNListParams as ASNListParams,
+    type ASNAsSetParams as ASNAsSetParams,
     type ASNGetParams as ASNGetParams,
     type ASNIPParams as ASNIPParams,
     type ASNRelParams as ASNRelParams,

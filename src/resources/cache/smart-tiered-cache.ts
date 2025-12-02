@@ -11,6 +11,14 @@ export class SmartTieredCache extends APIResource {
    * to an origin, and uses the latency data to determine how well any upper-tier
    * data center is connected with an origin. As a result, Cloudflare can select the
    * data center with the lowest latency to be the upper-tier for an origin.
+   *
+   * @example
+   * ```ts
+   * const smartTieredCache =
+   *   await client.cache.smartTieredCache.delete({
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   delete(
     params: SmartTieredCacheDeleteParams,
@@ -32,6 +40,14 @@ export class SmartTieredCache extends APIResource {
    * to an origin, and uses the latency data to determine how well any upper-tier
    * data center is connected with an origin. As a result, Cloudflare can select the
    * data center with the lowest latency to be the upper-tier for an origin.
+   *
+   * @example
+   * ```ts
+   * const response = await client.cache.smartTieredCache.edit({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   value: 'on',
+   * });
+   * ```
    */
   edit(
     params: SmartTieredCacheEditParams,
@@ -53,6 +69,14 @@ export class SmartTieredCache extends APIResource {
    * to an origin, and uses the latency data to determine how well any upper-tier
    * data center is connected with an origin. As a result, Cloudflare can select the
    * data center with the lowest latency to be the upper-tier for an origin.
+   *
+   * @example
+   * ```ts
+   * const smartTieredCache =
+   *   await client.cache.smartTieredCache.get({
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   get(
     params: SmartTieredCacheGetParams,
@@ -70,12 +94,12 @@ export class SmartTieredCache extends APIResource {
 
 export interface SmartTieredCacheDeleteResponse {
   /**
-   * ID of the zone setting.
+   * The identifier of the caching setting.
    */
   id: 'tiered_cache_smart_topology_enable';
 
   /**
-   * Whether the setting is editable
+   * Whether the setting is editable.
    */
   editable: boolean;
 
@@ -87,17 +111,17 @@ export interface SmartTieredCacheDeleteResponse {
 
 export interface SmartTieredCacheEditResponse {
   /**
-   * ID of the zone setting.
+   * The identifier of the caching setting.
    */
   id: 'tiered_cache_smart_topology_enable';
 
   /**
-   * Whether the setting is editable
+   * Whether the setting is editable.
    */
   editable: boolean;
 
   /**
-   * The value of the feature
+   * Value of the Smart Tiered Cache zone setting.
    */
   value: 'on' | 'off';
 
@@ -109,17 +133,17 @@ export interface SmartTieredCacheEditResponse {
 
 export interface SmartTieredCacheGetResponse {
   /**
-   * ID of the zone setting.
+   * The identifier of the caching setting.
    */
   id: 'tiered_cache_smart_topology_enable';
 
   /**
-   * Whether the setting is editable
+   * Whether the setting is editable.
    */
   editable: boolean;
 
   /**
-   * The value of the feature
+   * Value of the Smart Tiered Cache zone setting.
    */
   value: 'on' | 'off';
 
@@ -131,26 +155,26 @@ export interface SmartTieredCacheGetResponse {
 
 export interface SmartTieredCacheDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }
 
 export interface SmartTieredCacheEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
   /**
-   * Body param: Enable or disable the Smart Tiered Cache
+   * Body param: Enable or disable the Smart Tiered Cache.
    */
   value: 'on' | 'off';
 }
 
 export interface SmartTieredCacheGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

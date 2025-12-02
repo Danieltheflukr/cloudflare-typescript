@@ -1,8 +1,12 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-export { BulkOperations, type OperationStatus, type BulkOperationGetResponse } from './bulk-operations';
 export {
-  ItemListResponsesCursorPagination,
+  BulkOperations,
+  type BulkOperationGetResponse,
+  type BulkOperationGetParams,
+} from './bulk-operations';
+export {
+  ItemListResponsesCursorPaginationAfter,
   Items,
   type ListCursor,
   type ListItem,
@@ -15,6 +19,7 @@ export {
   type ItemUpdateParams,
   type ItemListParams,
   type ItemDeleteParams,
+  type ItemGetParams,
 } from './items';
 export {
   ListsListsSinglePage,
@@ -22,7 +27,10 @@ export {
   type Hostname,
   type ListsList,
   type Redirect,
+  type ListCreateResponse,
+  type ListUpdateResponse,
   type ListDeleteResponse,
+  type ListGetResponse,
   type ListCreateParams,
   type ListUpdateParams,
   type ListListParams,

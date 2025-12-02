@@ -7,10 +7,12 @@ export {
   type AppUpdateResponse,
   type AppListResponse,
   type AppDeleteResponse,
+  type AppEditResponse,
   type AppCreateParams,
   type AppUpdateParams,
   type AppListParams,
   type AppDeleteParams,
+  type AppEditParams,
 } from './apps';
 export {
   CfInterconnects,
@@ -26,12 +28,16 @@ export {
 export {
   ConnectorListResponsesSinglePage,
   Connectors,
+  type ConnectorCreateResponse,
   type ConnectorUpdateResponse,
   type ConnectorListResponse,
+  type ConnectorDeleteResponse,
   type ConnectorEditResponse,
   type ConnectorGetResponse,
+  type ConnectorCreateParams,
   type ConnectorUpdateParams,
   type ConnectorListParams,
+  type ConnectorDeleteParams,
   type ConnectorEditParams,
   type ConnectorGetParams,
 } from './connectors/index';
@@ -80,6 +86,7 @@ export {
   type PCAPCreateParams,
   type PCAPListParams,
   type PCAPGetParams,
+  type PCAPStopParams,
 } from './pcaps/index';
 export {
   Routes,

@@ -8,6 +8,18 @@ export class Bindings extends APIResource {
   /**
    * Fetch script bindings from a script uploaded to a Workers for Platforms
    * namespace.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const bindingGetResponse of client.workersForPlatforms.dispatch.namespaces.scripts.bindings.get(
+   *   'my-dispatch-namespace',
+   *   'this-is_my_script-01',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   get(
     dispatchNamespace: string,
@@ -27,28 +39,38 @@ export class Bindings extends APIResource {
 export class BindingGetResponsesSinglePage extends SinglePage<BindingGetResponse> {}
 
 /**
- * A binding to allow the Worker to communicate with resources
+ * A binding to allow the Worker to communicate with resources.
  */
 export type BindingGetResponse =
   | BindingGetResponse.WorkersBindingKindAI
   | BindingGetResponse.WorkersBindingKindAnalyticsEngine
   | BindingGetResponse.WorkersBindingKindAssets
-  | BindingGetResponse.WorkersBindingKindBrowserRendering
+  | BindingGetResponse.WorkersBindingKindBrowser
   | BindingGetResponse.WorkersBindingKindD1
+  | BindingGetResponse.WorkersBindingKindDataBlob
   | BindingGetResponse.WorkersBindingKindDispatchNamespace
   | BindingGetResponse.WorkersBindingKindDurableObjectNamespace
   | BindingGetResponse.WorkersBindingKindHyperdrive
+  | BindingGetResponse.WorkersBindingKindInherit
+  | BindingGetResponse.WorkersBindingKindImages
   | BindingGetResponse.WorkersBindingKindJson
   | BindingGetResponse.WorkersBindingKindKVNamespace
   | BindingGetResponse.WorkersBindingKindMTLSCertificate
   | BindingGetResponse.WorkersBindingKindPlainText
+  | BindingGetResponse.WorkersBindingKindPipelines
   | BindingGetResponse.WorkersBindingKindQueue
   | BindingGetResponse.WorkersBindingKindR2Bucket
   | BindingGetResponse.WorkersBindingKindSecretText
+  | BindingGetResponse.WorkersBindingKindSendEmail
   | BindingGetResponse.WorkersBindingKindService
   | BindingGetResponse.WorkersBindingKindTailConsumer
+  | BindingGetResponse.WorkersBindingKindTextBlob
   | BindingGetResponse.WorkersBindingKindVectorize
-  | BindingGetResponse.WorkersBindingKindVersionMetadata;
+  | BindingGetResponse.WorkersBindingKindVersionMetadata
+  | BindingGetResponse.WorkersBindingKindSecretsStoreSecret
+  | BindingGetResponse.WorkersBindingKindSecretKey
+  | BindingGetResponse.WorkersBindingKindWorkflow
+  | BindingGetResponse.WorkersBindingKindWasmModule;
 
 export namespace BindingGetResponse {
   export interface WorkersBindingKindAI {
@@ -60,26 +82,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'ai';
   }
 
   export interface WorkersBindingKindAnalyticsEngine {
@@ -96,26 +99,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'analytics_engine';
   }
 
   export interface WorkersBindingKindAssets {
@@ -127,29 +111,10 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'assets';
   }
 
-  export interface WorkersBindingKindBrowserRendering {
+  export interface WorkersBindingKindBrowser {
     /**
      * A JavaScript variable name for the binding.
      */
@@ -158,26 +123,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'browser';
   }
 
   export interface WorkersBindingKindD1 {
@@ -194,26 +140,25 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'd1';
+  }
+
+  export interface WorkersBindingKindDataBlob {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The name of the file containing the data content. Only accepted for
+     * `service worker syntax` Workers.
+     */
+    part: string;
+
+    /**
+     * @deprecated The kind of resource that the binding provides.
+     */
+    type: 'data_blob';
   }
 
   export interface WorkersBindingKindDispatchNamespace {
@@ -230,26 +175,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'dispatch_namespace';
 
     /**
      * Outbound worker.
@@ -294,11 +220,6 @@ export namespace BindingGetResponse {
 
   export interface WorkersBindingKindDurableObjectNamespace {
     /**
-     * The exported class name of the Durable Object.
-     */
-    class_name: string;
-
-    /**
      * A JavaScript variable name for the binding.
      */
     name: string;
@@ -306,26 +227,12 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'durable_object_namespace';
+
+    /**
+     * The exported class name of the Durable Object.
+     */
+    class_name?: string;
 
     /**
      * The environment of the script_name to bind to.
@@ -358,26 +265,45 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'hyperdrive';
+  }
+
+  export interface WorkersBindingKindInherit {
+    /**
+     * The name of the inherited binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'inherit';
+
+    /**
+     * The old name of the inherited binding. If set, the binding will be renamed from
+     * `old_name` to `name` in the new version. If not set, the binding will keep the
+     * same name between versions.
+     */
+    old_name?: string;
+
+    /**
+     * Identifier for the version to inherit the binding from, which can be the version
+     * ID or the literal "latest" to inherit from the latest version. Defaults to
+     * inheriting the binding from the latest version.
+     */
+    version_id?: string;
+  }
+
+  export interface WorkersBindingKindImages {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'images';
   }
 
   export interface WorkersBindingKindJson {
@@ -394,26 +320,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'json';
   }
 
   export interface WorkersBindingKindKVNamespace {
@@ -430,26 +337,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'kv_namespace';
   }
 
   export interface WorkersBindingKindMTLSCertificate {
@@ -466,26 +354,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'mtls_certificate';
   }
 
   export interface WorkersBindingKindPlainText {
@@ -502,26 +371,24 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'plain_text';
+  }
+
+  export interface WorkersBindingKindPipelines {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * Name of the Pipeline to bind to.
+     */
+    pipeline: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'pipelines';
   }
 
   export interface WorkersBindingKindQueue {
@@ -538,26 +405,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'queue';
   }
 
   export interface WorkersBindingKindR2Bucket {
@@ -574,26 +422,14 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'r2_bucket';
+
+    /**
+     * The
+     * [jurisdiction](https://developers.cloudflare.com/r2/reference/data-location/#jurisdictional-restrictions)
+     * of the R2 bucket.
+     */
+    jurisdiction?: 'eu' | 'fedramp';
   }
 
   export interface WorkersBindingKindSecretText {
@@ -603,41 +439,39 @@ export namespace BindingGetResponse {
     name: string;
 
     /**
-     * The secret value to use.
+     * The kind of resource that the binding provides.
      */
-    text: string;
+    type: 'secret_text';
+  }
+
+  export interface WorkersBindingKindSendEmail {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
 
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'send_email';
+
+    /**
+     * List of allowed destination addresses.
+     */
+    allowed_destination_addresses?: Array<string>;
+
+    /**
+     * List of allowed sender addresses.
+     */
+    allowed_sender_addresses?: Array<string>;
+
+    /**
+     * Destination address for the email.
+     */
+    destination_address?: string;
   }
 
   export interface WorkersBindingKindService {
-    /**
-     * Optional environment if the Worker utilizes one.
-     */
-    environment: string;
-
     /**
      * A JavaScript variable name for the binding.
      */
@@ -651,26 +485,12 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'service';
+
+    /**
+     * Optional environment if the Worker utilizes one.
+     */
+    environment?: string;
   }
 
   export interface WorkersBindingKindTailConsumer {
@@ -687,26 +507,25 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'tail_consumer';
+  }
+
+  export interface WorkersBindingKindTextBlob {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The name of the file containing the text content. Only accepted for
+     * `service worker syntax` Workers.
+     */
+    part: string;
+
+    /**
+     * @deprecated The kind of resource that the binding provides.
+     */
+    type: 'text_blob';
   }
 
   export interface WorkersBindingKindVectorize {
@@ -723,26 +542,7 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'vectorize';
   }
 
   export interface WorkersBindingKindVersionMetadata {
@@ -754,32 +554,114 @@ export namespace BindingGetResponse {
     /**
      * The kind of resource that the binding provides.
      */
-    type:
-      | 'ai'
-      | 'analytics_engine'
-      | 'assets'
-      | 'browser_rendering'
-      | 'd1'
-      | 'dispatch_namespace'
-      | 'durable_object_namespace'
-      | 'hyperdrive'
-      | 'json'
-      | 'kv_namespace'
-      | 'mtls_certificate'
-      | 'plain_text'
-      | 'queue'
-      | 'r2_bucket'
-      | 'secret_text'
-      | 'service'
-      | 'tail_consumer'
-      | 'vectorize'
-      | 'version_metadata';
+    type: 'version_metadata';
+  }
+
+  export interface WorkersBindingKindSecretsStoreSecret {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * Name of the secret in the store.
+     */
+    secret_name: string;
+
+    /**
+     * ID of the store containing the secret.
+     */
+    store_id: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secrets_store_secret';
+  }
+
+  export interface WorkersBindingKindSecretKey {
+    /**
+     * Algorithm-specific key parameters.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#algorithm).
+     */
+    algorithm: unknown;
+
+    /**
+     * Data format of the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#format).
+     */
+    format: 'raw' | 'pkcs8' | 'spki' | 'jwk';
+
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secret_key';
+
+    /**
+     * Allowed operations with the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#keyUsages).
+     */
+    usages: Array<
+      'encrypt' | 'decrypt' | 'sign' | 'verify' | 'deriveKey' | 'deriveBits' | 'wrapKey' | 'unwrapKey'
+    >;
+  }
+
+  export interface WorkersBindingKindWorkflow {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'workflow';
+
+    /**
+     * Name of the Workflow to bind to.
+     */
+    workflow_name: string;
+
+    /**
+     * Class name of the Workflow. Should only be provided if the Workflow belongs to
+     * this script.
+     */
+    class_name?: string;
+
+    /**
+     * Script name that contains the Workflow. If not provided, defaults to this script
+     * name.
+     */
+    script_name?: string;
+  }
+
+  export interface WorkersBindingKindWasmModule {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The name of the file containing the WebAssembly module content. Only accepted
+     * for `service worker syntax` Workers.
+     */
+    part: string;
+
+    /**
+     * @deprecated The kind of resource that the binding provides.
+     */
+    type: 'wasm_module';
   }
 }
 
 export interface BindingGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }

@@ -10,8 +10,10 @@ const client = new Cloudflare({
 });
 
 describe('resource subscriptions', () => {
-  test('create', async () => {
-    const responsePromise = client.zones.subscriptions.create('506e3185e9c882d175a2d0cb0093d9f2', {});
+  test('create: only required params', async () => {
+    const responsePromise = client.zones.subscriptions.create({
+      zone_id: '506e3185e9c882d175a2d0cb0093d9f2',
+    });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -21,8 +23,26 @@ describe('resource subscriptions', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  test('update', async () => {
-    const responsePromise = client.zones.subscriptions.update('506e3185e9c882d175a2d0cb0093d9f2', {});
+  test('create: required and optional params', async () => {
+    const response = await client.zones.subscriptions.create({
+      zone_id: '506e3185e9c882d175a2d0cb0093d9f2',
+      frequency: 'monthly',
+      rate_plan: {
+        id: 'free',
+        currency: 'USD',
+        externally_managed: false,
+        is_contract: false,
+        public_name: 'Business Plan',
+        scope: 'zone',
+        sets: ['string'],
+      },
+    });
+  });
+
+  test('update: only required params', async () => {
+    const responsePromise = client.zones.subscriptions.update({
+      zone_id: '506e3185e9c882d175a2d0cb0093d9f2',
+    });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -32,8 +52,24 @@ describe('resource subscriptions', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  test('get', async () => {
-    const responsePromise = client.zones.subscriptions.get('506e3185e9c882d175a2d0cb0093d9f2');
+  test('update: required and optional params', async () => {
+    const response = await client.zones.subscriptions.update({
+      zone_id: '506e3185e9c882d175a2d0cb0093d9f2',
+      frequency: 'monthly',
+      rate_plan: {
+        id: 'free',
+        currency: 'USD',
+        externally_managed: false,
+        is_contract: false,
+        public_name: 'Business Plan',
+        scope: 'zone',
+        sets: ['string'],
+      },
+    });
+  });
+
+  test('get: only required params', async () => {
+    const responsePromise = client.zones.subscriptions.get({ zone_id: '506e3185e9c882d175a2d0cb0093d9f2' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -43,12 +79,7 @@ describe('resource subscriptions', () => {
     expect(dataAndResponse.response).toBe(rawResponse);
   });
 
-  test('get: request options instead of params are passed correctly', async () => {
-    // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
-    await expect(
-      client.zones.subscriptions.get('506e3185e9c882d175a2d0cb0093d9f2', {
-        path: '/_stainless_unknown_path',
-      }),
-    ).rejects.toThrow(Cloudflare.NotFoundError);
+  test('get: required and optional params', async () => {
+    const response = await client.zones.subscriptions.get({ zone_id: '506e3185e9c882d175a2d0cb0093d9f2' });
   });
 });

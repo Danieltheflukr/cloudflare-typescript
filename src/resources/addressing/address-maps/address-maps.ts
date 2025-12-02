@@ -3,7 +3,7 @@
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
 import * as AddressMapsAPI from './address-maps';
-import * as Shared from '../../shared';
+import * as IPsAPI from '../../ips';
 import * as AccountsAPI from './accounts';
 import {
   AccountDeleteParams,
@@ -12,7 +12,7 @@ import {
   AccountUpdateResponse,
   Accounts,
 } from './accounts';
-import * as IPsAPI from './ips';
+import * as AddressMapsIPsAPI from './ips';
 import { IPDeleteParams, IPDeleteResponse, IPUpdateParams, IPUpdateResponse, IPs } from './ips';
 import * as ZonesAPI from './zones';
 import { ZoneDeleteParams, ZoneDeleteResponse, ZoneUpdateParams, ZoneUpdateResponse, Zones } from './zones';
@@ -20,11 +20,19 @@ import { SinglePage } from '../../../pagination';
 
 export class AddressMaps extends APIResource {
   accounts: AccountsAPI.Accounts = new AccountsAPI.Accounts(this._client);
-  ips: IPsAPI.IPs = new IPsAPI.IPs(this._client);
+  ips: AddressMapsIPsAPI.IPs = new AddressMapsIPsAPI.IPs(this._client);
   zones: ZonesAPI.Zones = new ZonesAPI.Zones(this._client);
 
   /**
    * Create a new address map under the account.
+   *
+   * @example
+   * ```ts
+   * const addressMap =
+   *   await client.addressing.addressMaps.create({
+   *     account_id: '258def64c72dae45f3e4c8516e2111f2',
+   *   });
+   * ```
    */
   create(
     params: AddressMapCreateParams,
@@ -41,6 +49,16 @@ export class AddressMaps extends APIResource {
 
   /**
    * List all address maps owned by the account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const addressMap of client.addressing.addressMaps.list(
+   *   { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: AddressMapListParams,
@@ -57,6 +75,15 @@ export class AddressMaps extends APIResource {
   /**
    * Delete a particular address map owned by the account. An Address Map must be
    * disabled before it can be deleted.
+   *
+   * @example
+   * ```ts
+   * const addressMap =
+   *   await client.addressing.addressMaps.delete(
+   *     '055817b111884e0227e1be16a0be6ee0',
+   *     { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   *   );
+   * ```
    */
   delete(
     addressMapId: string,
@@ -69,6 +96,14 @@ export class AddressMaps extends APIResource {
 
   /**
    * Modify properties of an address map owned by the account.
+   *
+   * @example
+   * ```ts
+   * const addressMap = await client.addressing.addressMaps.edit(
+   *   '055817b111884e0227e1be16a0be6ee0',
+   *   { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   * );
+   * ```
    */
   edit(
     addressMapId: string,
@@ -86,6 +121,14 @@ export class AddressMaps extends APIResource {
 
   /**
    * Show a particular address map owned by the account.
+   *
+   * @example
+   * ```ts
+   * const addressMap = await client.addressing.addressMaps.get(
+   *   '055817b111884e0227e1be16a0be6ee0',
+   *   { account_id: '258def64c72dae45f3e4c8516e2111f2' },
+   * );
+   * ```
    */
   get(
     addressMapId: string,
@@ -202,7 +245,7 @@ export interface AddressMapCreateResponse {
   /**
    * The set of IPs on the Address Map.
    */
-  ips?: Array<AddressMapCreateResponse.IP>;
+  ips?: IPsAPI.IPsArray;
 
   /**
    * Zones and Accounts which will be assigned IPs on this Address Map. A zone
@@ -214,15 +257,6 @@ export interface AddressMapCreateResponse {
 }
 
 export namespace AddressMapCreateResponse {
-  export interface IP {
-    created_at?: string;
-
-    /**
-     * An IPv4 or IPv6 address.
-     */
-    ip?: string;
-  }
-
   export interface Membership {
     /**
      * Controls whether the membership can be deleted via the API or not.
@@ -244,12 +278,12 @@ export namespace AddressMapCreateResponse {
 }
 
 export interface AddressMapDeleteResponse {
-  errors: Array<Shared.ResponseInfo>;
+  errors: Array<AddressMapDeleteResponse.Error>;
 
-  messages: Array<Shared.ResponseInfo>;
+  messages: Array<AddressMapDeleteResponse.Message>;
 
   /**
-   * Whether the API call was successful
+   * Whether the API call was successful.
    */
   success: true;
 
@@ -257,24 +291,56 @@ export interface AddressMapDeleteResponse {
 }
 
 export namespace AddressMapDeleteResponse {
+  export interface Error {
+    code: number;
+
+    message: string;
+
+    documentation_url?: string;
+
+    source?: Error.Source;
+  }
+
+  export namespace Error {
+    export interface Source {
+      pointer?: string;
+    }
+  }
+
+  export interface Message {
+    code: number;
+
+    message: string;
+
+    documentation_url?: string;
+
+    source?: Message.Source;
+  }
+
+  export namespace Message {
+    export interface Source {
+      pointer?: string;
+    }
+  }
+
   export interface ResultInfo {
     /**
-     * Total number of results for the requested service
+     * Total number of results for the requested service.
      */
     count?: number;
 
     /**
-     * Current page within paginated list of results
+     * Current page within paginated list of results.
      */
     page?: number;
 
     /**
-     * Number of results per page of results
+     * Number of results per page of results.
      */
     per_page?: number;
 
     /**
-     * Total results available without any search parameters
+     * Total results available without any search parameters.
      */
     total_count?: number;
   }
@@ -324,7 +390,7 @@ export interface AddressMapGetResponse {
   /**
    * The set of IPs on the Address Map.
    */
-  ips?: Array<AddressMapGetResponse.IP>;
+  ips?: IPsAPI.IPsArray;
 
   /**
    * Zones and Accounts which will be assigned IPs on this Address Map. A zone
@@ -336,15 +402,6 @@ export interface AddressMapGetResponse {
 }
 
 export namespace AddressMapGetResponse {
-  export interface IP {
-    created_at?: string;
-
-    /**
-     * An IPv4 or IPv6 address.
-     */
-    ip?: string;
-  }
-
   export interface Membership {
     /**
      * Controls whether the membership can be deleted via the API or not.

@@ -2,12 +2,21 @@
 
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
-import * as Shared from '../../shared';
 import { SinglePage } from '../../../pagination';
 
 export class Webhooks extends APIResource {
   /**
    * Creates a new webhook destination.
+   *
+   * @example
+   * ```ts
+   * const webhook =
+   *   await client.alerting.destinations.webhooks.create({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     name: 'Slack Webhook',
+   *     url: 'https://hooks.slack.com/services/Ds3fdBFbV/456464Gdd',
+   *   });
+   * ```
    */
   create(params: WebhookCreateParams, options?: Core.RequestOptions): Core.APIPromise<WebhookCreateResponse> {
     const { account_id, ...body } = params;
@@ -21,6 +30,19 @@ export class Webhooks extends APIResource {
 
   /**
    * Update a webhook destination.
+   *
+   * @example
+   * ```ts
+   * const webhook =
+   *   await client.alerting.destinations.webhooks.update(
+   *     'b115d5ec-15c6-41ee-8b76-92c449b5227b',
+   *     {
+   *       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *       name: 'Slack Webhook',
+   *       url: 'https://hooks.slack.com/services/Ds3fdBFbV/456464Gdd',
+   *     },
+   *   );
+   * ```
    */
   update(
     webhookId: string,
@@ -38,6 +60,16 @@ export class Webhooks extends APIResource {
 
   /**
    * Gets a list of all configured webhook destinations.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const webhooks of client.alerting.destinations.webhooks.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: WebhookListParams,
@@ -53,6 +85,15 @@ export class Webhooks extends APIResource {
 
   /**
    * Delete a configured webhook destination.
+   *
+   * @example
+   * ```ts
+   * const webhook =
+   *   await client.alerting.destinations.webhooks.delete(
+   *     'b115d5ec-15c6-41ee-8b76-92c449b5227b',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   delete(
     webhookId: string,
@@ -68,6 +109,15 @@ export class Webhooks extends APIResource {
 
   /**
    * Get details for a single webhooks destination.
+   *
+   * @example
+   * ```ts
+   * const webhooks =
+   *   await client.alerting.destinations.webhooks.get(
+   *     'b115d5ec-15c6-41ee-8b76-92c449b5227b',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(webhookId: string, params: WebhookGetParams, options?: Core.RequestOptions): Core.APIPromise<Webhooks> {
     const { account_id } = params;
@@ -114,7 +164,7 @@ export interface Webhooks {
   /**
    * Type of webhook endpoint.
    */
-  type?: 'slack' | 'generic' | 'gchat';
+  type?: 'datadog' | 'discord' | 'feishu' | 'gchat' | 'generic' | 'opsgenie' | 'slack' | 'splunk';
 
   /**
    * The POST endpoint to call when dispatching a notification.
@@ -137,39 +187,27 @@ export interface WebhookUpdateResponse {
 }
 
 export interface WebhookDeleteResponse {
-  errors: Array<Shared.ResponseInfo>;
+  errors: Array<WebhookDeleteResponse.Error>;
 
-  messages: Array<Shared.ResponseInfo>;
+  messages: Array<WebhookDeleteResponse.Message>;
 
   /**
    * Whether the API call was successful
    */
   success: true;
-
-  result_info?: WebhookDeleteResponse.ResultInfo;
 }
 
 export namespace WebhookDeleteResponse {
-  export interface ResultInfo {
-    /**
-     * Total number of results for the requested service
-     */
-    count?: number;
+  export interface Error {
+    message: string;
 
-    /**
-     * Current page within paginated list of results
-     */
-    page?: number;
+    code?: number;
+  }
 
-    /**
-     * Number of results per page of results
-     */
-    per_page?: number;
+  export interface Message {
+    message: string;
 
-    /**
-     * Total results available without any search parameters
-     */
-    total_count?: number;
+    code?: number;
   }
 }
 

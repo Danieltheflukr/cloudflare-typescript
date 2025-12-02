@@ -12,6 +12,15 @@ export class WARPConnector extends APIResource {
 
   /**
    * Creates a new Warp Connector Tunnel in an account.
+   *
+   * @example
+   * ```ts
+   * const warpConnector =
+   *   await client.zeroTrust.tunnels.warpConnector.create({
+   *     account_id: '699d98642c564d2e855e9661899b7252',
+   *     name: 'blog',
+   *   });
+   * ```
    */
   create(
     params: WARPConnectorCreateParams,
@@ -27,6 +36,16 @@ export class WARPConnector extends APIResource {
 
   /**
    * Lists and filters Warp Connector Tunnels in an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const warpConnectorListResponse of client.zeroTrust.tunnels.warpConnector.list(
+   *   { account_id: '699d98642c564d2e855e9661899b7252' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: WARPConnectorListParams,
@@ -42,6 +61,15 @@ export class WARPConnector extends APIResource {
 
   /**
    * Deletes a Warp Connector Tunnel from an account.
+   *
+   * @example
+   * ```ts
+   * const warpConnector =
+   *   await client.zeroTrust.tunnels.warpConnector.delete(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   delete(
     tunnelId: string,
@@ -58,6 +86,15 @@ export class WARPConnector extends APIResource {
 
   /**
    * Updates an existing Warp Connector Tunnel.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.zeroTrust.tunnels.warpConnector.edit(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   edit(
     tunnelId: string,
@@ -75,6 +112,15 @@ export class WARPConnector extends APIResource {
 
   /**
    * Fetches a single Warp Connector Tunnel.
+   *
+   * @example
+   * ```ts
+   * const warpConnector =
+   *   await client.zeroTrust.tunnels.warpConnector.get(
+   *     'f70ff985-a4ef-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   get(
     tunnelId: string,
@@ -115,7 +161,9 @@ export namespace WARPConnectorCreateResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -237,7 +285,9 @@ export namespace WARPConnectorListResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -359,7 +409,9 @@ export namespace WARPConnectorDeleteResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -481,7 +533,9 @@ export namespace WARPConnectorEditResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 
@@ -603,7 +657,9 @@ export namespace WARPConnectorGetResponse {
     account_tag?: string;
 
     /**
-     * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+     * @deprecated This field will start returning an empty array. To fetch the
+     * connections of a given tunnel, please use the dedicated endpoint
+     * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
      */
     connections?: Array<TunnelWARPConnectorTunnel.Connection>;
 

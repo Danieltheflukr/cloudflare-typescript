@@ -43,7 +43,6 @@ describe('resource top', () => {
           limitDirection: 'ORIGIN',
           limitPerLocation: 10,
           location: ['string'],
-          magnitude: 'AFFECTED_ZONES',
           mitigationProduct: ['DDOS'],
           name: ['main_series'],
           normalization: 'PERCENTAGE',

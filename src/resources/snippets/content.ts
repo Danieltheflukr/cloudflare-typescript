@@ -6,7 +6,7 @@ import { type Response } from '../../_shims/index';
 
 export class Content extends APIResource {
   /**
-   * Snippet Content
+   * Fetches the content of a snippet belonging to the zone.
    */
   get(
     snippetName: string,
@@ -24,7 +24,7 @@ export class Content extends APIResource {
 
 export interface ContentGetParams {
   /**
-   * Identifier
+   * The unique ID of the zone.
    */
   zone_id: string;
 }

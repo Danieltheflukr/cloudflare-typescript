@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import Cloudflare from 'cloudflare';
+import Cloudflare, { toFile } from 'cloudflare';
 import { Response } from 'node-fetch';
 
 const client = new Cloudflare({
@@ -36,19 +36,22 @@ describe('resource scripts', () => {
         metadata: {
           assets: {
             config: {
+              _headers: '/dashboard/*\nX-Frame-Options: DENY\n\n/static/*\nAccess-Control-Allow-Origin: *',
+              _redirects: '/foo /bar 301\n/news/* /blog/:splat',
               html_handling: 'auto-trailing-slash',
-              not_found_handling: 'none',
-              run_worker_first: false,
+              not_found_handling: '404-page',
+              run_worker_first: ['string'],
               serve_directly: true,
             },
             jwt: 'jwt',
           },
-          bindings: [{ name: 'MY_ENV_VAR', type: 'ai' }],
+          bindings: [{ name: 'MY_ENV_VAR', text: 'my_data', type: 'plain_text' }],
           body_part: 'worker.js',
           compatibility_date: '2021-01-01',
           compatibility_flags: ['nodejs_compat'],
           keep_assets: false,
           keep_bindings: ['string'],
+          limits: { cpu_ms: 50 },
           logpush: false,
           main_module: 'worker.js',
           migrations: {
@@ -60,7 +63,17 @@ describe('resource scripts', () => {
             renamed_classes: [{ from: 'from', to: 'to' }],
             transferred_classes: [{ from: 'from', from_script: 'from_script', to: 'to' }],
           },
-          observability: { enabled: true, head_sampling_rate: 0.1 },
+          observability: {
+            enabled: true,
+            head_sampling_rate: 0.1,
+            logs: {
+              enabled: true,
+              invocation_logs: true,
+              destinations: ['cloudflare'],
+              head_sampling_rate: 0.1,
+              persist: true,
+            },
+          },
           placement: { mode: 'smart' },
           tags: ['string'],
           tail_consumers: [
@@ -68,6 +81,7 @@ describe('resource scripts', () => {
           ],
           usage_model: 'standard',
         },
+        files: [await toFile(Buffer.from('# my file contents'), 'README.md')],
       },
     );
   });

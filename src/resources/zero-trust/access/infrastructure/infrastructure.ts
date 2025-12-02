@@ -4,8 +4,10 @@ import { APIResource } from '../../../../resource';
 import * as TargetsAPI from './targets';
 import {
   TargetBulkDeleteParams,
+  TargetBulkDeleteV2Params,
   TargetBulkUpdateParams,
   TargetBulkUpdateResponse,
+  TargetBulkUpdateResponsesSinglePage,
   TargetCreateParams,
   TargetCreateResponse,
   TargetDeleteParams,
@@ -25,6 +27,7 @@ export class Infrastructure extends APIResource {
 
 Infrastructure.Targets = Targets;
 Infrastructure.TargetListResponsesV4PagePaginationArray = TargetListResponsesV4PagePaginationArray;
+Infrastructure.TargetBulkUpdateResponsesSinglePage = TargetBulkUpdateResponsesSinglePage;
 
 export declare namespace Infrastructure {
   export {
@@ -35,11 +38,13 @@ export declare namespace Infrastructure {
     type TargetBulkUpdateResponse as TargetBulkUpdateResponse,
     type TargetGetResponse as TargetGetResponse,
     TargetListResponsesV4PagePaginationArray as TargetListResponsesV4PagePaginationArray,
+    TargetBulkUpdateResponsesSinglePage as TargetBulkUpdateResponsesSinglePage,
     type TargetCreateParams as TargetCreateParams,
     type TargetUpdateParams as TargetUpdateParams,
     type TargetListParams as TargetListParams,
     type TargetDeleteParams as TargetDeleteParams,
     type TargetBulkDeleteParams as TargetBulkDeleteParams,
+    type TargetBulkDeleteV2Params as TargetBulkDeleteV2Params,
     type TargetBulkUpdateParams as TargetBulkUpdateParams,
     type TargetGetParams as TargetGetParams,
   };

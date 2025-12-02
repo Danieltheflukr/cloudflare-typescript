@@ -6,6 +6,18 @@ import * as Core from '../../../core';
 export class Categories extends APIResource {
   /**
    * Creates a new category
+   *
+   * @example
+   * ```ts
+   * const category =
+   *   await client.cloudforceOne.threatEvents.categories.create(
+   *     {
+   *       account_id: 'account_id',
+   *       killChain: 0,
+   *       name: 'name',
+   *     },
+   *   );
+   * ```
    */
   create(
     params: CategoryCreateParams,
@@ -20,6 +32,14 @@ export class Categories extends APIResource {
 
   /**
    * Lists categories
+   *
+   * @example
+   * ```ts
+   * const categories =
+   *   await client.cloudforceOne.threatEvents.categories.list({
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   list(params: CategoryListParams, options?: Core.RequestOptions): Core.APIPromise<CategoryListResponse> {
     const { account_id } = params;
@@ -28,6 +48,15 @@ export class Categories extends APIResource {
 
   /**
    * Deletes a category
+   *
+   * @example
+   * ```ts
+   * const category =
+   *   await client.cloudforceOne.threatEvents.categories.delete(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   delete(
     categoryId: string,
@@ -43,6 +72,15 @@ export class Categories extends APIResource {
 
   /**
    * Updates a category
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.cloudforceOne.threatEvents.categories.edit(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   edit(
     categoryId: string,
@@ -58,6 +96,15 @@ export class Categories extends APIResource {
 
   /**
    * Reads a category
+   *
+   * @example
+   * ```ts
+   * const category =
+   *   await client.cloudforceOne.threatEvents.categories.get(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   get(
     categoryId: string,
@@ -130,9 +177,9 @@ export interface CategoryGetResponse {
 
 export interface CategoryCreateParams {
   /**
-   * Path param: Account ID
+   * Path param: Account ID.
    */
-  account_id: number;
+  account_id: string;
 
   /**
    * Body param:
@@ -157,23 +204,23 @@ export interface CategoryCreateParams {
 
 export interface CategoryListParams {
   /**
-   * Account ID
+   * Account ID.
    */
-  account_id: number;
+  account_id: string;
 }
 
 export interface CategoryDeleteParams {
   /**
-   * Account ID
+   * Account ID.
    */
-  account_id: number;
+  account_id: string;
 }
 
 export interface CategoryEditParams {
   /**
-   * Path param: Account ID
+   * Path param: Account ID.
    */
-  account_id: number;
+  account_id: string;
 
   /**
    * Body param:
@@ -198,9 +245,9 @@ export interface CategoryEditParams {
 
 export interface CategoryGetParams {
   /**
-   * Account ID
+   * Account ID.
    */
-  account_id: number;
+  account_id: string;
 }
 
 export declare namespace Categories {

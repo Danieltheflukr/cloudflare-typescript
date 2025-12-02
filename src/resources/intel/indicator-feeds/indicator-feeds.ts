@@ -3,7 +3,7 @@
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
 import * as DownloadsAPI from './downloads';
-import { DownloadGetParams, DownloadGetResponse, Downloads } from './downloads';
+import { Downloads } from './downloads';
 import * as PermissionsAPI from './permissions';
 import {
   PermissionCreateParams,
@@ -25,6 +25,14 @@ export class IndicatorFeeds extends APIResource {
 
   /**
    * Create new indicator feed
+   *
+   * @example
+   * ```ts
+   * const indicatorFeed =
+   *   await client.intel.indicatorFeeds.create({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   create(
     params: IndicatorFeedCreateParams,
@@ -41,6 +49,14 @@ export class IndicatorFeeds extends APIResource {
 
   /**
    * Update indicator feed metadata
+   *
+   * @example
+   * ```ts
+   * const indicatorFeed =
+   *   await client.intel.indicatorFeeds.update(12, {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   update(
     feedId: number,
@@ -58,6 +74,16 @@ export class IndicatorFeeds extends APIResource {
 
   /**
    * Get indicator feeds owned by this account
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const indicatorFeedListResponse of client.intel.indicatorFeeds.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: IndicatorFeedListParams,
@@ -73,6 +99,14 @@ export class IndicatorFeeds extends APIResource {
 
   /**
    * Get indicator feed data
+   *
+   * @example
+   * ```ts
+   * const response = await client.intel.indicatorFeeds.data(
+   *   12,
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   data(
     feedId: number,
@@ -88,6 +122,14 @@ export class IndicatorFeeds extends APIResource {
 
   /**
    * Get indicator feed metadata
+   *
+   * @example
+   * ```ts
+   * const indicatorFeed = await client.intel.indicatorFeeds.get(
+   *   12,
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     feedId: number,
@@ -397,9 +439,5 @@ export declare namespace IndicatorFeeds {
     type PermissionDeleteParams as PermissionDeleteParams,
   };
 
-  export {
-    Downloads as Downloads,
-    type DownloadGetResponse as DownloadGetResponse,
-    type DownloadGetParams as DownloadGetParams,
-  };
+  export { Downloads as Downloads };
 }

@@ -26,6 +26,15 @@ export class Pools extends APIResource {
 
   /**
    * Create a new pool.
+   *
+   * @example
+   * ```ts
+   * const pool = await client.loadBalancers.pools.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   name: 'primary-dc-1',
+   *   origins: [{}],
+   * });
+   * ```
    */
   create(params: PoolCreateParams, options?: Core.RequestOptions): Core.APIPromise<Pool> {
     const { account_id, ...body } = params;
@@ -39,6 +48,18 @@ export class Pools extends APIResource {
 
   /**
    * Modify a configured pool.
+   *
+   * @example
+   * ```ts
+   * const pool = await client.loadBalancers.pools.update(
+   *   '17b5962d775c646f3f9725cbc7a53df4',
+   *   {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     name: 'primary-dc-1',
+   *     origins: [{}],
+   *   },
+   * );
+   * ```
    */
   update(poolId: string, params: PoolUpdateParams, options?: Core.RequestOptions): Core.APIPromise<Pool> {
     const { account_id, ...body } = params;
@@ -52,6 +73,16 @@ export class Pools extends APIResource {
 
   /**
    * List configured pools.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const pool of client.loadBalancers.pools.list({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * })) {
+   *   // ...
+   * }
+   * ```
    */
   list(params: PoolListParams, options?: Core.RequestOptions): Core.PagePromise<PoolsSinglePage, Pool> {
     const { account_id, ...query } = params;
@@ -63,6 +94,14 @@ export class Pools extends APIResource {
 
   /**
    * Delete a configured pool.
+   *
+   * @example
+   * ```ts
+   * const pool = await client.loadBalancers.pools.delete(
+   *   '17b5962d775c646f3f9725cbc7a53df4',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     poolId: string,
@@ -83,6 +122,16 @@ export class Pools extends APIResource {
    * properties. Pools are ordered by ascending `name`. Returns the list of affected
    * pools. Supports the standard pagination query parameters, either
    * `limit`/`offset` or `per_page`/`page`.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const pool of client.loadBalancers.pools.bulkEdit(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   bulkEdit(
     params: PoolBulkEditParams,
@@ -98,6 +147,14 @@ export class Pools extends APIResource {
 
   /**
    * Apply changes to an existing pool, overwriting the supplied properties.
+   *
+   * @example
+   * ```ts
+   * const pool = await client.loadBalancers.pools.edit(
+   *   '17b5962d775c646f3f9725cbc7a53df4',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   edit(poolId: string, params: PoolEditParams, options?: Core.RequestOptions): Core.APIPromise<Pool> {
     const { account_id, ...body } = params;
@@ -111,6 +168,14 @@ export class Pools extends APIResource {
 
   /**
    * Fetch a single configured pool.
+   *
+   * @example
+   * ```ts
+   * const pool = await client.loadBalancers.pools.get(
+   *   '17b5962d775c646f3f9725cbc7a53df4',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(poolId: string, params: PoolGetParams, options?: Core.RequestOptions): Core.APIPromise<Pool> {
     const { account_id } = params;
@@ -186,6 +251,12 @@ export interface Pool {
   monitor?: string;
 
   /**
+   * The ID of the Monitor Group to use for checking the health of origins within
+   * this pool.
+   */
+  monitor_group?: string;
+
+  /**
    * A short name (tag) for the pool. Only alphanumeric characters, hyphens, and
    * underscores are allowed.
    */
@@ -230,7 +301,7 @@ export interface PoolDeleteResponse {
 
 export interface PoolCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -288,6 +359,12 @@ export interface PoolCreateParams {
    * within this pool.
    */
   monitor?: string;
+
+  /**
+   * Body param: The ID of the Monitor Group to use for checking the health of
+   * origins within this pool.
+   */
+  monitor_group?: string;
 
   /**
    * Body param: This field is now deprecated. It has been moved to Cloudflare's
@@ -313,7 +390,7 @@ export interface PoolCreateParams {
 
 export interface PoolUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -379,6 +456,12 @@ export interface PoolUpdateParams {
   monitor?: string;
 
   /**
+   * Body param: The ID of the Monitor Group to use for checking the health of
+   * origins within this pool.
+   */
+  monitor_group?: string;
+
+  /**
    * Body param: This field is now deprecated. It has been moved to Cloudflare's
    * Centralized Notification service
    * https://developers.cloudflare.com/fundamentals/notifications/. The email address
@@ -402,7 +485,7 @@ export interface PoolUpdateParams {
 
 export interface PoolListParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -415,14 +498,14 @@ export interface PoolListParams {
 
 export interface PoolDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
 export interface PoolBulkEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -436,7 +519,7 @@ export interface PoolBulkEditParams {
 
 export interface PoolEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -487,6 +570,12 @@ export interface PoolEditParams {
    * within this pool.
    */
   monitor?: string;
+
+  /**
+   * Body param: The ID of the Monitor Group to use for checking the health of
+   * origins within this pool.
+   */
+  monitor_group?: string;
 
   /**
    * Body param: A short name (tag) for the pool. Only alphanumeric characters,
@@ -525,7 +614,7 @@ export interface PoolEditParams {
 
 export interface PoolGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }

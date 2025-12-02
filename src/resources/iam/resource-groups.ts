@@ -2,11 +2,28 @@
 
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
-import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../pagination';
+import { SinglePage } from '../../pagination';
 
 export class ResourceGroups extends APIResource {
   /**
    * Create a new Resource Group under the specified account.
+   *
+   * @example
+   * ```ts
+   * const resourceGroup =
+   *   await client.iam.resourceGroups.create({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     name: 'NewResourceGroup',
+   *     scope: {
+   *       key: 'com.cloudflare.api.account.eb78d65290b24279ba6f44721b3ea3c4',
+   *       objects: [
+   *         {
+   *           key: 'com.cloudflare.api.account.zone.23f8d65290b24279ba6f44721b3eaad5',
+   *         },
+   *       ],
+   *     },
+   *   });
+   * ```
    */
   create(
     params: ResourceGroupCreateParams,
@@ -18,6 +35,15 @@ export class ResourceGroups extends APIResource {
 
   /**
    * Modify an existing resource group.
+   *
+   * @example
+   * ```ts
+   * const resourceGroup =
+   *   await client.iam.resourceGroups.update(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   update(
     resourceGroupId: string,
@@ -33,21 +59,40 @@ export class ResourceGroups extends APIResource {
 
   /**
    * List all the resource groups for an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const resourceGroupListResponse of client.iam.resourceGroups.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: ResourceGroupListParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<ResourceGroupListResponsesV4PagePaginationArray, ResourceGroupListResponse> {
+  ): Core.PagePromise<ResourceGroupListResponsesSinglePage, ResourceGroupListResponse> {
     const { account_id, ...query } = params;
     return this._client.getAPIList(
       `/accounts/${account_id}/iam/resource_groups`,
-      ResourceGroupListResponsesV4PagePaginationArray,
+      ResourceGroupListResponsesSinglePage,
       { query, ...options },
     );
   }
 
   /**
    * Remove a resource group from an account.
+   *
+   * @example
+   * ```ts
+   * const resourceGroup =
+   *   await client.iam.resourceGroups.delete(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   delete(
     resourceGroupId: string,
@@ -65,6 +110,14 @@ export class ResourceGroups extends APIResource {
 
   /**
    * Get information about a specific resource group in an account.
+   *
+   * @example
+   * ```ts
+   * const resourceGroup = await client.iam.resourceGroups.get(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     resourceGroupId: string,
@@ -76,7 +129,7 @@ export class ResourceGroups extends APIResource {
   }
 }
 
-export class ResourceGroupListResponsesV4PagePaginationArray extends V4PagePaginationArray<ResourceGroupListResponse> {}
+export class ResourceGroupListResponsesSinglePage extends SinglePage<ResourceGroupListResponse> {}
 
 /**
  * A group of scoped resources.
@@ -136,7 +189,7 @@ export namespace ResourceGroupCreateResponse {
  */
 export interface ResourceGroupUpdateResponse {
   /**
-   * Identifier of the group.
+   * Identifier of the resource group.
    */
   id: string;
 
@@ -202,7 +255,7 @@ export namespace ResourceGroupUpdateResponse {
  */
 export interface ResourceGroupListResponse {
   /**
-   * Identifier of the group.
+   * Identifier of the resource group.
    */
   id: string;
 
@@ -275,7 +328,7 @@ export interface ResourceGroupDeleteResponse {
  */
 export interface ResourceGroupGetResponse {
   /**
-   * Identifier of the group.
+   * Identifier of the resource group.
    */
   id: string;
 
@@ -343,15 +396,15 @@ export interface ResourceGroupCreateParams {
   account_id: string;
 
   /**
+   * Body param: Name of the resource group
+   */
+  name: string;
+
+  /**
    * Body param: A scope is a combination of scope objects which provides additional
    * context.
    */
   scope: ResourceGroupCreateParams.Scope;
-
-  /**
-   * Body param: Attributes associated to the resource group.
-   */
-  meta?: unknown;
 }
 
 export namespace ResourceGroupCreateParams {
@@ -394,15 +447,15 @@ export interface ResourceGroupUpdateParams {
   account_id: string;
 
   /**
+   * Body param: Name of the resource group
+   */
+  name?: string;
+
+  /**
    * Body param: A scope is a combination of scope objects which provides additional
    * context.
    */
-  scope: ResourceGroupUpdateParams.Scope;
-
-  /**
-   * Body param: Attributes associated to the resource group.
-   */
-  meta?: unknown;
+  scope?: ResourceGroupUpdateParams.Scope;
 }
 
 export namespace ResourceGroupUpdateParams {
@@ -438,7 +491,7 @@ export namespace ResourceGroupUpdateParams {
   }
 }
 
-export interface ResourceGroupListParams extends V4PagePaginationArrayParams {
+export interface ResourceGroupListParams {
   /**
    * Path param: Account identifier tag.
    */
@@ -469,8 +522,7 @@ export interface ResourceGroupGetParams {
   account_id: string;
 }
 
-ResourceGroups.ResourceGroupListResponsesV4PagePaginationArray =
-  ResourceGroupListResponsesV4PagePaginationArray;
+ResourceGroups.ResourceGroupListResponsesSinglePage = ResourceGroupListResponsesSinglePage;
 
 export declare namespace ResourceGroups {
   export {
@@ -479,7 +531,7 @@ export declare namespace ResourceGroups {
     type ResourceGroupListResponse as ResourceGroupListResponse,
     type ResourceGroupDeleteResponse as ResourceGroupDeleteResponse,
     type ResourceGroupGetResponse as ResourceGroupGetResponse,
-    ResourceGroupListResponsesV4PagePaginationArray as ResourceGroupListResponsesV4PagePaginationArray,
+    ResourceGroupListResponsesSinglePage as ResourceGroupListResponsesSinglePage,
     type ResourceGroupCreateParams as ResourceGroupCreateParams,
     type ResourceGroupUpdateParams as ResourceGroupUpdateParams,
     type ResourceGroupListParams as ResourceGroupListParams,

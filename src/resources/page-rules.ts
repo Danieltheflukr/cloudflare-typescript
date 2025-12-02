@@ -7,6 +7,23 @@ import * as SettingsAPI from './zones/settings';
 export class PageRules extends APIResource {
   /**
    * Creates a new Page Rule.
+   *
+   * @example
+   * ```ts
+   * const pageRule = await client.pageRules.create({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   actions: [{ id: 'browser_check' }],
+   *   targets: [
+   *     {
+   *       constraint: {
+   *         operator: 'matches',
+   *         value: '*example.com/images/*',
+   *       },
+   *       target: 'url',
+   *     },
+   *   ],
+   * });
+   * ```
    */
   create(params: PageRuleCreateParams, options?: Core.RequestOptions): Core.APIPromise<PageRule> {
     const { zone_id, ...body } = params;
@@ -20,6 +37,26 @@ export class PageRules extends APIResource {
   /**
    * Replaces the configuration of an existing Page Rule. The configuration of the
    * updated Page Rule will exactly match the data passed in the API request.
+   *
+   * @example
+   * ```ts
+   * const pageRule = await client.pageRules.update(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   {
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     actions: [{ id: 'browser_check' }],
+   *     targets: [
+   *       {
+   *         constraint: {
+   *           operator: 'matches',
+   *           value: '*example.com/images/*',
+   *         },
+   *         target: 'url',
+   *       },
+   *     ],
+   *   },
+   * );
+   * ```
    */
   update(
     pageruleId: string,
@@ -36,6 +73,13 @@ export class PageRules extends APIResource {
 
   /**
    * Fetches Page Rules in a zone.
+   *
+   * @example
+   * ```ts
+   * const pageRules = await client.pageRules.list({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   list(params: PageRuleListParams, options?: Core.RequestOptions): Core.APIPromise<PageRuleListResponse> {
     const { zone_id, ...query } = params;
@@ -48,6 +92,14 @@ export class PageRules extends APIResource {
 
   /**
    * Deletes an existing Page Rule.
+   *
+   * @example
+   * ```ts
+   * const pageRule = await client.pageRules.delete(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     pageruleId: string,
@@ -64,6 +116,14 @@ export class PageRules extends APIResource {
 
   /**
    * Updates one or more fields of an existing Page Rule.
+   *
+   * @example
+   * ```ts
+   * const pageRule = await client.pageRules.edit(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   edit(
     pageruleId: string,
@@ -81,6 +141,14 @@ export class PageRules extends APIResource {
 
   /**
    * Fetches the details of a Page Rule.
+   *
+   * @example
+   * ```ts
+   * const pageRule = await client.pageRules.get(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     pageruleId: string,
@@ -98,7 +166,7 @@ export class PageRules extends APIResource {
 
 export interface PageRule {
   /**
-   * Identifier
+   * Identifier.
    */
   id: string;
 
@@ -385,7 +453,7 @@ export namespace PageRule {
      *   seconds or one of the following strings: no-store (equivalent to -1), no-cache
      *   (equivalent to 0).
      */
-    value?: Record<string, 'no-cache' | 'no-store' | number>;
+    value?: { [key: string]: 'no-cache' | 'no-store' | number };
   }
 
   export interface DisableApps {
@@ -584,14 +652,14 @@ export type PageRuleListResponse = Array<PageRule>;
 
 export interface PageRuleDeleteResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id: string;
 }
 
 export interface PageRuleCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -868,7 +936,7 @@ export namespace PageRuleCreateParams {
      *   seconds or one of the following strings: no-store (equivalent to -1), no-cache
      *   (equivalent to 0).
      */
-    value?: Record<string, 'no-cache' | 'no-store' | number>;
+    value?: { [key: string]: 'no-cache' | 'no-store' | number };
   }
 
   export interface DisableApps {
@@ -999,7 +1067,7 @@ export namespace PageRuleCreateParams {
 
 export interface PageRuleUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -1276,7 +1344,7 @@ export namespace PageRuleUpdateParams {
      *   seconds or one of the following strings: no-store (equivalent to -1), no-cache
      *   (equivalent to 0).
      */
-    value?: Record<string, 'no-cache' | 'no-store' | number>;
+    value?: { [key: string]: 'no-cache' | 'no-store' | number };
   }
 
   export interface DisableApps {
@@ -1407,7 +1475,7 @@ export namespace PageRuleUpdateParams {
 
 export interface PageRuleListParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -1435,14 +1503,14 @@ export interface PageRuleListParams {
 
 export interface PageRuleDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }
 
 export interface PageRuleEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -1719,7 +1787,7 @@ export namespace PageRuleEditParams {
      *   seconds or one of the following strings: no-store (equivalent to -1), no-cache
      *   (equivalent to 0).
      */
-    value?: Record<string, 'no-cache' | 'no-store' | number>;
+    value?: { [key: string]: 'no-cache' | 'no-store' | number };
   }
 
   export interface DisableApps {
@@ -1850,7 +1918,22 @@ export namespace PageRuleEditParams {
 
 export interface PageRuleGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
+}
+
+export declare namespace PageRules {
+  export {
+    type PageRule as PageRule,
+    type Target as Target,
+    type PageRuleListResponse as PageRuleListResponse,
+    type PageRuleDeleteResponse as PageRuleDeleteResponse,
+    type PageRuleCreateParams as PageRuleCreateParams,
+    type PageRuleUpdateParams as PageRuleUpdateParams,
+    type PageRuleListParams as PageRuleListParams,
+    type PageRuleDeleteParams as PageRuleDeleteParams,
+    type PageRuleEditParams as PageRuleEditParams,
+    type PageRuleGetParams as PageRuleGetParams,
+  };
 }

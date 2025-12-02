@@ -66,6 +66,18 @@ export class BotManagement extends APIResource {
    *   "fight_mode": false
    * }
    * ```
+   *
+   * @example
+   * ```ts
+   * const botManagement = await client.botManagement.update({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   ai_bots_protection: 'disabled',
+   *   cf_robots_variant: 'off',
+   *   crawler_protection: 'disabled',
+   *   enable_js: true,
+   *   fight_mode: true,
+   * });
+   * ```
    */
   update(
     params: BotManagementUpdateParams,
@@ -81,6 +93,13 @@ export class BotManagement extends APIResource {
 
   /**
    * Retrieve a zone's Bot Management Config
+   *
+   * @example
+   * ```ts
+   * const botManagement = await client.botManagement.get({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   get(
     params: BotManagementGetParams,
@@ -97,9 +116,20 @@ export class BotManagement extends APIResource {
 
 export interface BotFightModeConfiguration {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
 
   /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
@@ -111,6 +141,12 @@ export interface BotFightModeConfiguration {
    * Whether to enable Bot Fight Mode.
    */
   fight_mode?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 
   /**
    * A read-only field that shows which unauthorized settings are currently active on
@@ -167,9 +203,20 @@ export namespace BotFightModeConfiguration {
 
 export interface BotFightModeConfigurationParam {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
 
   /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
@@ -181,13 +228,20 @@ export interface BotFightModeConfigurationParam {
    * Whether to enable Bot Fight Mode.
    */
   fight_mode?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 }
 
 export interface SubscriptionConfiguration {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
 
   /**
    * Automatically update to the newest bot detection models created by Cloudflare as
@@ -197,10 +251,32 @@ export interface SubscriptionConfiguration {
   auto_update_model?: boolean;
 
   /**
+   * Indicates that the bot management cookie can be placed on end user devices
+   * accessing the site. Defaults to true
+   */
+  bm_cookie_enabled?: boolean;
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
+
+  /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
    * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
    */
   enable_js?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 
   /**
    * A read-only field that shows which unauthorized settings are currently active on
@@ -263,9 +339,10 @@ export namespace SubscriptionConfiguration {
 
 export interface SubscriptionConfigurationParam {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
 
   /**
    * Automatically update to the newest bot detection models created by Cloudflare as
@@ -275,10 +352,32 @@ export interface SubscriptionConfigurationParam {
   auto_update_model?: boolean;
 
   /**
+   * Indicates that the bot management cookie can be placed on end user devices
+   * accessing the site. Defaults to true
+   */
+  bm_cookie_enabled?: boolean;
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
+
+  /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
    * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
    */
   enable_js?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 
   /**
    * Whether to disable tracking the highest bot score for a session in the Bot
@@ -289,15 +388,32 @@ export interface SubscriptionConfigurationParam {
 
 export interface SuperBotFightModeDefinitelyConfiguration {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
 
   /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
    * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
    */
   enable_js?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 
   /**
    * Whether to optimize Super Bot Fight Mode protections for Wordpress.
@@ -355,15 +471,32 @@ export namespace SuperBotFightModeDefinitelyConfiguration {
 
 export interface SuperBotFightModeDefinitelyConfigurationParam {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
 
   /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
    * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
    */
   enable_js?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 
   /**
    * Whether to optimize Super Bot Fight Mode protections for Wordpress.
@@ -390,15 +523,32 @@ export interface SuperBotFightModeDefinitelyConfigurationParam {
 
 export interface SuperBotFightModeLikelyConfiguration {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
 
   /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
    * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
    */
   enable_js?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 
   /**
    * Whether to optimize Super Bot Fight Mode protections for Wordpress.
@@ -455,15 +605,32 @@ export namespace SuperBotFightModeLikelyConfiguration {
 
 export interface SuperBotFightModeLikelyConfigurationParam {
   /**
-   * Enable rule to block AI Scrapers and Crawlers.
+   * Enable rule to block AI Scrapers and Crawlers. Please note the value
+   * `only_on_ad_pages` is currently not available for Enterprise customers.
    */
-  ai_bots_protection?: 'block' | 'disabled';
+  ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+  /**
+   * Specifies the Robots Access Control License variant to use.
+   */
+  cf_robots_variant?: 'off' | 'policy_only';
+
+  /**
+   * Enable rule to punish AI Scrapers and Crawlers via a link maze.
+   */
+  crawler_protection?: 'enabled' | 'disabled';
 
   /**
    * Use lightweight, invisible JavaScript detections to improve Bot Management.
    * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
    */
   enable_js?: boolean;
+
+  /**
+   * Enable cloudflare managed robots.txt. If an existing robots.txt is detected,
+   * then managed robots.txt will be prepended to the existing robots.txt.
+   */
+  is_robots_txt_managed?: boolean;
 
   /**
    * Whether to optimize Super Bot Fight Mode protections for Wordpress.
@@ -514,14 +681,25 @@ export type BotManagementUpdateParams =
 export declare namespace BotManagementUpdateParams {
   export interface BotFightModeConfiguration {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Enable rule to block AI Scrapers and Crawlers.
+     * Body param: Enable rule to block AI Scrapers and Crawlers. Please note the value
+     * `only_on_ad_pages` is currently not available for Enterprise customers.
      */
-    ai_bots_protection?: 'block' | 'disabled';
+    ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+    /**
+     * Body param: Specifies the Robots Access Control License variant to use.
+     */
+    cf_robots_variant?: 'off' | 'policy_only';
+
+    /**
+     * Body param: Enable rule to punish AI Scrapers and Crawlers via a link maze.
+     */
+    crawler_protection?: 'enabled' | 'disabled';
 
     /**
      * Body param: Use lightweight, invisible JavaScript detections to improve Bot
@@ -534,18 +712,35 @@ export declare namespace BotManagementUpdateParams {
      * Body param: Whether to enable Bot Fight Mode.
      */
     fight_mode?: boolean;
+
+    /**
+     * Body param: Enable cloudflare managed robots.txt. If an existing robots.txt is
+     * detected, then managed robots.txt will be prepended to the existing robots.txt.
+     */
+    is_robots_txt_managed?: boolean;
   }
 
   export interface SuperBotFightModeDefinitelyConfiguration {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Enable rule to block AI Scrapers and Crawlers.
+     * Body param: Enable rule to block AI Scrapers and Crawlers. Please note the value
+     * `only_on_ad_pages` is currently not available for Enterprise customers.
      */
-    ai_bots_protection?: 'block' | 'disabled';
+    ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+    /**
+     * Body param: Specifies the Robots Access Control License variant to use.
+     */
+    cf_robots_variant?: 'off' | 'policy_only';
+
+    /**
+     * Body param: Enable rule to punish AI Scrapers and Crawlers via a link maze.
+     */
+    crawler_protection?: 'enabled' | 'disabled';
 
     /**
      * Body param: Use lightweight, invisible JavaScript detections to improve Bot
@@ -553,6 +748,12 @@ export declare namespace BotManagementUpdateParams {
      * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
      */
     enable_js?: boolean;
+
+    /**
+     * Body param: Enable cloudflare managed robots.txt. If an existing robots.txt is
+     * detected, then managed robots.txt will be prepended to the existing robots.txt.
+     */
+    is_robots_txt_managed?: boolean;
 
     /**
      * Body param: Whether to optimize Super Bot Fight Mode protections for Wordpress.
@@ -581,14 +782,25 @@ export declare namespace BotManagementUpdateParams {
 
   export interface SuperBotFightModeLikelyConfiguration {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Enable rule to block AI Scrapers and Crawlers.
+     * Body param: Enable rule to block AI Scrapers and Crawlers. Please note the value
+     * `only_on_ad_pages` is currently not available for Enterprise customers.
      */
-    ai_bots_protection?: 'block' | 'disabled';
+    ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
+
+    /**
+     * Body param: Specifies the Robots Access Control License variant to use.
+     */
+    cf_robots_variant?: 'off' | 'policy_only';
+
+    /**
+     * Body param: Enable rule to punish AI Scrapers and Crawlers via a link maze.
+     */
+    crawler_protection?: 'enabled' | 'disabled';
 
     /**
      * Body param: Use lightweight, invisible JavaScript detections to improve Bot
@@ -596,6 +808,12 @@ export declare namespace BotManagementUpdateParams {
      * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
      */
     enable_js?: boolean;
+
+    /**
+     * Body param: Enable cloudflare managed robots.txt. If an existing robots.txt is
+     * detected, then managed robots.txt will be prepended to the existing robots.txt.
+     */
+    is_robots_txt_managed?: boolean;
 
     /**
      * Body param: Whether to optimize Super Bot Fight Mode protections for Wordpress.
@@ -630,14 +848,15 @@ export declare namespace BotManagementUpdateParams {
 
   export interface SubscriptionConfiguration {
     /**
-     * Path param: Identifier
+     * Path param: Identifier.
      */
     zone_id: string;
 
     /**
-     * Body param: Enable rule to block AI Scrapers and Crawlers.
+     * Body param: Enable rule to block AI Scrapers and Crawlers. Please note the value
+     * `only_on_ad_pages` is currently not available for Enterprise customers.
      */
-    ai_bots_protection?: 'block' | 'disabled';
+    ai_bots_protection?: 'block' | 'disabled' | 'only_on_ad_pages';
 
     /**
      * Body param: Automatically update to the newest bot detection models created by
@@ -647,11 +866,33 @@ export declare namespace BotManagementUpdateParams {
     auto_update_model?: boolean;
 
     /**
+     * Body param: Indicates that the bot management cookie can be placed on end user
+     * devices accessing the site. Defaults to true
+     */
+    bm_cookie_enabled?: boolean;
+
+    /**
+     * Body param: Specifies the Robots Access Control License variant to use.
+     */
+    cf_robots_variant?: 'off' | 'policy_only';
+
+    /**
+     * Body param: Enable rule to punish AI Scrapers and Crawlers via a link maze.
+     */
+    crawler_protection?: 'enabled' | 'disabled';
+
+    /**
      * Body param: Use lightweight, invisible JavaScript detections to improve Bot
      * Management.
      * [Learn more about JavaScript Detections](https://developers.cloudflare.com/bots/reference/javascript-detections/).
      */
     enable_js?: boolean;
+
+    /**
+     * Body param: Enable cloudflare managed robots.txt. If an existing robots.txt is
+     * detected, then managed robots.txt will be prepended to the existing robots.txt.
+     */
+    is_robots_txt_managed?: boolean;
 
     /**
      * Body param: Whether to disable tracking the highest bot score for a session in
@@ -663,7 +904,20 @@ export declare namespace BotManagementUpdateParams {
 
 export interface BotManagementGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
+}
+
+export declare namespace BotManagement {
+  export {
+    type BotFightModeConfiguration as BotFightModeConfiguration,
+    type SubscriptionConfiguration as SubscriptionConfiguration,
+    type SuperBotFightModeDefinitelyConfiguration as SuperBotFightModeDefinitelyConfiguration,
+    type SuperBotFightModeLikelyConfiguration as SuperBotFightModeLikelyConfiguration,
+    type BotManagementUpdateResponse as BotManagementUpdateResponse,
+    type BotManagementGetResponse as BotManagementGetResponse,
+    type BotManagementUpdateParams as BotManagementUpdateParams,
+    type BotManagementGetParams as BotManagementGetParams,
+  };
 }

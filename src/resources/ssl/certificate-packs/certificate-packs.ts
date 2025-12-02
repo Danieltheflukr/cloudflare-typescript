@@ -11,6 +11,23 @@ export class CertificatePacks extends APIResource {
 
   /**
    * For a given zone, order an advanced certificate pack.
+   *
+   * @example
+   * ```ts
+   * const certificatePack =
+   *   await client.ssl.certificatePacks.create({
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     certificate_authority: 'lets_encrypt',
+   *     hosts: [
+   *       'example.com',
+   *       '*.example.com',
+   *       'www.example.com',
+   *     ],
+   *     type: 'advanced',
+   *     validation_method: 'txt',
+   *     validity_days: 14,
+   *   });
+   * ```
    */
   create(
     params: CertificatePackCreateParams,
@@ -27,6 +44,16 @@ export class CertificatePacks extends APIResource {
 
   /**
    * For a given zone, list all active certificate packs.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const certificatePackListResponse of client.ssl.certificatePacks.list(
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: CertificatePackListParams,
@@ -42,6 +69,15 @@ export class CertificatePacks extends APIResource {
 
   /**
    * For a given zone, delete an advanced certificate pack.
+   *
+   * @example
+   * ```ts
+   * const certificatePack =
+   *   await client.ssl.certificatePacks.delete(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   delete(
     certificatePackId: string,
@@ -61,6 +97,14 @@ export class CertificatePacks extends APIResource {
    * For a given zone, restart validation or add cloudflare branding for an advanced
    * certificate pack. The former is only a validation operation for a Certificate
    * Pack in a validation_timed_out status.
+   *
+   * @example
+   * ```ts
+   * const response = await client.ssl.certificatePacks.edit(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   edit(
     certificatePackId: string,
@@ -78,6 +122,15 @@ export class CertificatePacks extends APIResource {
 
   /**
    * For a given zone, get a certificate pack.
+   *
+   * @example
+   * ```ts
+   * const certificatePack =
+   *   await client.ssl.certificatePacks.get(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     certificatePackId: string,
@@ -143,7 +196,7 @@ export type ValidationMethod = 'http' | 'cname' | 'txt';
 
 export interface CertificatePackCreateResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id?: string;
 
@@ -174,7 +227,21 @@ export interface CertificatePackCreateResponse {
   /**
    * Type of certificate pack.
    */
-  type?: 'advanced';
+  type?:
+    | 'mh_custom'
+    | 'managed_hostname'
+    | 'sni_custom'
+    | 'universal'
+    | 'advanced'
+    | 'total_tls'
+    | 'keyless'
+    | 'legacy_custom';
+
+  /**
+   * Domain validation errors that have been received by the certificate authority
+   * (CA).
+   */
+  validation_errors?: Array<CertificatePackCreateResponse.ValidationError>;
 
   /**
    * Validation Method selected for the order.
@@ -182,23 +249,72 @@ export interface CertificatePackCreateResponse {
   validation_method?: 'txt' | 'http' | 'email';
 
   /**
+   * Certificates' validation records. Only present when certificate pack is in
+   * "pending_validation" status
+   */
+  validation_records?: Array<CertificatePackCreateResponse.ValidationRecord>;
+
+  /**
    * Validity Days selected for the order.
    */
   validity_days?: 14 | 30 | 90 | 365;
+}
+
+export namespace CertificatePackCreateResponse {
+  export interface ValidationError {
+    /**
+     * A domain validation error.
+     */
+    message?: string;
+  }
+
+  /**
+   * Certificate's required validation record.
+   */
+  export interface ValidationRecord {
+    /**
+     * The set of email addresses that the certificate authority (CA) will use to
+     * complete domain validation.
+     */
+    emails?: Array<string>;
+
+    /**
+     * The content that the certificate authority (CA) will expect to find at the
+     * http_url during the domain validation.
+     */
+    http_body?: string;
+
+    /**
+     * The url that will be checked during domain validation.
+     */
+    http_url?: string;
+
+    /**
+     * The hostname that the certificate authority (CA) will check for a TXT record
+     * during domain validation .
+     */
+    txt_name?: string;
+
+    /**
+     * The TXT record that the certificate authority (CA) will check during domain
+     * validation.
+     */
+    txt_value?: string;
+  }
 }
 
 export type CertificatePackListResponse = unknown;
 
 export interface CertificatePackDeleteResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id?: string;
 }
 
 export interface CertificatePackEditResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id?: string;
 
@@ -229,7 +345,21 @@ export interface CertificatePackEditResponse {
   /**
    * Type of certificate pack.
    */
-  type?: 'advanced';
+  type?:
+    | 'mh_custom'
+    | 'managed_hostname'
+    | 'sni_custom'
+    | 'universal'
+    | 'advanced'
+    | 'total_tls'
+    | 'keyless'
+    | 'legacy_custom';
+
+  /**
+   * Domain validation errors that have been received by the certificate authority
+   * (CA).
+   */
+  validation_errors?: Array<CertificatePackEditResponse.ValidationError>;
 
   /**
    * Validation Method selected for the order.
@@ -237,16 +367,65 @@ export interface CertificatePackEditResponse {
   validation_method?: 'txt' | 'http' | 'email';
 
   /**
+   * Certificates' validation records. Only present when certificate pack is in
+   * "pending_validation" status
+   */
+  validation_records?: Array<CertificatePackEditResponse.ValidationRecord>;
+
+  /**
    * Validity Days selected for the order.
    */
   validity_days?: 14 | 30 | 90 | 365;
+}
+
+export namespace CertificatePackEditResponse {
+  export interface ValidationError {
+    /**
+     * A domain validation error.
+     */
+    message?: string;
+  }
+
+  /**
+   * Certificate's required validation record.
+   */
+  export interface ValidationRecord {
+    /**
+     * The set of email addresses that the certificate authority (CA) will use to
+     * complete domain validation.
+     */
+    emails?: Array<string>;
+
+    /**
+     * The content that the certificate authority (CA) will expect to find at the
+     * http_url during the domain validation.
+     */
+    http_body?: string;
+
+    /**
+     * The url that will be checked during domain validation.
+     */
+    http_url?: string;
+
+    /**
+     * The hostname that the certificate authority (CA) will check for a TXT record
+     * during domain validation .
+     */
+    txt_name?: string;
+
+    /**
+     * The TXT record that the certificate authority (CA) will check during domain
+     * validation.
+     */
+    txt_value?: string;
+  }
 }
 
 export type CertificatePackGetResponse = unknown;
 
 export interface CertificatePackCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -288,7 +467,7 @@ export interface CertificatePackCreateParams {
 
 export interface CertificatePackListParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -300,14 +479,14 @@ export interface CertificatePackListParams {
 
 export interface CertificatePackDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }
 
 export interface CertificatePackEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -320,7 +499,7 @@ export interface CertificatePackEditParams {
 
 export interface CertificatePackGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

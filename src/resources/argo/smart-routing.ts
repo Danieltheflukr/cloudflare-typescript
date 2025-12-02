@@ -5,7 +5,15 @@ import * as Core from '../../core';
 
 export class SmartRouting extends APIResource {
   /**
-   * Updates enablement of Argo Smart Routing.
+   * Configures the value of the Argo Smart Routing enablement setting.
+   *
+   * @example
+   * ```ts
+   * const response = await client.argo.smartRouting.edit({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   value: 'on',
+   * });
+   * ```
    */
   edit(
     params: SmartRoutingEditParams,
@@ -20,7 +28,14 @@ export class SmartRouting extends APIResource {
   }
 
   /**
-   * Get Argo Smart Routing setting
+   * Retrieves the value of Argo Smart Routing enablement setting.
+   *
+   * @example
+   * ```ts
+   * const smartRouting = await client.argo.smartRouting.get({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   get(
     params: SmartRoutingGetParams,
@@ -35,25 +50,65 @@ export class SmartRouting extends APIResource {
   }
 }
 
-export type SmartRoutingEditResponse = unknown | string | null;
+export interface SmartRoutingEditResponse {
+  /**
+   * Specifies the identifier of the Argo Smart Routing setting.
+   */
+  id: string;
 
-export type SmartRoutingGetResponse = unknown | string | null;
+  /**
+   * Specifies if the setting is editable.
+   */
+  editable: boolean;
+
+  /**
+   * Specifies the enablement value of Argo Smart Routing.
+   */
+  value: 'on' | 'off';
+
+  /**
+   * Specifies the time when the setting was last modified.
+   */
+  modified_on?: string;
+}
+
+export interface SmartRoutingGetResponse {
+  /**
+   * Specifies the identifier of the Argo Smart Routing setting.
+   */
+  id: string;
+
+  /**
+   * Specifies if the setting is editable.
+   */
+  editable: boolean;
+
+  /**
+   * Specifies the enablement value of Argo Smart Routing.
+   */
+  value: 'on' | 'off';
+
+  /**
+   * Specifies the time when the setting was last modified.
+   */
+  modified_on?: string;
+}
 
 export interface SmartRoutingEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Specifies the zone associated with the API call.
    */
   zone_id: string;
 
   /**
-   * Body param: Enables Argo Smart Routing.
+   * Body param: Specifies the enablement value of Argo Smart Routing.
    */
   value: 'on' | 'off';
 }
 
 export interface SmartRoutingGetParams {
   /**
-   * Identifier
+   * Specifies the zone associated with the API call.
    */
   zone_id: string;
 }

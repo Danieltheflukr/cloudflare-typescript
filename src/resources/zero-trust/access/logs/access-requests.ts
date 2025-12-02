@@ -7,6 +7,14 @@ import * as SCIMAPI from './scim/scim';
 export class AccessRequests extends APIResource {
   /**
    * Gets a list of Access authentication audit logs for an account.
+   *
+   * @example
+   * ```ts
+   * const accessRequests =
+   *   await client.zeroTrust.access.logs.accessRequests.list({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   list(
     params: AccessRequestListParams,
@@ -26,7 +34,7 @@ export type AccessRequestListResponse = Array<SCIMAPI.AccessRequest>;
 
 export interface AccessRequestListParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -39,6 +47,16 @@ export interface AccessRequestListParams {
    * Query param: The maximum number of log entries to retrieve.
    */
   limit?: number;
+
+  /**
+   * Query param: Page number of results.
+   */
+  page?: number;
+
+  /**
+   * Query param: Number of results per page.
+   */
+  per_page?: number;
 
   /**
    * Query param: The earliest event timestamp to query.

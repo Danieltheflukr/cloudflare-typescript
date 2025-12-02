@@ -4,7 +4,6 @@ export {
   Custom,
   type CustomProfile,
   type Pattern,
-  type CustomCreateResponse,
   type CustomDeleteResponse,
   type CustomCreateParams,
   type CustomUpdateParams,
@@ -14,7 +13,10 @@ export {
 export {
   Predefined,
   type PredefinedProfile,
+  type PredefinedDeleteResponse,
+  type PredefinedCreateParams,
   type PredefinedUpdateParams,
+  type PredefinedDeleteParams,
   type PredefinedGetParams,
 } from './predefined';
 export {

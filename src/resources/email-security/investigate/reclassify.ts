@@ -6,6 +6,18 @@ import * as Core from '../../../core';
 export class Reclassify extends APIResource {
   /**
    * Change email classfication
+   *
+   * @example
+   * ```ts
+   * const reclassify =
+   *   await client.emailSecurity.investigate.reclassify.create(
+   *     '4Njp3P0STMz2c02Q',
+   *     {
+   *       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *       expected_disposition: 'NONE',
+   *     },
+   *   );
+   * ```
    */
   create(
     postfixId: string,
@@ -38,7 +50,12 @@ export interface ReclassifyCreateParams {
   /**
    * Body param: Base64 encoded content of the EML file
    */
-  eml_content?: string | null;
+  eml_content?: string;
+
+  /**
+   * Body param:
+   */
+  escalated_submission_id?: string;
 }
 
 export declare namespace Reclassify {

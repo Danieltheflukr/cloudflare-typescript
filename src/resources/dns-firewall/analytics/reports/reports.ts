@@ -15,6 +15,15 @@ export class Reports extends APIResource {
    * See
    * [Analytics API properties](https://developers.cloudflare.com/dns/reference/analytics-api-properties/)
    * for detailed information about the available query parameters.
+   *
+   * @example
+   * ```ts
+   * const report =
+   *   await client.dnsFirewall.analytics.reports.get(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     dnsFirewallId: string,
@@ -33,7 +42,7 @@ export class Reports extends APIResource {
 
 export interface ReportGetParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 

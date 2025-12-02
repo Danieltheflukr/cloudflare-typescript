@@ -7,11 +7,18 @@ import { SinglePage } from '../../pagination';
 export class Edge extends APIResource {
   /**
    * Creates a new Instant Logs job for a zone.
+   *
+   * @example
+   * ```ts
+   * const instantLogpushJob = await client.logpush.edge.create({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   create(params: EdgeCreateParams, options?: Core.RequestOptions): Core.APIPromise<InstantLogpushJob | null> {
     const { zone_id, ...body } = params;
     return (
-      this._client.post(`/zones/${zone_id}/logpush/edge`, { body, ...options }) as Core.APIPromise<{
+      this._client.post(`/zones/${zone_id}/logpush/edge/jobs`, { body, ...options }) as Core.APIPromise<{
         result: InstantLogpushJob | null;
       }>
     )._thenUnwrap((obj) => obj.result);
@@ -19,13 +26,27 @@ export class Edge extends APIResource {
 
   /**
    * Lists Instant Logs jobs for a zone.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const instantLogpushJob of client.logpush.edge.get(
+   *   { zone_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   get(
     params: EdgeGetParams,
     options?: Core.RequestOptions,
   ): Core.PagePromise<InstantLogpushJobsSinglePage, InstantLogpushJob | null> {
     const { zone_id } = params;
-    return this._client.getAPIList(`/zones/${zone_id}/logpush/edge`, InstantLogpushJobsSinglePage, options);
+    return this._client.getAPIList(
+      `/zones/${zone_id}/logpush/edge/jobs`,
+      InstantLogpushJobsSinglePage,
+      options,
+    );
   }
 }
 
@@ -61,7 +82,7 @@ export interface InstantLogpushJob {
 
 export interface EdgeCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -84,7 +105,7 @@ export interface EdgeCreateParams {
 
 export interface EdgeGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

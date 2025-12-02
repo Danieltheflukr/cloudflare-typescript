@@ -10,6 +10,8 @@ import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../p
 export class Organizations extends APIResource {
   /**
    * Lists organizations the user is associated with.
+   *
+   * @deprecated
    */
   list(
     query?: OrganizationListParams,
@@ -31,6 +33,8 @@ export class Organizations extends APIResource {
 
   /**
    * Removes association to an organization.
+   *
+   * @deprecated
    */
   delete(organizationId: string, options?: Core.RequestOptions): Core.APIPromise<OrganizationDeleteResponse> {
     return this._client.delete(`/user/organizations/${organizationId}`, options);
@@ -38,6 +42,8 @@ export class Organizations extends APIResource {
 
   /**
    * Gets a specific organization the user is associated with.
+   *
+   * @deprecated
    */
   get(organizationId: string, options?: Core.RequestOptions): Core.APIPromise<OrganizationGetResponse> {
     return (

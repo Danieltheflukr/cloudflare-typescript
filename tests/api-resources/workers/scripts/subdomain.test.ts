@@ -28,7 +28,26 @@ describe('resource subdomain', () => {
     const response = await client.workers.scripts.subdomain.create('this-is_my_script-01', {
       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
       enabled: true,
-      previews_enabled: true,
+      previews_enabled: false,
+    });
+  });
+
+  test('delete: only required params', async () => {
+    const responsePromise = client.workers.scripts.subdomain.delete('this-is_my_script-01', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+    });
+    const rawResponse = await responsePromise.asResponse();
+    expect(rawResponse).toBeInstanceOf(Response);
+    const response = await responsePromise;
+    expect(response).not.toBeInstanceOf(Response);
+    const dataAndResponse = await responsePromise.withResponse();
+    expect(dataAndResponse.data).toBe(response);
+    expect(dataAndResponse.response).toBe(rawResponse);
+  });
+
+  test('delete: required and optional params', async () => {
+    const response = await client.workers.scripts.subdomain.delete('this-is_my_script-01', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
     });
   });
 

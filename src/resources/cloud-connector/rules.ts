@@ -57,7 +57,7 @@ export interface RuleUpdateResponse {
   /**
    * Cloud Provider type
    */
-  provider?: 'aws_s3' | 'r2' | 'gcp_storage' | 'azure_storage';
+  provider?: 'aws_s3' | 'cloudflare_r2' | 'gcp_storage' | 'azure_storage';
 }
 
 export namespace RuleUpdateResponse {
@@ -89,7 +89,7 @@ export interface RuleListResponse {
   /**
    * Cloud Provider type
    */
-  provider?: 'aws_s3' | 'r2' | 'gcp_storage' | 'azure_storage';
+  provider?: 'aws_s3' | 'cloudflare_r2' | 'gcp_storage' | 'azure_storage';
 }
 
 export namespace RuleListResponse {
@@ -106,12 +106,12 @@ export namespace RuleListResponse {
 
 export interface RuleUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
   /**
-   * Body param: List of Cloud Connector rules
+   * Body param:
    */
   rules?: Array<RuleUpdateParams.Rule>;
 }
@@ -134,7 +134,7 @@ export namespace RuleUpdateParams {
     /**
      * Cloud Provider type
      */
-    provider?: 'aws_s3' | 'r2' | 'gcp_storage' | 'azure_storage';
+    provider?: 'aws_s3' | 'cloudflare_r2' | 'gcp_storage' | 'azure_storage';
   }
 
   export namespace Rule {
@@ -152,7 +152,7 @@ export namespace RuleUpdateParams {
 
 export interface RuleListParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

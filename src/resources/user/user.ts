@@ -45,6 +45,11 @@ export class User extends APIResource {
 
   /**
    * Edit part of your user details.
+   *
+   * @example
+   * ```ts
+   * const response = await client.user.edit();
+   * ```
    */
   edit(body: UserEditParams, options?: Core.RequestOptions): Core.APIPromise<UserEditResponse> {
     return (
@@ -54,6 +59,11 @@ export class User extends APIResource {
 
   /**
    * User Details
+   *
+   * @example
+   * ```ts
+   * const user = await client.user.get();
+   * ```
    */
   get(options?: Core.RequestOptions): Core.APIPromise<UserGetResponse> {
     return (this._client.get('/user', options) as Core.APIPromise<{ result: UserGetResponse }>)._thenUnwrap(
@@ -62,9 +72,147 @@ export class User extends APIResource {
   }
 }
 
-export type UserEditResponse = unknown;
+export interface UserEditResponse {
+  /**
+   * Identifier of the user.
+   */
+  id?: string;
 
-export type UserGetResponse = unknown;
+  /**
+   * Lists the betas that the user is participating in.
+   */
+  betas?: Array<string>;
+
+  /**
+   * The country in which the user lives.
+   */
+  country?: string | null;
+
+  /**
+   * User's first name
+   */
+  first_name?: string | null;
+
+  /**
+   * Indicates whether user has any business zones
+   */
+  has_business_zones?: boolean;
+
+  /**
+   * Indicates whether user has any enterprise zones
+   */
+  has_enterprise_zones?: boolean;
+
+  /**
+   * Indicates whether user has any pro zones
+   */
+  has_pro_zones?: boolean;
+
+  /**
+   * User's last name
+   */
+  last_name?: string | null;
+
+  organizations?: Array<OrganizationsAPI.Organization>;
+
+  /**
+   * Indicates whether user has been suspended
+   */
+  suspended?: boolean;
+
+  /**
+   * User's telephone number
+   */
+  telephone?: string | null;
+
+  /**
+   * Indicates whether two-factor authentication is enabled for the user account.
+   * Does not apply to API authentication.
+   */
+  two_factor_authentication_enabled?: boolean;
+
+  /**
+   * Indicates whether two-factor authentication is required by one of the accounts
+   * that the user is a member of.
+   */
+  two_factor_authentication_locked?: boolean;
+
+  /**
+   * The zipcode or postal code where the user lives.
+   */
+  zipcode?: string | null;
+}
+
+export interface UserGetResponse {
+  /**
+   * Identifier of the user.
+   */
+  id?: string;
+
+  /**
+   * Lists the betas that the user is participating in.
+   */
+  betas?: Array<string>;
+
+  /**
+   * The country in which the user lives.
+   */
+  country?: string | null;
+
+  /**
+   * User's first name
+   */
+  first_name?: string | null;
+
+  /**
+   * Indicates whether user has any business zones
+   */
+  has_business_zones?: boolean;
+
+  /**
+   * Indicates whether user has any enterprise zones
+   */
+  has_enterprise_zones?: boolean;
+
+  /**
+   * Indicates whether user has any pro zones
+   */
+  has_pro_zones?: boolean;
+
+  /**
+   * User's last name
+   */
+  last_name?: string | null;
+
+  organizations?: Array<OrganizationsAPI.Organization>;
+
+  /**
+   * Indicates whether user has been suspended
+   */
+  suspended?: boolean;
+
+  /**
+   * User's telephone number
+   */
+  telephone?: string | null;
+
+  /**
+   * Indicates whether two-factor authentication is enabled for the user account.
+   * Does not apply to API authentication.
+   */
+  two_factor_authentication_enabled?: boolean;
+
+  /**
+   * Indicates whether two-factor authentication is required by one of the accounts
+   * that the user is a member of.
+   */
+  two_factor_authentication_locked?: boolean;
+
+  /**
+   * The zipcode or postal code where the user lives.
+   */
+  zipcode?: string | null;
+}
 
 export interface UserEditParams {
   /**
@@ -103,6 +251,12 @@ User.Subscriptions = Subscriptions;
 User.Tokens = Tokens;
 
 export declare namespace User {
+  export {
+    type UserEditResponse as UserEditResponse,
+    type UserGetResponse as UserGetResponse,
+    type UserEditParams as UserEditParams,
+  };
+
   export { AuditLogs as AuditLogs, type AuditLogListParams as AuditLogListParams };
 
   export { Billing as Billing };

@@ -11,7 +11,7 @@ const client = new Cloudflare({
 
 describe('resource accounts', () => {
   test('create: only required params', async () => {
-    const responsePromise = client.accounts.create({ name: 'name', type: 'standard' });
+    const responsePromise = client.accounts.create({ name: 'name' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -31,8 +31,10 @@ describe('resource accounts', () => {
 
   test('update: only required params', async () => {
     const responsePromise = client.accounts.update({
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      id: '023e105f4ecef8ad9ca31a8372d0c353',
       name: 'Demo Account',
+      type: 'standard',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -45,14 +47,11 @@ describe('resource accounts', () => {
 
   test('update: required and optional params', async () => {
     const response = await client.accounts.update({
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      id: '023e105f4ecef8ad9ca31a8372d0c353',
       name: 'Demo Account',
-      settings: {
-        abuse_contact_email: 'abuse_contact_email',
-        default_nameservers: 'cloudflare.standard',
-        enforce_twofactor: true,
-        use_account_custom_ns_by_default: true,
-      },
+      type: 'standard',
+      settings: { abuse_contact_email: 'abuse_contact_email', enforce_twofactor: true },
     });
   });
 
@@ -78,7 +77,7 @@ describe('resource accounts', () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
     await expect(
       client.accounts.list(
-        { direction: 'asc', name: 'example.com', page: 1, per_page: 5 },
+        { direction: 'desc', name: 'example.com', page: 1, per_page: 5 },
         { path: '/_stainless_unknown_path' },
       ),
     ).rejects.toThrow(Cloudflare.NotFoundError);
@@ -100,7 +99,7 @@ describe('resource accounts', () => {
   });
 
   test('get: only required params', async () => {
-    const responsePromise = client.accounts.get({ account_id: 'eb78d65290b24279ba6f44721b3ea3c4' });
+    const responsePromise = client.accounts.get({ account_id: '023e105f4ecef8ad9ca31a8372d0c353' });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -111,6 +110,6 @@ describe('resource accounts', () => {
   });
 
   test('get: required and optional params', async () => {
-    const response = await client.accounts.get({ account_id: 'eb78d65290b24279ba6f44721b3ea3c4' });
+    const response = await client.accounts.get({ account_id: '023e105f4ecef8ad9ca31a8372d0c353' });
   });
 });

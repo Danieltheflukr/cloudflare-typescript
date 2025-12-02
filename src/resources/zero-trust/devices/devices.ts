@@ -2,19 +2,32 @@
 
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
+import * as DevicesDevicesAPI from './devices_';
+import {
+  DeviceDeleteParams,
+  DeviceDeleteResponse,
+  DeviceListResponse,
+  DeviceListResponsesCursorPagination,
+  DeviceRevokeParams,
+  DeviceRevokeResponse,
+  Devices as DevicesAPIDevices,
+} from './devices_';
 import * as DEXTestsAPI from './dex-tests';
 import {
-  DEXTest,
   DEXTestCreateParams,
+  DEXTestCreateResponse,
   DEXTestDeleteParams,
   DEXTestDeleteResponse,
   DEXTestGetParams,
+  DEXTestGetResponse,
   DEXTestListParams,
+  DEXTestListResponse,
+  DEXTestListResponsesSinglePage,
   DEXTestUpdateParams,
+  DEXTestUpdateResponse,
   DEXTests,
   SchemaData,
   SchemaHTTP,
-  SchemaHTTPSSinglePage,
 } from './dex-tests';
 import * as FleetStatusAPI from './fleet-status';
 import { FleetStatus, FleetStatusGetParams, FleetStatusGetResponse } from './fleet-status';
@@ -30,14 +43,39 @@ import {
   Networks,
 } from './networks';
 import * as OverrideCodesAPI from './override-codes';
-import { OverrideCodeListParams, OverrideCodeListResponse, OverrideCodes } from './override-codes';
+import {
+  OverrideCodeGetParams,
+  OverrideCodeGetResponse,
+  OverrideCodeListParams,
+  OverrideCodeListResponse,
+  OverrideCodeListResponsesSinglePage,
+  OverrideCodes,
+} from './override-codes';
+import * as RegistrationsAPI from './registrations';
+import {
+  RegistrationBulkDeleteParams,
+  RegistrationBulkDeleteResponse,
+  RegistrationDeleteParams,
+  RegistrationDeleteResponse,
+  RegistrationGetParams,
+  RegistrationGetResponse,
+  RegistrationListParams,
+  RegistrationListResponse,
+  RegistrationListResponsesCursorPagination,
+  RegistrationRevokeParams,
+  RegistrationRevokeResponse,
+  RegistrationUnrevokeParams,
+  RegistrationUnrevokeResponse,
+  Registrations,
+} from './registrations';
 import * as RevokeAPI from './revoke';
 import { Revoke, RevokeCreateParams, RevokeCreateResponse } from './revoke';
 import * as SettingsAPI from './settings';
 import {
   DeviceSettings,
+  SettingDeleteParams,
   SettingEditParams,
-  SettingListParams,
+  SettingGetParams,
   SettingUpdateParams,
   Settings,
 } from './settings';
@@ -82,9 +120,14 @@ import {
   UniqueClientIDInput,
   WorkspaceOneInput,
 } from './posture/posture';
+import * as ResilienceAPI from './resilience/resilience';
+import { Resilience } from './resilience/resilience';
 import { SinglePage } from '../../../pagination';
 
 export class Devices extends APIResource {
+  devices: DevicesDevicesAPI.Devices = new DevicesDevicesAPI.Devices(this._client);
+  resilience: ResilienceAPI.Resilience = new ResilienceAPI.Resilience(this._client);
+  registrations: RegistrationsAPI.Registrations = new RegistrationsAPI.Registrations(this._client);
   dexTests: DEXTestsAPI.DEXTests = new DEXTestsAPI.DEXTests(this._client);
   networks: NetworksAPI.Networks = new NetworksAPI.Networks(this._client);
   fleetStatus: FleetStatusAPI.FleetStatus = new FleetStatusAPI.FleetStatus(this._client);
@@ -96,7 +139,16 @@ export class Devices extends APIResource {
   overrideCodes: OverrideCodesAPI.OverrideCodes = new OverrideCodesAPI.OverrideCodes(this._client);
 
   /**
-   * Fetches a list of enrolled devices.
+   * List WARP devices. Not supported when
+   * [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/)
+   * is enabled for the account.
+   *
+   * **Deprecated**: please use one of the following endpoints instead:
+   *
+   * - GET /accounts/{account_id}/devices/physical-devices
+   * - GET /accounts/{account_id}/devices/registrations
+   *
+   * @deprecated
    */
   list(params: DeviceListParams, options?: Core.RequestOptions): Core.PagePromise<DevicesSinglePage, Device> {
     const { account_id } = params;
@@ -104,7 +156,16 @@ export class Devices extends APIResource {
   }
 
   /**
-   * Fetches details for a single device.
+   * Fetches a single WARP device. Not supported when
+   * [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/)
+   * is enabled for the account.
+   *
+   * **Deprecated**: please use one of the following endpoints instead:
+   *
+   * - GET /accounts/{account_id}/devices/physical-devices/{device_id}
+   * - GET /accounts/{account_id}/devices/registrations/{registration_id}
+   *
+   * @deprecated
    */
   get(
     deviceId: string,
@@ -124,7 +185,8 @@ export class DevicesSinglePage extends SinglePage<Device> {}
 
 export interface Device {
   /**
-   * Device ID.
+   * Registration ID. Equal to Device ID except for accounts which enabled
+   * [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/).
    */
   id?: string;
 
@@ -138,7 +200,7 @@ export interface Device {
    */
   deleted?: boolean;
 
-  device_type?: 'windows' | 'mac' | 'linux' | 'android' | 'ios';
+  device_type?: 'windows' | 'mac' | 'linux' | 'android' | 'ios' | 'chromeos';
 
   /**
    * IPv4 or IPv6 address.
@@ -221,7 +283,7 @@ export interface Device {
 export namespace Device {
   export interface User {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -239,7 +301,8 @@ export namespace Device {
 
 export interface DeviceGetResponse {
   /**
-   * Device ID.
+   * Registration ID. Equal to Device ID except for accounts which enabled
+   * [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/).
    */
   id?: string;
 
@@ -345,7 +408,7 @@ export namespace DeviceGetResponse {
 
   export interface User {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -370,8 +433,13 @@ export interface DeviceGetParams {
 }
 
 Devices.DevicesSinglePage = DevicesSinglePage;
+Devices.Devices = DevicesAPIDevices;
+Devices.DeviceListResponsesCursorPagination = DeviceListResponsesCursorPagination;
+Devices.Resilience = Resilience;
+Devices.Registrations = Registrations;
+Devices.RegistrationListResponsesCursorPagination = RegistrationListResponsesCursorPagination;
 Devices.DEXTests = DEXTests;
-Devices.SchemaHTTPSSinglePage = SchemaHTTPSSinglePage;
+Devices.DEXTestListResponsesSinglePage = DEXTestListResponsesSinglePage;
 Devices.Networks = Networks;
 Devices.DeviceNetworksSinglePage = DeviceNetworksSinglePage;
 Devices.FleetStatus = FleetStatus;
@@ -382,6 +450,7 @@ Devices.Revoke = Revoke;
 Devices.Settings = Settings;
 Devices.Unrevoke = Unrevoke;
 Devices.OverrideCodes = OverrideCodes;
+Devices.OverrideCodeListResponsesSinglePage = OverrideCodeListResponsesSinglePage;
 
 export declare namespace Devices {
   export {
@@ -393,12 +462,44 @@ export declare namespace Devices {
   };
 
   export {
+    DevicesAPIDevices as Devices,
+    type DeviceListResponse as DeviceListResponse,
+    type DeviceDeleteResponse as DeviceDeleteResponse,
+    type DeviceRevokeResponse as DeviceRevokeResponse,
+    DeviceListResponsesCursorPagination as DeviceListResponsesCursorPagination,
+    type DeviceDeleteParams as DeviceDeleteParams,
+    type DeviceRevokeParams as DeviceRevokeParams,
+  };
+
+  export { Resilience as Resilience };
+
+  export {
+    Registrations as Registrations,
+    type RegistrationListResponse as RegistrationListResponse,
+    type RegistrationDeleteResponse as RegistrationDeleteResponse,
+    type RegistrationBulkDeleteResponse as RegistrationBulkDeleteResponse,
+    type RegistrationGetResponse as RegistrationGetResponse,
+    type RegistrationRevokeResponse as RegistrationRevokeResponse,
+    type RegistrationUnrevokeResponse as RegistrationUnrevokeResponse,
+    RegistrationListResponsesCursorPagination as RegistrationListResponsesCursorPagination,
+    type RegistrationListParams as RegistrationListParams,
+    type RegistrationDeleteParams as RegistrationDeleteParams,
+    type RegistrationBulkDeleteParams as RegistrationBulkDeleteParams,
+    type RegistrationGetParams as RegistrationGetParams,
+    type RegistrationRevokeParams as RegistrationRevokeParams,
+    type RegistrationUnrevokeParams as RegistrationUnrevokeParams,
+  };
+
+  export {
     DEXTests as DEXTests,
-    type DEXTest as DEXTest,
     type SchemaData as SchemaData,
     type SchemaHTTP as SchemaHTTP,
+    type DEXTestCreateResponse as DEXTestCreateResponse,
+    type DEXTestUpdateResponse as DEXTestUpdateResponse,
+    type DEXTestListResponse as DEXTestListResponse,
     type DEXTestDeleteResponse as DEXTestDeleteResponse,
-    SchemaHTTPSSinglePage as SchemaHTTPSSinglePage,
+    type DEXTestGetResponse as DEXTestGetResponse,
+    DEXTestListResponsesSinglePage as DEXTestListResponsesSinglePage,
     type DEXTestCreateParams as DEXTestCreateParams,
     type DEXTestUpdateParams as DEXTestUpdateParams,
     type DEXTestListParams as DEXTestListParams,
@@ -472,8 +573,9 @@ export declare namespace Devices {
     Settings as Settings,
     type DeviceSettings as DeviceSettings,
     type SettingUpdateParams as SettingUpdateParams,
-    type SettingListParams as SettingListParams,
+    type SettingDeleteParams as SettingDeleteParams,
     type SettingEditParams as SettingEditParams,
+    type SettingGetParams as SettingGetParams,
   };
 
   export {
@@ -485,6 +587,9 @@ export declare namespace Devices {
   export {
     OverrideCodes as OverrideCodes,
     type OverrideCodeListResponse as OverrideCodeListResponse,
+    type OverrideCodeGetResponse as OverrideCodeGetResponse,
+    OverrideCodeListResponsesSinglePage as OverrideCodeListResponsesSinglePage,
     type OverrideCodeListParams as OverrideCodeListParams,
+    type OverrideCodeGetParams as OverrideCodeGetParams,
   };
 }

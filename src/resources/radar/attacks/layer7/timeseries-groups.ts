@@ -7,6 +7,12 @@ import * as Core from '../../../../core';
 export class TimeseriesGroups extends APIResource {
   /**
    * Retrieves the distribution of layer 7 attacks by HTTP method over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.timeseriesGroups.httpMethod();
+   * ```
    */
   httpMethod(
     query?: TimeseriesGroupHTTPMethodParams,
@@ -30,6 +36,12 @@ export class TimeseriesGroups extends APIResource {
 
   /**
    * Retrieves the distribution of layer 7 attacks by HTTP version over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.timeseriesGroups.httpVersion();
+   * ```
    */
   httpVersion(
     query?: TimeseriesGroupHTTPVersionParams,
@@ -53,6 +65,12 @@ export class TimeseriesGroups extends APIResource {
 
   /**
    * Retrieves the distribution of layer 7 attacks by targeted industry over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.timeseriesGroups.industry();
+   * ```
    */
   industry(
     query?: TimeseriesGroupIndustryParams,
@@ -76,6 +94,12 @@ export class TimeseriesGroups extends APIResource {
 
   /**
    * Retrieves the distribution of layer 7 attacks by IP version used over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.timeseriesGroups.ipVersion();
+   * ```
    */
   ipVersion(
     query?: TimeseriesGroupIPVersionParams,
@@ -99,6 +123,12 @@ export class TimeseriesGroups extends APIResource {
 
   /**
    * Retrieves the distribution of layer 7 attacks by managed rules over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.timeseriesGroups.managedRules();
+   * ```
    */
   managedRules(
     query?: TimeseriesGroupManagedRulesParams,
@@ -122,6 +152,12 @@ export class TimeseriesGroups extends APIResource {
 
   /**
    * Retrieves the distribution of layer 7 attacks by mitigation product over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.timeseriesGroups.mitigationProduct();
+   * ```
    */
   mitigationProduct(
     query?: TimeseriesGroupMitigationProductParams,
@@ -145,6 +181,12 @@ export class TimeseriesGroups extends APIResource {
 
   /**
    * Retrieves the distribution of layer 7 attacks by targeted vertical over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.timeseriesGroups.vertical();
+   * ```
    */
   vertical(
     query?: TimeseriesGroupVerticalParams,
@@ -168,25 +210,218 @@ export class TimeseriesGroups extends APIResource {
 }
 
 export interface TimeseriesGroupHTTPMethodResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupHTTPMethodResponse.Meta;
 
   serie_0: TimeseriesGroupHTTPMethodResponse.Serie0;
 }
 
 export namespace TimeseriesGroupHTTPMethodResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     timestamps: Array<string>;
-    [k: string]: Array<string> | undefined;
+
+    [k: string]: Array<string> | Array<string> | undefined;
   }
 }
 
 export interface TimeseriesGroupHTTPVersionResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupHTTPVersionResponse.Meta;
 
   serie_0: TimeseriesGroupHTTPVersionResponse.Serie0;
 }
 
 export namespace TimeseriesGroupHTTPVersionResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     'HTTP/1.x': Array<string>;
 
@@ -199,25 +434,218 @@ export namespace TimeseriesGroupHTTPVersionResponse {
 }
 
 export interface TimeseriesGroupIndustryResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupIndustryResponse.Meta;
 
   serie_0: TimeseriesGroupIndustryResponse.Serie0;
 }
 
 export namespace TimeseriesGroupIndustryResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     timestamps: Array<string>;
-    [k: string]: Array<string> | undefined;
+
+    [k: string]: Array<string> | Array<string> | undefined;
   }
 }
 
 export interface TimeseriesGroupIPVersionResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupIPVersionResponse.Meta;
 
   serie_0: TimeseriesGroupIPVersionResponse.Serie0;
 }
 
 export namespace TimeseriesGroupIPVersionResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     IPv4: Array<string>;
 
@@ -228,63 +656,355 @@ export namespace TimeseriesGroupIPVersionResponse {
 }
 
 export interface TimeseriesGroupManagedRulesResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupManagedRulesResponse.Meta;
 
   serie_0: TimeseriesGroupManagedRulesResponse.Serie0;
 }
 
 export namespace TimeseriesGroupManagedRulesResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     timestamps: Array<string>;
-    [k: string]: Array<string> | undefined;
+
+    [k: string]: Array<string> | Array<string> | undefined;
   }
 }
 
 export interface TimeseriesGroupMitigationProductResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupMitigationProductResponse.Meta;
 
   serie_0: TimeseriesGroupMitigationProductResponse.Serie0;
 }
 
 export namespace TimeseriesGroupMitigationProductResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     timestamps: Array<string>;
-    [k: string]: Array<string> | undefined;
+
+    [k: string]: Array<string> | Array<string> | undefined;
   }
 }
 
 export interface TimeseriesGroupVerticalResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupVerticalResponse.Meta;
 
   serie_0: TimeseriesGroupVerticalResponse.Serie0;
 }
 
 export namespace TimeseriesGroupVerticalResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     timestamps: Array<string>;
-    [k: string]: Array<string> | undefined;
+
+    [k: string]: Array<string> | Array<string> | undefined;
   }
 }
 
 export interface TimeseriesGroupHTTPMethodParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -294,9 +1014,9 @@ export interface TimeseriesGroupHTTPMethodParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -322,21 +1042,20 @@ export interface TimeseriesGroupHTTPMethodParams {
 
   /**
    * Limits the number of objects per group to the top items within the specified
-   * time range. If there are more items than the limit, the response will include
-   * the count of items, with any remaining items grouped together under an "other"
-   * category.
+   * time range. When item count exceeds the limit, extra items appear grouped under
+   * an "other" category.
    */
   limitPerGroup?: number;
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'
@@ -354,7 +1073,7 @@ export interface TimeseriesGroupHTTPMethodParams {
   name?: Array<string>;
 
   /**
-   * Normalization method applied. Refer to
+   * Normalization method applied to the results. Refer to
    * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
    */
   normalization?: 'PERCENTAGE' | 'MIN0_MAX';
@@ -362,23 +1081,24 @@ export interface TimeseriesGroupHTTPMethodParams {
 
 export interface TimeseriesGroupHTTPVersionParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -388,9 +1108,9 @@ export interface TimeseriesGroupHTTPVersionParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -462,14 +1182,14 @@ export interface TimeseriesGroupHTTPVersionParams {
   ipVersion?: Array<'IPv4' | 'IPv6'>;
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'
@@ -487,7 +1207,7 @@ export interface TimeseriesGroupHTTPVersionParams {
   name?: Array<string>;
 
   /**
-   * Normalization method applied. Refer to
+   * Normalization method applied to the results. Refer to
    * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
    */
   normalization?: 'PERCENTAGE' | 'MIN0_MAX';
@@ -495,23 +1215,24 @@ export interface TimeseriesGroupHTTPVersionParams {
 
 export interface TimeseriesGroupIndustryParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -521,9 +1242,9 @@ export interface TimeseriesGroupIndustryParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -601,21 +1322,20 @@ export interface TimeseriesGroupIndustryParams {
 
   /**
    * Limits the number of objects per group to the top items within the specified
-   * time range. If there are more items than the limit, the response will include
-   * the count of items, with any remaining items grouped together under an "other"
-   * category.
+   * time range. When item count exceeds the limit, extra items appear grouped under
+   * an "other" category.
    */
   limitPerGroup?: number;
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'
@@ -633,7 +1353,7 @@ export interface TimeseriesGroupIndustryParams {
   name?: Array<string>;
 
   /**
-   * Normalization method applied. Refer to
+   * Normalization method applied to the results. Refer to
    * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
    */
   normalization?: 'PERCENTAGE' | 'MIN0_MAX';
@@ -641,23 +1361,24 @@ export interface TimeseriesGroupIndustryParams {
 
 export interface TimeseriesGroupIPVersionParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -667,9 +1388,9 @@ export interface TimeseriesGroupIPVersionParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -741,14 +1462,14 @@ export interface TimeseriesGroupIPVersionParams {
   httpVersion?: Array<'HTTPv1' | 'HTTPv2' | 'HTTPv3'>;
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'
@@ -766,7 +1487,7 @@ export interface TimeseriesGroupIPVersionParams {
   name?: Array<string>;
 
   /**
-   * Normalization method applied. Refer to
+   * Normalization method applied to the results. Refer to
    * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
    */
   normalization?: 'PERCENTAGE' | 'MIN0_MAX';
@@ -774,23 +1495,24 @@ export interface TimeseriesGroupIPVersionParams {
 
 export interface TimeseriesGroupManagedRulesParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -800,9 +1522,9 @@ export interface TimeseriesGroupManagedRulesParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -880,21 +1602,20 @@ export interface TimeseriesGroupManagedRulesParams {
 
   /**
    * Limits the number of objects per group to the top items within the specified
-   * time range. If there are more items than the limit, the response will include
-   * the count of items, with any remaining items grouped together under an "other"
-   * category.
+   * time range. When item count exceeds the limit, extra items appear grouped under
+   * an "other" category.
    */
   limitPerGroup?: number;
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'
@@ -912,7 +1633,7 @@ export interface TimeseriesGroupManagedRulesParams {
   name?: Array<string>;
 
   /**
-   * Normalization method applied. Refer to
+   * Normalization method applied to the results. Refer to
    * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
    */
   normalization?: 'PERCENTAGE' | 'MIN0_MAX';
@@ -920,23 +1641,24 @@ export interface TimeseriesGroupManagedRulesParams {
 
 export interface TimeseriesGroupMitigationProductParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -946,9 +1668,9 @@ export interface TimeseriesGroupMitigationProductParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -1026,16 +1748,15 @@ export interface TimeseriesGroupMitigationProductParams {
 
   /**
    * Limits the number of objects per group to the top items within the specified
-   * time range. If there are more items than the limit, the response will include
-   * the count of items, with any remaining items grouped together under an "other"
-   * category.
+   * time range. When item count exceeds the limit, extra items appear grouped under
+   * an "other" category.
    */
   limitPerGroup?: number;
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
@@ -1045,7 +1766,7 @@ export interface TimeseriesGroupMitigationProductParams {
   name?: Array<string>;
 
   /**
-   * Normalization method applied. Refer to
+   * Normalization method applied to the results. Refer to
    * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
    */
   normalization?: 'PERCENTAGE' | 'MIN0_MAX';
@@ -1053,23 +1774,24 @@ export interface TimeseriesGroupMitigationProductParams {
 
 export interface TimeseriesGroupVerticalParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -1079,9 +1801,9 @@ export interface TimeseriesGroupVerticalParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -1159,21 +1881,20 @@ export interface TimeseriesGroupVerticalParams {
 
   /**
    * Limits the number of objects per group to the top items within the specified
-   * time range. If there are more items than the limit, the response will include
-   * the count of items, with any remaining items grouped together under an "other"
-   * category.
+   * time range. When item count exceeds the limit, extra items appear grouped under
+   * an "other" category.
    */
   limitPerGroup?: number;
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'
@@ -1191,7 +1912,7 @@ export interface TimeseriesGroupVerticalParams {
   name?: Array<string>;
 
   /**
-   * Normalization method applied. Refer to
+   * Normalization method applied to the results. Refer to
    * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
    */
   normalization?: 'PERCENTAGE' | 'MIN0_MAX';

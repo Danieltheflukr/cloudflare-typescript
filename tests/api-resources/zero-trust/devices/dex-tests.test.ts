@@ -12,7 +12,7 @@ const client = new Cloudflare({
 describe('resource dexTests', () => {
   test('create: only required params', async () => {
     const responsePromise = client.zeroTrust.devices.dexTests.create({
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
       data: {},
       enabled: true,
       interval: '30m',
@@ -29,7 +29,7 @@ describe('resource dexTests', () => {
 
   test('create: required and optional params', async () => {
     const response = await client.zeroTrust.devices.dexTests.create({
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
       data: { host: 'https://dash.cloudflare.com', kind: 'http', method: 'GET' },
       enabled: true,
       interval: '30m',
@@ -42,7 +42,7 @@ describe('resource dexTests', () => {
 
   test('update: only required params', async () => {
     const responsePromise = client.zeroTrust.devices.dexTests.update('f174e90a-fafe-4643-bbbc-4a0ed4fc8415', {
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
       data: {},
       enabled: true,
       interval: '30m',
@@ -59,7 +59,7 @@ describe('resource dexTests', () => {
 
   test('update: required and optional params', async () => {
     const response = await client.zeroTrust.devices.dexTests.update('f174e90a-fafe-4643-bbbc-4a0ed4fc8415', {
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
       data: { host: 'https://dash.cloudflare.com', kind: 'http', method: 'GET' },
       enabled: true,
       interval: '30m',
@@ -72,7 +72,7 @@ describe('resource dexTests', () => {
 
   test('list: only required params', async () => {
     const responsePromise = client.zeroTrust.devices.dexTests.list({
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -85,13 +85,13 @@ describe('resource dexTests', () => {
 
   test('list: required and optional params', async () => {
     const response = await client.zeroTrust.devices.dexTests.list({
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
     });
   });
 
   test('delete: only required params', async () => {
     const responsePromise = client.zeroTrust.devices.dexTests.delete('f174e90a-fafe-4643-bbbc-4a0ed4fc8415', {
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -104,13 +104,13 @@ describe('resource dexTests', () => {
 
   test('delete: required and optional params', async () => {
     const response = await client.zeroTrust.devices.dexTests.delete('f174e90a-fafe-4643-bbbc-4a0ed4fc8415', {
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
     });
   });
 
   test('get: only required params', async () => {
     const responsePromise = client.zeroTrust.devices.dexTests.get('372e67954025e0ba6aaa6d586b9e0b59', {
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -123,7 +123,7 @@ describe('resource dexTests', () => {
 
   test('get: required and optional params', async () => {
     const response = await client.zeroTrust.devices.dexTests.get('372e67954025e0ba6aaa6d586b9e0b59', {
-      account_id: '699d98642c564d2e855e9661899b7252',
+      account_id: '01a7362d577a6c3019a474fd6f485823',
     });
   });
 });

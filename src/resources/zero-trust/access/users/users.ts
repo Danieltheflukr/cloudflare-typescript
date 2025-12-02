@@ -20,7 +20,7 @@ import {
 } from './failed-logins';
 import * as LastSeenIdentityAPI from './last-seen-identity';
 import { Identity, LastSeenIdentity, LastSeenIdentityGetParams } from './last-seen-identity';
-import { SinglePage } from '../../../../pagination';
+import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../../../pagination';
 
 export class Users extends APIResource {
   activeSessions: ActiveSessionsAPI.ActiveSessions = new ActiveSessionsAPI.ActiveSessions(this._client);
@@ -31,22 +31,33 @@ export class Users extends APIResource {
 
   /**
    * Gets a list of users for an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const userListResponse of client.zeroTrust.access.users.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: UserListParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<UserListResponsesSinglePage, UserListResponse> {
+  ): Core.PagePromise<UserListResponsesV4PagePaginationArray, UserListResponse> {
     const { account_id, ...query } = params;
-    return this._client.getAPIList(`/accounts/${account_id}/access/users`, UserListResponsesSinglePage, {
-      query,
-      ...options,
-    });
+    return this._client.getAPIList(
+      `/accounts/${account_id}/access/users`,
+      UserListResponsesV4PagePaginationArray,
+      { query, ...options },
+    );
   }
 }
 
-export class UserListResponsesSinglePage extends SinglePage<UserListResponse> {}
+export class UserListResponsesV4PagePaginationArray extends V4PagePaginationArray<UserListResponse> {}
 
-export class AccessUsersSinglePage extends SinglePage<AccessUser> {}
+export class AccessUsersV4PagePaginationArray extends V4PagePaginationArray<AccessUser> {}
 
 export interface AccessUser {
   /**
@@ -119,7 +130,7 @@ export namespace AccessUser {
 
 export interface UserListResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 
@@ -168,9 +179,9 @@ export interface UserListResponse {
   updated_at?: string;
 }
 
-export interface UserListParams {
+export interface UserListParams extends V4PagePaginationArrayParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -190,7 +201,7 @@ export interface UserListParams {
   search?: string;
 }
 
-Users.UserListResponsesSinglePage = UserListResponsesSinglePage;
+Users.UserListResponsesV4PagePaginationArray = UserListResponsesV4PagePaginationArray;
 Users.ActiveSessions = ActiveSessions;
 Users.ActiveSessionListResponsesSinglePage = ActiveSessionListResponsesSinglePage;
 Users.LastSeenIdentity = LastSeenIdentity;
@@ -201,7 +212,7 @@ export declare namespace Users {
   export {
     type AccessUser as AccessUser,
     type UserListResponse as UserListResponse,
-    UserListResponsesSinglePage as UserListResponsesSinglePage,
+    UserListResponsesV4PagePaginationArray as UserListResponsesV4PagePaginationArray,
     type UserListParams as UserListParams,
   };
 

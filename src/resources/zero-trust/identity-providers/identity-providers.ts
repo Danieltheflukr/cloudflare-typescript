@@ -7,13 +7,24 @@ import * as IdentityProvidersAPI from './identity-providers';
 import * as SCIMAPI from './scim/scim';
 import { SCIM } from './scim/scim';
 import { CloudflareError } from '../../../error';
-import { SinglePage } from '../../../pagination';
+import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../../pagination';
 
 export class IdentityProviders extends APIResource {
   scim: SCIMAPI.SCIM = new SCIMAPI.SCIM(this._client);
 
   /**
    * Adds a new identity provider to Access.
+   *
+   * @example
+   * ```ts
+   * const identityProvider =
+   *   await client.zeroTrust.identityProviders.create({
+   *     config: {},
+   *     name: 'Widget Corps IDP',
+   *     type: 'onetimepin',
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   create(
     params: IdentityProviderCreateParams,
@@ -46,6 +57,20 @@ export class IdentityProviders extends APIResource {
 
   /**
    * Updates a configured identity provider.
+   *
+   * @example
+   * ```ts
+   * const identityProvider =
+   *   await client.zeroTrust.identityProviders.update(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     {
+   *       config: {},
+   *       name: 'Widget Corps IDP',
+   *       type: 'onetimepin',
+   *       account_id: 'account_id',
+   *     },
+   *   );
+   * ```
    */
   update(
     identityProviderId: string,
@@ -79,18 +104,28 @@ export class IdentityProviders extends APIResource {
 
   /**
    * Lists all configured identity providers.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const identityProviderListResponse of client.zeroTrust.identityProviders.list(
+   *   { account_id: 'account_id' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params?: IdentityProviderListParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<IdentityProviderListResponsesSinglePage, IdentityProviderListResponse>;
+  ): Core.PagePromise<IdentityProviderListResponsesV4PagePaginationArray, IdentityProviderListResponse>;
   list(
     options?: Core.RequestOptions,
-  ): Core.PagePromise<IdentityProviderListResponsesSinglePage, IdentityProviderListResponse>;
+  ): Core.PagePromise<IdentityProviderListResponsesV4PagePaginationArray, IdentityProviderListResponse>;
   list(
     params: IdentityProviderListParams | Core.RequestOptions = {},
     options?: Core.RequestOptions,
-  ): Core.PagePromise<IdentityProviderListResponsesSinglePage, IdentityProviderListResponse> {
+  ): Core.PagePromise<IdentityProviderListResponsesV4PagePaginationArray, IdentityProviderListResponse> {
     if (isRequestOptions(params)) {
       return this.list({}, params);
     }
@@ -113,13 +148,22 @@ export class IdentityProviders extends APIResource {
         };
     return this._client.getAPIList(
       `/${accountOrZone}/${accountOrZoneId}/access/identity_providers`,
-      IdentityProviderListResponsesSinglePage,
+      IdentityProviderListResponsesV4PagePaginationArray,
       { query, ...options },
     );
   }
 
   /**
    * Deletes an identity provider from Access.
+   *
+   * @example
+   * ```ts
+   * const identityProvider =
+   *   await client.zeroTrust.identityProviders.delete(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   delete(
     identityProviderId: string,
@@ -165,6 +209,15 @@ export class IdentityProviders extends APIResource {
 
   /**
    * Fetches a configured identity provider.
+   *
+   * @example
+   * ```ts
+   * const identityProvider =
+   *   await client.zeroTrust.identityProviders.get(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   get(
     identityProviderId: string,
@@ -206,7 +259,7 @@ export class IdentityProviders extends APIResource {
   }
 }
 
-export class IdentityProviderListResponsesSinglePage extends SinglePage<IdentityProviderListResponse> {}
+export class IdentityProviderListResponsesV4PagePaginationArray extends V4PagePaginationArray<IdentityProviderListResponse> {}
 
 export interface AzureAD {
   /**
@@ -229,7 +282,7 @@ export interface AzureAD {
   type: IdentityProviderType;
 
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 
@@ -441,7 +494,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -512,7 +565,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -544,7 +597,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -576,7 +629,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -637,7 +690,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -703,7 +756,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -735,7 +788,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -821,7 +874,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -892,7 +945,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -958,7 +1011,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -1024,7 +1077,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -1117,7 +1170,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -1149,7 +1202,7 @@ export namespace IdentityProvider {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2035,7 +2088,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2106,7 +2159,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2138,7 +2191,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2170,7 +2223,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2231,7 +2284,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2297,7 +2350,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2329,7 +2382,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2415,7 +2468,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2486,7 +2539,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2552,7 +2605,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2618,7 +2671,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2711,7 +2764,7 @@ export namespace IdentityProviderListResponse {
     type: IdentityProvidersAPI.IdentityProviderType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2725,7 +2778,7 @@ export namespace IdentityProviderListResponse {
 
 export interface IdentityProviderDeleteResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 }
@@ -4636,7 +4689,7 @@ export declare namespace IdentityProviderUpdateParams {
   }
 }
 
-export interface IdentityProviderListParams {
+export interface IdentityProviderListParams extends V4PagePaginationArrayParams {
   /**
    * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
    * Zone ID.
@@ -4680,7 +4733,8 @@ export interface IdentityProviderGetParams {
   zone_id?: string;
 }
 
-IdentityProviders.IdentityProviderListResponsesSinglePage = IdentityProviderListResponsesSinglePage;
+IdentityProviders.IdentityProviderListResponsesV4PagePaginationArray =
+  IdentityProviderListResponsesV4PagePaginationArray;
 IdentityProviders.SCIM = SCIM;
 
 export declare namespace IdentityProviders {
@@ -4692,7 +4746,7 @@ export declare namespace IdentityProviders {
     type IdentityProviderType as IdentityProviderType,
     type IdentityProviderListResponse as IdentityProviderListResponse,
     type IdentityProviderDeleteResponse as IdentityProviderDeleteResponse,
-    IdentityProviderListResponsesSinglePage as IdentityProviderListResponsesSinglePage,
+    IdentityProviderListResponsesV4PagePaginationArray as IdentityProviderListResponsesV4PagePaginationArray,
     type IdentityProviderCreateParams as IdentityProviderCreateParams,
     type IdentityProviderUpdateParams as IdentityProviderUpdateParams,
     type IdentityProviderListParams as IdentityProviderListParams,

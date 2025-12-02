@@ -9,6 +9,12 @@ export class TimeseriesGroups extends APIResource {
   /**
    * Retrieves the distribution of emails by ARC (Authenticated Received Chain)
    * validation over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.routing.timeseriesGroups.arc();
+   * ```
    */
   arc(
     query?: TimeseriesGroupARCParams,
@@ -33,6 +39,12 @@ export class TimeseriesGroups extends APIResource {
   /**
    * Retrieves the distribution of emails by DKIM (DomainKeys Identified Mail)
    * validation over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.routing.timeseriesGroups.dkim();
+   * ```
    */
   dkim(
     query?: TimeseriesGroupDKIMParams,
@@ -57,6 +69,12 @@ export class TimeseriesGroups extends APIResource {
   /**
    * Retrieves the distribution of emails by DMARC (Domain-based Message
    * Authentication, Reporting and Conformance) validation over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.routing.timeseriesGroups.dmarc();
+   * ```
    */
   dmarc(
     query?: TimeseriesGroupDMARCParams,
@@ -81,6 +99,12 @@ export class TimeseriesGroups extends APIResource {
   /**
    * Retrieves the distribution of emails by encryption status (encrypted vs.
    * not-encrypted) over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.routing.timeseriesGroups.encrypted();
+   * ```
    */
   encrypted(
     query?: TimeseriesGroupEncryptedParams,
@@ -104,6 +128,12 @@ export class TimeseriesGroups extends APIResource {
 
   /**
    * Retrieves the distribution of emails by IP version over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.routing.timeseriesGroups.ipVersion();
+   * ```
    */
   ipVersion(
     query?: TimeseriesGroupIPVersionParams,
@@ -128,6 +158,12 @@ export class TimeseriesGroups extends APIResource {
   /**
    * Retrieves the distribution of emails by SPF (Sender Policy Framework) validation
    * over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.email.routing.timeseriesGroups.spf();
+   * ```
    */
   spf(
     query?: TimeseriesGroupSPFParams,
@@ -151,30 +187,420 @@ export class TimeseriesGroups extends APIResource {
 }
 
 export interface TimeseriesGroupARCResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupARCResponse.Meta;
 
   serie_0: EmailAPI.RadarEmailSeries;
+}
+
+export namespace TimeseriesGroupARCResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
 }
 
 export interface TimeseriesGroupDKIMResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupDKIMResponse.Meta;
 
   serie_0: EmailAPI.RadarEmailSeries;
+}
+
+export namespace TimeseriesGroupDKIMResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
 }
 
 export interface TimeseriesGroupDMARCResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupDMARCResponse.Meta;
 
   serie_0: EmailAPI.RadarEmailSeries;
 }
 
+export namespace TimeseriesGroupDMARCResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+}
+
 export interface TimeseriesGroupEncryptedResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupEncryptedResponse.Meta;
 
   serie_0: TimeseriesGroupEncryptedResponse.Serie0;
 }
 
 export namespace TimeseriesGroupEncryptedResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     ENCRYPTED: Array<string>;
 
@@ -183,12 +609,108 @@ export namespace TimeseriesGroupEncryptedResponse {
 }
 
 export interface TimeseriesGroupIPVersionResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupIPVersionResponse.Meta;
 
   serie_0: TimeseriesGroupIPVersionResponse.Serie0;
 }
 
 export namespace TimeseriesGroupIPVersionResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+
   export interface Serie0 {
     IPv4: Array<string>;
 
@@ -197,15 +719,113 @@ export namespace TimeseriesGroupIPVersionResponse {
 }
 
 export interface TimeseriesGroupSPFResponse {
-  meta: unknown;
+  /**
+   * Metadata for the results.
+   */
+  meta: TimeseriesGroupSPFResponse.Meta;
 
   serie_0: EmailAPI.RadarEmailSeries;
 }
 
+export namespace TimeseriesGroupSPFResponse {
+  /**
+   * Metadata for the results.
+   */
+  export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
+  }
+
+  export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
+  }
+}
+
 export interface TimeseriesGroupARCParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
@@ -216,9 +836,9 @@ export interface TimeseriesGroupARCParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -266,8 +886,8 @@ export interface TimeseriesGroupARCParams {
 
 export interface TimeseriesGroupDKIMParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
@@ -283,9 +903,9 @@ export interface TimeseriesGroupDKIMParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -328,8 +948,8 @@ export interface TimeseriesGroupDKIMParams {
 
 export interface TimeseriesGroupDMARCParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
@@ -345,9 +965,9 @@ export interface TimeseriesGroupDMARCParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -389,8 +1009,8 @@ export interface TimeseriesGroupDMARCParams {
 
 export interface TimeseriesGroupEncryptedParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
@@ -406,9 +1026,9 @@ export interface TimeseriesGroupEncryptedParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -451,8 +1071,8 @@ export interface TimeseriesGroupEncryptedParams {
 
 export interface TimeseriesGroupIPVersionParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
@@ -468,9 +1088,9 @@ export interface TimeseriesGroupIPVersionParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -513,8 +1133,8 @@ export interface TimeseriesGroupIPVersionParams {
 
 export interface TimeseriesGroupSPFParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
@@ -530,9 +1150,9 @@ export interface TimeseriesGroupSPFParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 

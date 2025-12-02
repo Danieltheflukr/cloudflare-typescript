@@ -6,6 +6,14 @@ import * as Core from '../../../core';
 export class IndicatorTypes extends APIResource {
   /**
    * Lists all indicator types
+   *
+   * @example
+   * ```ts
+   * const indicatorTypes =
+   *   await client.cloudforceOne.threatEvents.indicatorTypes.list(
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   list(
     params: IndicatorTypeListParams,
@@ -30,9 +38,9 @@ export namespace IndicatorTypeListResponse {
 
 export interface IndicatorTypeListParams {
   /**
-   * Account ID
+   * Account ID.
    */
-  account_id: number;
+  account_id: string;
 }
 
 export declare namespace IndicatorTypes {

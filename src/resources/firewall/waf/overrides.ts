@@ -10,6 +10,8 @@ export class Overrides extends APIResource {
    *
    * **Note:** Applies only to the
    * [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).
+   *
+   * @deprecated
    */
   create(params: OverrideCreateParams, options?: Core.RequestOptions): Core.APIPromise<Override> {
     const { zone_id, ...body } = params;
@@ -25,6 +27,8 @@ export class Overrides extends APIResource {
    *
    * **Note:** Applies only to the
    * [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).
+   *
+   * @deprecated
    */
   update(
     overridesId: string,
@@ -45,6 +49,8 @@ export class Overrides extends APIResource {
    *
    * **Note:** Applies only to the
    * [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).
+   *
+   * @deprecated
    */
   list(
     params: OverrideListParams,
@@ -63,6 +69,8 @@ export class Overrides extends APIResource {
    *
    * **Note:** Applies only to the
    * [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).
+   *
+   * @deprecated
    */
   delete(
     overridesId: string,
@@ -83,6 +91,8 @@ export class Overrides extends APIResource {
    *
    * **Note:** Applies only to the
    * [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).
+   *
+   * @deprecated
    */
   get(
     overridesId: string,
@@ -119,10 +129,10 @@ export interface Override {
    * creating a new URI-based WAF override, you must provide a `groups` object or a
    * `rules` object.
    */
-  groups?: Record<string, unknown>;
+  groups?: { [key: string]: unknown };
 
   /**
-   * When true, indicates that the WAF package is currently paused.
+   * When true, indicates that the rule is currently paused.
    */
   paused?: boolean;
 
@@ -229,7 +239,7 @@ export interface RewriteActionParam {
  * group that this WAF rule belongs to. When creating a new URI-based WAF override,
  * you must provide a `groups` object or a `rules` object.
  */
-export type WAFRule = Record<string, 'challenge' | 'block' | 'simulate' | 'disable' | 'default'>;
+export type WAFRule = { [key: string]: 'challenge' | 'block' | 'simulate' | 'disable' | 'default' };
 
 /**
  * An object that allows you to override the action of specific WAF rules. Each key
@@ -238,7 +248,7 @@ export type WAFRule = Record<string, 'challenge' | 'block' | 'simulate' | 'disab
  * group that this WAF rule belongs to. When creating a new URI-based WAF override,
  * you must provide a `groups` object or a `rules` object.
  */
-export type WAFRuleParam = Record<string, 'challenge' | 'block' | 'simulate' | 'disable' | 'default'>;
+export type WAFRuleParam = { [key: string]: 'challenge' | 'block' | 'simulate' | 'disable' | 'default' };
 
 export interface OverrideDeleteResponse {
   /**
@@ -249,7 +259,7 @@ export interface OverrideDeleteResponse {
 
 export interface OverrideCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
 
@@ -263,12 +273,12 @@ export interface OverrideCreateParams {
 
 export interface OverrideUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
 
   /**
-   * Body param: Identifier
+   * Body param: Defines an identifier.
    */
   id: string;
 
@@ -297,21 +307,21 @@ export interface OverrideUpdateParams {
 
 export interface OverrideListParams extends V4PagePaginationArrayParams {
   /**
-   * Path param: Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
 }
 
 export interface OverrideDeleteParams {
   /**
-   * Identifier
+   * Defines an identifier.
    */
   zone_id: string;
 }
 
 export interface OverrideGetParams {
   /**
-   * Identifier
+   * Defines an identifier.
    */
   zone_id: string;
 }

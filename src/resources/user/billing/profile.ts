@@ -6,6 +6,8 @@ import * as Core from '../../../core';
 export class Profile extends APIResource {
   /**
    * Accesses your billing profile object.
+   *
+   * @deprecated
    */
   get(options?: Core.RequestOptions): Core.APIPromise<ProfileGetResponse> {
     return (

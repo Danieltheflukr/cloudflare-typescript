@@ -1,6 +1,6 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-import Cloudflare from 'cloudflare';
+import Cloudflare, { toFile } from 'cloudflare';
 import { Response } from 'node-fetch';
 
 const client = new Cloudflare({
@@ -32,12 +32,13 @@ describe('resource versions', () => {
       metadata: {
         main_module: 'worker.js',
         annotations: { 'workers/message': 'Fixed worker code.', 'workers/tag': 'workers/tag' },
-        bindings: [{ name: 'MY_ENV_VAR', type: 'ai' }],
+        bindings: [{ name: 'MY_ENV_VAR', text: 'my_data', type: 'plain_text' }],
         compatibility_date: '2021-01-01',
         compatibility_flags: ['nodejs_compat'],
         keep_bindings: ['string'],
         usage_model: 'standard',
       },
+      files: [await toFile(Buffer.from('# my file contents'), 'README.md')],
     });
   });
 

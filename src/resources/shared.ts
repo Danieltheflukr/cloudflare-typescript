@@ -141,7 +141,16 @@ export interface CloudflareTunnel {
   account_tag?: string;
 
   /**
-   * The Cloudflare Tunnel connections between your origin and Cloudflare's edge.
+   * Indicates if this is a locally or remotely configured tunnel. If `local`, manage
+   * the tunnel using a YAML file on the origin machine. If `cloudflare`, manage the
+   * tunnel on the Zero Trust dashboard.
+   */
+  config_src?: 'local' | 'cloudflare';
+
+  /**
+   * @deprecated This field will start returning an empty array. To fetch the
+   * connections of a given tunnel, please use the dedicated endpoint
+   * `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`
    */
   connections?: Array<CloudflareTunnel.Connection>;
 
@@ -179,8 +188,7 @@ export interface CloudflareTunnel {
   name?: string;
 
   /**
-   * If `true`, the tunnel can be configured remotely from the Zero Trust dashboard.
-   * If `false`, the tunnel must be configured locally on the origin machine.
+   * @deprecated Use the config_src field instead.
    */
   remote_config?: boolean;
 
@@ -263,7 +271,7 @@ export namespace ErrorData {
 
 export interface Identifier {
   /**
-   * Identifier
+   * Identifier.
    */
   id?: string;
 }
@@ -272,7 +280,7 @@ export interface LoadBalancerPreview {
   /**
    * Monitored pool IDs mapped to their respective names.
    */
-  pools?: Record<string, string>;
+  pools?: { [key: string]: string };
 
   preview_id?: string;
 }
@@ -282,6 +290,11 @@ export interface Member {
    * Membership identifier tag.
    */
   id?: string;
+
+  /**
+   * The contact email address of the user.
+   */
+  email?: string;
 
   /**
    * Access policy for the membership
@@ -334,7 +347,7 @@ export namespace Member {
      */
     export interface PermissionGroup {
       /**
-       * Identifier of the group.
+       * Identifier of the permission group.
        */
       id: string;
 
@@ -344,7 +357,7 @@ export namespace Member {
       meta?: PermissionGroup.Meta;
 
       /**
-       * Name of the group.
+       * Name of the permission group.
        */
       name?: string;
     }
@@ -365,7 +378,7 @@ export namespace Member {
      */
     export interface ResourceGroup {
       /**
-       * Identifier of the group.
+       * Identifier of the resource group.
        */
       id: string;
 
@@ -599,6 +612,16 @@ export interface ResponseInfo {
   code: number;
 
   message: string;
+
+  documentation_url?: string;
+
+  source?: ResponseInfo.Source;
+}
+
+export namespace ResponseInfo {
+  export interface Source {
+    pointer?: string;
+  }
 }
 
 export type Result = Result.UnionMember0 | Result.AaaAPIResponseCommon;
@@ -878,7 +901,7 @@ export interface TokenPolicy {
   /**
    * A list of resource names that the policy applies to.
    */
-  resources: Record<string, string>;
+  resources: { [key: string]: string } | { [key: string]: { [key: string]: string } };
 }
 
 export namespace TokenPolicy {
@@ -888,7 +911,7 @@ export namespace TokenPolicy {
    */
   export interface PermissionGroup {
     /**
-     * Identifier of the group.
+     * Identifier of the permission group.
      */
     id: string;
 
@@ -898,7 +921,7 @@ export namespace TokenPolicy {
     meta?: PermissionGroup.Meta;
 
     /**
-     * Name of the group.
+     * Name of the permission group.
      */
     name?: string;
   }
@@ -929,7 +952,7 @@ export interface TokenPolicyParam {
   /**
    * A list of resource names that the policy applies to.
    */
-  resources: Record<string, string>;
+  resources: { [key: string]: string } | { [key: string]: { [key: string]: string } };
 }
 
 export namespace TokenPolicyParam {
@@ -939,7 +962,7 @@ export namespace TokenPolicyParam {
    */
   export interface PermissionGroup {
     /**
-     * Identifier of the group.
+     * Identifier of the permission group.
      */
     id: string;
 

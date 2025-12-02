@@ -7,7 +7,6 @@ import * as CustomAPI from './custom';
 import {
   Custom,
   CustomCreateParams,
-  CustomCreateResponse,
   CustomDeleteParams,
   CustomDeleteResponse,
   CustomGetParams,
@@ -18,6 +17,9 @@ import {
 import * as PredefinedAPI from './predefined';
 import {
   Predefined,
+  PredefinedCreateParams,
+  PredefinedDeleteParams,
+  PredefinedDeleteResponse,
   PredefinedGetParams,
   PredefinedProfile as PredefinedAPIPredefinedProfile,
   PredefinedUpdateParams,
@@ -30,6 +32,16 @@ export class Profiles extends APIResource {
 
   /**
    * Lists all DLP profiles in an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const profile of client.zeroTrust.dlp.profiles.list(
+   *   { account_id: 'account_id' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: ProfileListParams,
@@ -43,7 +55,15 @@ export class Profiles extends APIResource {
   }
 
   /**
-   * Fetches a DLP profile by ID
+   * Fetches a DLP profile by ID.
+   *
+   * @example
+   * ```ts
+   * const profile = await client.zeroTrust.dlp.profiles.get(
+   *   '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *   { account_id: 'account_id' },
+   * );
+   * ```
    */
   get(profileId: string, params: ProfileGetParams, options?: Core.RequestOptions): Core.APIPromise<Profile> {
     const { account_id } = params;
@@ -58,8 +78,8 @@ export class Profiles extends APIResource {
 export class ProfilesSinglePage extends SinglePage<Profile> {}
 
 /**
- * Scan the context of predefined entries to only return matches surrounded by
- * keywords.
+ * @deprecated Scan the context of predefined entries to only return matches
+ * surrounded by keywords.
  */
 export interface ContextAwareness {
   /**
@@ -75,8 +95,8 @@ export interface ContextAwareness {
 }
 
 /**
- * Scan the context of predefined entries to only return matches surrounded by
- * keywords.
+ * @deprecated Scan the context of predefined entries to only return matches
+ * surrounded by keywords.
  */
 export interface ContextAwarenessParam {
   /**
@@ -96,7 +116,7 @@ export type Profile = Profile.CustomProfile | Profile.PredefinedProfile | Profil
 export namespace Profile {
   export interface CustomProfile {
     /**
-     * The id of the profile (uuid)
+     * The id of the profile (uuid).
      */
     id: string;
 
@@ -106,26 +126,12 @@ export namespace Profile {
     allowed_match_count: number;
 
     /**
-     * Scan the context of predefined entries to only return matches surrounded by
-     * keywords.
-     */
-    context_awareness: ProfilesAPI.ContextAwareness;
-
-    /**
-     * When the profile was created
+     * When the profile was created.
      */
     created_at: string;
 
-    entries: Array<
-      | CustomProfile.CustomEntry
-      | CustomProfile.PredefinedEntry
-      | CustomProfile.IntegrationEntry
-      | CustomProfile.ExactDataEntry
-      | CustomProfile.WordListEntry
-    >;
-
     /**
-     * The name of the profile
+     * The name of the profile.
      */
     name: string;
 
@@ -134,7 +140,7 @@ export namespace Profile {
     type: 'custom';
 
     /**
-     * When the profile was lasted updated
+     * When the profile was lasted updated.
      */
     updated_at: string;
 
@@ -143,9 +149,24 @@ export namespace Profile {
     confidence_threshold?: 'low' | 'medium' | 'high' | 'very_high';
 
     /**
-     * The description of the profile
+     * @deprecated Scan the context of predefined entries to only return matches
+     * surrounded by keywords.
+     */
+    context_awareness?: ProfilesAPI.ContextAwareness;
+
+    /**
+     * The description of the profile.
      */
     description?: string | null;
+
+    entries?: Array<
+      | CustomProfile.CustomEntry
+      | CustomProfile.PredefinedEntry
+      | CustomProfile.IntegrationEntry
+      | CustomProfile.ExactDataEntry
+      | CustomProfile.DocumentFingerprintEntry
+      | CustomProfile.WordListEntry
+    >;
   }
 
   export namespace CustomProfile {
@@ -179,20 +200,30 @@ export namespace Profile {
       type: 'predefined';
 
       profile_id?: string | null;
+
+      variant?: PredefinedEntry.Variant;
     }
 
     export namespace PredefinedEntry {
       export interface Confidence {
         /**
-         * Indicates whether this entry has AI remote service validation
+         * Indicates whether this entry has AI remote service validation.
          */
         ai_context_available: boolean;
 
         /**
          * Indicates whether this entry has any form of validation that is not an AI remote
-         * service
+         * service.
          */
         available: boolean;
+      }
+
+      export interface Variant {
+        topic_type: 'Intent' | 'Content';
+
+        type: 'PromptTopic';
+
+        description?: string | null;
       }
     }
 
@@ -215,6 +246,12 @@ export namespace Profile {
     export interface ExactDataEntry {
       id: string;
 
+      /**
+       * Only applies to custom word lists. Determines if the words should be matched in
+       * a case-sensitive manner Cannot be set to false if secret is true
+       */
+      case_sensitive: boolean;
+
       created_at: string;
 
       enabled: boolean;
@@ -224,6 +261,20 @@ export namespace Profile {
       secret: boolean;
 
       type: 'exact_data';
+
+      updated_at: string;
+    }
+
+    export interface DocumentFingerprintEntry {
+      id: string;
+
+      created_at: string;
+
+      enabled: boolean;
+
+      name: string;
+
+      type: 'document_fingerprint';
 
       updated_at: string;
     }
@@ -249,7 +300,7 @@ export namespace Profile {
 
   export interface PredefinedProfile {
     /**
-     * The id of the predefined profile (uuid)
+     * The id of the predefined profile (uuid).
      */
     id: string;
 
@@ -260,11 +311,12 @@ export namespace Profile {
       | PredefinedProfile.PredefinedEntry
       | PredefinedProfile.IntegrationEntry
       | PredefinedProfile.ExactDataEntry
+      | PredefinedProfile.DocumentFingerprintEntry
       | PredefinedProfile.WordListEntry
     >;
 
     /**
-     * The name of the predefined profile
+     * The name of the predefined profile.
      */
     name: string;
 
@@ -275,15 +327,15 @@ export namespace Profile {
     confidence_threshold?: 'low' | 'medium' | 'high' | 'very_high';
 
     /**
-     * Scan the context of predefined entries to only return matches surrounded by
-     * keywords.
+     * @deprecated Scan the context of predefined entries to only return matches
+     * surrounded by keywords.
      */
     context_awareness?: ProfilesAPI.ContextAwareness;
 
     ocr_enabled?: boolean;
 
     /**
-     * Whether this profile can be accessed by anyone
+     * Whether this profile can be accessed by anyone.
      */
     open_access?: boolean;
   }
@@ -319,20 +371,30 @@ export namespace Profile {
       type: 'predefined';
 
       profile_id?: string | null;
+
+      variant?: PredefinedEntry.Variant;
     }
 
     export namespace PredefinedEntry {
       export interface Confidence {
         /**
-         * Indicates whether this entry has AI remote service validation
+         * Indicates whether this entry has AI remote service validation.
          */
         ai_context_available: boolean;
 
         /**
          * Indicates whether this entry has any form of validation that is not an AI remote
-         * service
+         * service.
          */
         available: boolean;
+      }
+
+      export interface Variant {
+        topic_type: 'Intent' | 'Content';
+
+        type: 'PromptTopic';
+
+        description?: string | null;
       }
     }
 
@@ -355,6 +417,12 @@ export namespace Profile {
     export interface ExactDataEntry {
       id: string;
 
+      /**
+       * Only applies to custom word lists. Determines if the words should be matched in
+       * a case-sensitive manner Cannot be set to false if secret is true
+       */
+      case_sensitive: boolean;
+
       created_at: string;
 
       enabled: boolean;
@@ -364,6 +432,20 @@ export namespace Profile {
       secret: boolean;
 
       type: 'exact_data';
+
+      updated_at: string;
+    }
+
+    export interface DocumentFingerprintEntry {
+      id: string;
+
+      created_at: string;
+
+      enabled: boolean;
+
+      name: string;
+
+      type: 'document_fingerprint';
 
       updated_at: string;
     }
@@ -397,6 +479,7 @@ export namespace Profile {
       | IntegrationProfile.PredefinedEntry
       | IntegrationProfile.IntegrationEntry
       | IntegrationProfile.ExactDataEntry
+      | IntegrationProfile.DocumentFingerprintEntry
       | IntegrationProfile.WordListEntry
     >;
 
@@ -407,7 +490,7 @@ export namespace Profile {
     updated_at: string;
 
     /**
-     * The description of the profile
+     * The description of the profile.
      */
     description?: string | null;
   }
@@ -443,20 +526,30 @@ export namespace Profile {
       type: 'predefined';
 
       profile_id?: string | null;
+
+      variant?: PredefinedEntry.Variant;
     }
 
     export namespace PredefinedEntry {
       export interface Confidence {
         /**
-         * Indicates whether this entry has AI remote service validation
+         * Indicates whether this entry has AI remote service validation.
          */
         ai_context_available: boolean;
 
         /**
          * Indicates whether this entry has any form of validation that is not an AI remote
-         * service
+         * service.
          */
         available: boolean;
+      }
+
+      export interface Variant {
+        topic_type: 'Intent' | 'Content';
+
+        type: 'PromptTopic';
+
+        description?: string | null;
       }
     }
 
@@ -479,6 +572,12 @@ export namespace Profile {
     export interface ExactDataEntry {
       id: string;
 
+      /**
+       * Only applies to custom word lists. Determines if the words should be matched in
+       * a case-sensitive manner Cannot be set to false if secret is true
+       */
+      case_sensitive: boolean;
+
       created_at: string;
 
       enabled: boolean;
@@ -488,6 +587,20 @@ export namespace Profile {
       secret: boolean;
 
       type: 'exact_data';
+
+      updated_at: string;
+    }
+
+    export interface DocumentFingerprintEntry {
+      id: string;
+
+      created_at: string;
+
+      enabled: boolean;
+
+      name: string;
+
+      type: 'document_fingerprint';
 
       updated_at: string;
     }
@@ -567,7 +680,6 @@ export declare namespace Profiles {
     Custom as Custom,
     type CustomAPICustomProfile as CustomProfile,
     type Pattern as Pattern,
-    type CustomCreateResponse as CustomCreateResponse,
     type CustomDeleteResponse as CustomDeleteResponse,
     type CustomCreateParams as CustomCreateParams,
     type CustomUpdateParams as CustomUpdateParams,
@@ -578,7 +690,10 @@ export declare namespace Profiles {
   export {
     Predefined as Predefined,
     type PredefinedAPIPredefinedProfile as PredefinedProfile,
+    type PredefinedDeleteResponse as PredefinedDeleteResponse,
+    type PredefinedCreateParams as PredefinedCreateParams,
     type PredefinedUpdateParams as PredefinedUpdateParams,
+    type PredefinedDeleteParams as PredefinedDeleteParams,
     type PredefinedGetParams as PredefinedGetParams,
   };
 }

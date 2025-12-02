@@ -14,7 +14,7 @@ import {
   CAGetParams,
   CAListParams,
   CAs,
-  CAsSinglePage,
+  CAsV4PagePaginationArray,
 } from './cas';
 import * as ApplicationsPoliciesAPI from './policies';
 import {
@@ -45,12 +45,20 @@ import {
   PolicyGetResponse,
   PolicyListParams,
   PolicyListResponse,
-  PolicyListResponsesSinglePage,
+  PolicyListResponsesV4PagePaginationArray,
   PolicyUpdateParams,
   PolicyUpdateResponse,
   SAMLGroupRule,
   ServiceTokenRule,
 } from './policies';
+import * as SettingsAPI from './settings';
+import {
+  SettingEditParams,
+  SettingEditResponse,
+  SettingUpdateParams,
+  SettingUpdateResponse,
+  Settings,
+} from './settings';
 import * as UserPolicyChecksAPI from './user-policy-checks';
 import {
   UserPolicyCheckGeo,
@@ -67,7 +75,7 @@ import {
   PolicyTests,
 } from './policy-tests/policy-tests';
 import { CloudflareError } from '../../../../error';
-import { SinglePage } from '../../../../pagination';
+import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../../../pagination';
 
 export class Applications extends APIResource {
   cas: CAsAPI.CAs = new CAsAPI.CAs(this._client);
@@ -76,9 +84,20 @@ export class Applications extends APIResource {
   );
   policies: ApplicationsPoliciesAPI.Policies = new ApplicationsPoliciesAPI.Policies(this._client);
   policyTests: PolicyTestsAPI.PolicyTests = new PolicyTestsAPI.PolicyTests(this._client);
+  settings: SettingsAPI.Settings = new SettingsAPI.Settings(this._client);
 
   /**
    * Adds a new application to Access.
+   *
+   * @example
+   * ```ts
+   * const application =
+   *   await client.zeroTrust.access.applications.create({
+   *     domain: 'test.example.com/admin',
+   *     type: 'self_hosted',
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   create(
     params: ApplicationCreateParams,
@@ -111,6 +130,19 @@ export class Applications extends APIResource {
 
   /**
    * Updates an Access application.
+   *
+   * @example
+   * ```ts
+   * const application =
+   *   await client.zeroTrust.access.applications.update(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     {
+   *       domain: 'test.example.com/admin',
+   *       type: 'self_hosted',
+   *       account_id: 'account_id',
+   *     },
+   *   );
+   * ```
    */
   update(
     appId: AppIDParam,
@@ -144,18 +176,28 @@ export class Applications extends APIResource {
 
   /**
    * Lists all Access applications in an account or zone.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const applicationListResponse of client.zeroTrust.access.applications.list(
+   *   { account_id: 'account_id' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params?: ApplicationListParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<ApplicationListResponsesSinglePage, ApplicationListResponse>;
+  ): Core.PagePromise<ApplicationListResponsesV4PagePaginationArray, ApplicationListResponse>;
   list(
     options?: Core.RequestOptions,
-  ): Core.PagePromise<ApplicationListResponsesSinglePage, ApplicationListResponse>;
+  ): Core.PagePromise<ApplicationListResponsesV4PagePaginationArray, ApplicationListResponse>;
   list(
     params: ApplicationListParams | Core.RequestOptions = {},
     options?: Core.RequestOptions,
-  ): Core.PagePromise<ApplicationListResponsesSinglePage, ApplicationListResponse> {
+  ): Core.PagePromise<ApplicationListResponsesV4PagePaginationArray, ApplicationListResponse> {
     if (isRequestOptions(params)) {
       return this.list({}, params);
     }
@@ -178,13 +220,22 @@ export class Applications extends APIResource {
         };
     return this._client.getAPIList(
       `/${accountOrZone}/${accountOrZoneId}/access/apps`,
-      ApplicationListResponsesSinglePage,
+      ApplicationListResponsesV4PagePaginationArray,
       { query, ...options },
     );
   }
 
   /**
    * Deletes an application from Access.
+   *
+   * @example
+   * ```ts
+   * const application =
+   *   await client.zeroTrust.access.applications.delete(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   delete(
     appId: AppIDParam,
@@ -227,6 +278,15 @@ export class Applications extends APIResource {
 
   /**
    * Fetches information about an Access application.
+   *
+   * @example
+   * ```ts
+   * const application =
+   *   await client.zeroTrust.access.applications.get(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   get(
     appId: AppIDParam,
@@ -269,6 +329,15 @@ export class Applications extends APIResource {
 
   /**
    * Revokes all tokens issued for an application.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.zeroTrust.access.applications.revokeTokens(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   revokeTokens(
     appId: AppIDParam,
@@ -313,7 +382,7 @@ export class Applications extends APIResource {
   }
 }
 
-export class ApplicationListResponsesSinglePage extends SinglePage<ApplicationListResponse> {}
+export class ApplicationListResponsesV4PagePaginationArray extends V4PagePaginationArray<ApplicationListResponse> {}
 
 export type AllowedHeaders = string;
 
@@ -356,12 +425,12 @@ export type AllowedOrigins = string;
 export type AllowedOriginsParam = string;
 
 /**
- * Identifier
+ * Identifier.
  */
 export type AppID = string;
 
 /**
- * Identifier
+ * Identifier.
  */
 export type AppIDParam = string;
 
@@ -388,9 +457,14 @@ export namespace Application {
     type: string;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -537,7 +611,7 @@ export namespace Application {
 
   export interface SaaSApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -683,7 +757,7 @@ export namespace Application {
           /**
            * A mapping from IdP ID to attribute name.
            */
-          name_by_idp?: Record<string, string>;
+          name_by_idp?: { [key: string]: string };
         }
       }
     }
@@ -844,9 +918,14 @@ export namespace Application {
     type: string;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -1003,9 +1082,14 @@ export namespace Application {
     type: string;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -1157,7 +1241,7 @@ export namespace Application {
     type: 'self_hosted' | 'saas' | 'ssh' | 'vnc' | 'app_launcher' | 'warp' | 'biso' | 'bookmark' | 'dash_sso';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -1213,7 +1297,7 @@ export namespace Application {
     type: 'self_hosted' | 'saas' | 'ssh' | 'vnc' | 'app_launcher' | 'warp' | 'biso' | 'bookmark' | 'dash_sso';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -1269,7 +1353,7 @@ export namespace Application {
     type: 'self_hosted' | 'saas' | 'ssh' | 'vnc' | 'app_launcher' | 'warp' | 'biso' | 'bookmark' | 'dash_sso';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -1330,7 +1414,7 @@ export namespace Application {
     type: string;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -1733,8 +1817,6 @@ export interface OIDCSaaSApp {
    */
   client_secret?: string;
 
-  created_at?: string;
-
   custom_claims?: Array<OIDCSaaSApp.CustomClaim>;
 
   /**
@@ -1769,8 +1851,6 @@ export interface OIDCSaaSApp {
    * automatically enabled if refresh tokens are enabled
    */
   scopes?: Array<'openid' | 'groups' | 'email' | 'profile'>;
-
-  updated_at?: string;
 }
 
 export namespace OIDCSaaSApp {
@@ -1803,7 +1883,7 @@ export namespace OIDCSaaSApp {
       /**
        * A mapping from IdP ID to claim name.
        */
-      name_by_idp?: Record<string, string>;
+      name_by_idp?: { [key: string]: string };
     }
   }
 
@@ -1928,7 +2008,7 @@ export namespace OIDCSaaSAppParam {
       /**
        * A mapping from IdP ID to claim name.
        */
-      name_by_idp?: Record<string, string>;
+      name_by_idp?: { [key: string]: string };
     }
   }
 
@@ -1975,8 +2055,6 @@ export interface SAMLSaaSApp {
    * SAML assertion.
    */
   consumer_service_url?: string;
-
-  created_at?: string;
 
   custom_attributes?: Array<SAMLSaaSApp.CustomAttribute>;
 
@@ -2027,8 +2105,6 @@ export interface SAMLSaaSApp {
    * The endpoint where your SaaS application will send login requests.
    */
   sso_endpoint?: string;
-
-  updated_at?: string;
 }
 
 export namespace SAMLSaaSApp {
@@ -2522,10 +2598,10 @@ export namespace ApplicationCreateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2536,6 +2612,11 @@ export namespace ApplicationCreateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -2560,8 +2641,6 @@ export namespace ApplicationCreateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -2630,6 +2709,17 @@ export namespace ApplicationCreateResponse {
     policies?: Array<SelfHostedApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -2657,7 +2747,7 @@ export namespace ApplicationCreateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -2671,8 +2761,6 @@ export namespace ApplicationCreateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace SelfHostedApplication {
@@ -2726,12 +2814,85 @@ export namespace ApplicationCreateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -2836,7 +2997,7 @@ export namespace ApplicationCreateResponse {
 
   export interface SaaSApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -2861,8 +3022,6 @@ export namespace ApplicationCreateResponse {
      * login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
-
-    created_at?: string;
 
     /**
      * The custom pages that will be displayed when applicable for this application
@@ -2898,18 +3057,89 @@ export namespace ApplicationCreateResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export namespace SaaSApplication {
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -3022,10 +3252,21 @@ export namespace ApplicationCreateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -3036,6 +3277,11 @@ export namespace ApplicationCreateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -3060,8 +3306,6 @@ export namespace ApplicationCreateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -3130,6 +3374,17 @@ export namespace ApplicationCreateResponse {
     policies?: Array<BrowserSSHApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -3157,7 +3412,7 @@ export namespace ApplicationCreateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -3171,8 +3426,6 @@ export namespace ApplicationCreateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserSSHApplication {
@@ -3226,12 +3479,85 @@ export namespace ApplicationCreateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -3344,10 +3670,21 @@ export namespace ApplicationCreateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -3358,6 +3695,11 @@ export namespace ApplicationCreateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -3382,8 +3724,6 @@ export namespace ApplicationCreateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -3452,6 +3792,17 @@ export namespace ApplicationCreateResponse {
     policies?: Array<BrowserVNCApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -3479,7 +3830,7 @@ export namespace ApplicationCreateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -3493,8 +3844,6 @@ export namespace ApplicationCreateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserVNCApplication {
@@ -3548,12 +3897,85 @@ export namespace ApplicationCreateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -3660,10 +4082,21 @@ export namespace ApplicationCreateResponse {
     /**
      * The application type.
      */
-    type: ApplicationsAPI.ApplicationType;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -3694,7 +4127,22 @@ export namespace ApplicationCreateResponse {
      */
     bg_color?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
+     */
+    custom_deny_url?: string;
+
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
@@ -3725,15 +4173,9 @@ export namespace ApplicationCreateResponse {
     policies?: Array<AppLauncherApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: AppLauncherApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -3741,8 +4183,6 @@ export namespace ApplicationCreateResponse {
      * Determines when to skip the App Launcher landing page.
      */
     skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace AppLauncherApplication {
@@ -3788,111 +4228,85 @@ export namespace ApplicationCreateResponse {
       title?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -3903,7 +4317,7 @@ export namespace ApplicationCreateResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -3912,11 +4326,6 @@ export namespace ApplicationCreateResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -3930,32 +4339,27 @@ export namespace ApplicationCreateResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<DeviceEnrollmentPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: DeviceEnrollmentPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -3965,174 +4369,93 @@ export namespace ApplicationCreateResponse {
     policies?: Array<DeviceEnrollmentPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: DeviceEnrollmentPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace DeviceEnrollmentPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -4143,7 +4466,7 @@ export namespace ApplicationCreateResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -4152,11 +4475,6 @@ export namespace ApplicationCreateResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -4170,32 +4488,27 @@ export namespace ApplicationCreateResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<BrowserIsolationPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: BrowserIsolationPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -4205,180 +4518,99 @@ export namespace ApplicationCreateResponse {
     policies?: Array<BrowserIsolationPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BrowserIsolationPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace BrowserIsolationPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
   export interface BookmarkApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -4391,8 +4623,6 @@ export namespace ApplicationCreateResponse {
      * Audience tag.
      */
     aud?: string;
-
-    created_at?: string;
 
     /**
      * The URL or domain of the bookmark.
@@ -4410,12 +4640,6 @@ export namespace ApplicationCreateResponse {
     name?: string;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BookmarkApplication.SCIMConfig;
-
-    /**
      * The tags you want assigned to an application. Tags are used to filter
      * applications in the App Launcher dashboard.
      */
@@ -4424,110 +4648,7 @@ export namespace ApplicationCreateResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
-  }
-
-  export namespace BookmarkApplication {
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export interface InfrastructureApplication {
@@ -4539,7 +4660,7 @@ export namespace ApplicationCreateResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -4548,22 +4669,12 @@ export namespace ApplicationCreateResponse {
      */
     aud?: string;
 
-    created_at?: string;
-
     /**
      * The name of the application.
      */
     name?: string;
 
     policies?: Array<InfrastructureApplication.Policy>;
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: InfrastructureApplication.SCIMConfig;
-
-    updated_at?: string;
   }
 
   export namespace InfrastructureApplication {
@@ -4577,12 +4688,12 @@ export namespace ApplicationCreateResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'SSH';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     export interface Policy {
@@ -4662,105 +4773,6 @@ export namespace ApplicationCreateResponse {
         }
       }
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
   export interface BrowserRdpApplication {
@@ -4775,10 +4787,10 @@ export namespace ApplicationCreateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -4789,6 +4801,11 @@ export namespace ApplicationCreateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -4813,8 +4830,6 @@ export namespace ApplicationCreateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -4883,6 +4898,17 @@ export namespace ApplicationCreateResponse {
     policies?: Array<BrowserRdpApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -4910,7 +4936,7 @@ export namespace ApplicationCreateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -4924,8 +4950,6 @@ export namespace ApplicationCreateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserRdpApplication {
@@ -4939,12 +4963,12 @@ export namespace ApplicationCreateResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'RDP';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     /**
@@ -4997,12 +5021,85 @@ export namespace ApplicationCreateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -5129,10 +5226,10 @@ export namespace ApplicationUpdateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -5143,6 +5240,11 @@ export namespace ApplicationUpdateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -5167,8 +5269,6 @@ export namespace ApplicationUpdateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -5237,6 +5337,17 @@ export namespace ApplicationUpdateResponse {
     policies?: Array<SelfHostedApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -5264,7 +5375,7 @@ export namespace ApplicationUpdateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -5278,8 +5389,6 @@ export namespace ApplicationUpdateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace SelfHostedApplication {
@@ -5333,12 +5442,85 @@ export namespace ApplicationUpdateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -5443,7 +5625,7 @@ export namespace ApplicationUpdateResponse {
 
   export interface SaaSApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -5468,8 +5650,6 @@ export namespace ApplicationUpdateResponse {
      * login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
-
-    created_at?: string;
 
     /**
      * The custom pages that will be displayed when applicable for this application
@@ -5505,18 +5685,89 @@ export namespace ApplicationUpdateResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export namespace SaaSApplication {
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -5629,10 +5880,21 @@ export namespace ApplicationUpdateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -5643,6 +5905,11 @@ export namespace ApplicationUpdateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -5667,8 +5934,6 @@ export namespace ApplicationUpdateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -5737,6 +6002,17 @@ export namespace ApplicationUpdateResponse {
     policies?: Array<BrowserSSHApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -5764,7 +6040,7 @@ export namespace ApplicationUpdateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -5778,8 +6054,6 @@ export namespace ApplicationUpdateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserSSHApplication {
@@ -5833,12 +6107,85 @@ export namespace ApplicationUpdateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -5951,10 +6298,21 @@ export namespace ApplicationUpdateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -5965,6 +6323,11 @@ export namespace ApplicationUpdateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -5989,8 +6352,6 @@ export namespace ApplicationUpdateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -6059,6 +6420,17 @@ export namespace ApplicationUpdateResponse {
     policies?: Array<BrowserVNCApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -6086,7 +6458,7 @@ export namespace ApplicationUpdateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -6100,8 +6472,6 @@ export namespace ApplicationUpdateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserVNCApplication {
@@ -6155,12 +6525,85 @@ export namespace ApplicationUpdateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -6267,10 +6710,21 @@ export namespace ApplicationUpdateResponse {
     /**
      * The application type.
      */
-    type: ApplicationsAPI.ApplicationType;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -6301,7 +6755,22 @@ export namespace ApplicationUpdateResponse {
      */
     bg_color?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
+     */
+    custom_deny_url?: string;
+
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
@@ -6332,15 +6801,9 @@ export namespace ApplicationUpdateResponse {
     policies?: Array<AppLauncherApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: AppLauncherApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -6348,8 +6811,6 @@ export namespace ApplicationUpdateResponse {
      * Determines when to skip the App Launcher landing page.
      */
     skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace AppLauncherApplication {
@@ -6395,111 +6856,85 @@ export namespace ApplicationUpdateResponse {
       title?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -6510,7 +6945,7 @@ export namespace ApplicationUpdateResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -6519,11 +6954,6 @@ export namespace ApplicationUpdateResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -6537,32 +6967,27 @@ export namespace ApplicationUpdateResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<DeviceEnrollmentPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: DeviceEnrollmentPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -6572,174 +6997,93 @@ export namespace ApplicationUpdateResponse {
     policies?: Array<DeviceEnrollmentPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: DeviceEnrollmentPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace DeviceEnrollmentPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -6750,7 +7094,7 @@ export namespace ApplicationUpdateResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -6759,11 +7103,6 @@ export namespace ApplicationUpdateResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -6777,32 +7116,27 @@ export namespace ApplicationUpdateResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<BrowserIsolationPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: BrowserIsolationPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -6812,180 +7146,99 @@ export namespace ApplicationUpdateResponse {
     policies?: Array<BrowserIsolationPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BrowserIsolationPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace BrowserIsolationPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
   export interface BookmarkApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -6998,8 +7251,6 @@ export namespace ApplicationUpdateResponse {
      * Audience tag.
      */
     aud?: string;
-
-    created_at?: string;
 
     /**
      * The URL or domain of the bookmark.
@@ -7017,12 +7268,6 @@ export namespace ApplicationUpdateResponse {
     name?: string;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BookmarkApplication.SCIMConfig;
-
-    /**
      * The tags you want assigned to an application. Tags are used to filter
      * applications in the App Launcher dashboard.
      */
@@ -7031,110 +7276,7 @@ export namespace ApplicationUpdateResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
-  }
-
-  export namespace BookmarkApplication {
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export interface InfrastructureApplication {
@@ -7146,7 +7288,7 @@ export namespace ApplicationUpdateResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -7155,22 +7297,12 @@ export namespace ApplicationUpdateResponse {
      */
     aud?: string;
 
-    created_at?: string;
-
     /**
      * The name of the application.
      */
     name?: string;
 
     policies?: Array<InfrastructureApplication.Policy>;
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: InfrastructureApplication.SCIMConfig;
-
-    updated_at?: string;
   }
 
   export namespace InfrastructureApplication {
@@ -7184,12 +7316,12 @@ export namespace ApplicationUpdateResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'SSH';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     export interface Policy {
@@ -7269,105 +7401,6 @@ export namespace ApplicationUpdateResponse {
         }
       }
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
   export interface BrowserRdpApplication {
@@ -7382,10 +7415,10 @@ export namespace ApplicationUpdateResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -7396,6 +7429,11 @@ export namespace ApplicationUpdateResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -7420,8 +7458,6 @@ export namespace ApplicationUpdateResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -7490,6 +7526,17 @@ export namespace ApplicationUpdateResponse {
     policies?: Array<BrowserRdpApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -7517,7 +7564,7 @@ export namespace ApplicationUpdateResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -7531,8 +7578,6 @@ export namespace ApplicationUpdateResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserRdpApplication {
@@ -7546,12 +7591,12 @@ export namespace ApplicationUpdateResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'RDP';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     /**
@@ -7604,12 +7649,85 @@ export namespace ApplicationUpdateResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -7736,10 +7854,10 @@ export namespace ApplicationListResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -7750,6 +7868,11 @@ export namespace ApplicationListResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -7774,8 +7897,6 @@ export namespace ApplicationListResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -7844,6 +7965,17 @@ export namespace ApplicationListResponse {
     policies?: Array<SelfHostedApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -7871,7 +8003,7 @@ export namespace ApplicationListResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -7885,8 +8017,6 @@ export namespace ApplicationListResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace SelfHostedApplication {
@@ -7940,12 +8070,85 @@ export namespace ApplicationListResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -8050,7 +8253,7 @@ export namespace ApplicationListResponse {
 
   export interface SaaSApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -8075,8 +8278,6 @@ export namespace ApplicationListResponse {
      * login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
-
-    created_at?: string;
 
     /**
      * The custom pages that will be displayed when applicable for this application
@@ -8112,18 +8313,89 @@ export namespace ApplicationListResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export namespace SaaSApplication {
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -8236,10 +8508,21 @@ export namespace ApplicationListResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -8250,6 +8533,11 @@ export namespace ApplicationListResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -8274,8 +8562,6 @@ export namespace ApplicationListResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -8344,6 +8630,17 @@ export namespace ApplicationListResponse {
     policies?: Array<BrowserSSHApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -8371,7 +8668,7 @@ export namespace ApplicationListResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -8385,8 +8682,6 @@ export namespace ApplicationListResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserSSHApplication {
@@ -8440,12 +8735,85 @@ export namespace ApplicationListResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -8558,10 +8926,21 @@ export namespace ApplicationListResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -8572,6 +8951,11 @@ export namespace ApplicationListResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -8596,8 +8980,6 @@ export namespace ApplicationListResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -8666,6 +9048,17 @@ export namespace ApplicationListResponse {
     policies?: Array<BrowserVNCApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -8693,7 +9086,7 @@ export namespace ApplicationListResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -8707,8 +9100,6 @@ export namespace ApplicationListResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserVNCApplication {
@@ -8762,12 +9153,85 @@ export namespace ApplicationListResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -8874,10 +9338,21 @@ export namespace ApplicationListResponse {
     /**
      * The application type.
      */
-    type: ApplicationsAPI.ApplicationType;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -8908,7 +9383,22 @@ export namespace ApplicationListResponse {
      */
     bg_color?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
+     */
+    custom_deny_url?: string;
+
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
@@ -8939,15 +9429,9 @@ export namespace ApplicationListResponse {
     policies?: Array<AppLauncherApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: AppLauncherApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -8955,8 +9439,6 @@ export namespace ApplicationListResponse {
      * Determines when to skip the App Launcher landing page.
      */
     skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace AppLauncherApplication {
@@ -9002,111 +9484,85 @@ export namespace ApplicationListResponse {
       title?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -9117,7 +9573,7 @@ export namespace ApplicationListResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -9126,11 +9582,6 @@ export namespace ApplicationListResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -9144,32 +9595,27 @@ export namespace ApplicationListResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<DeviceEnrollmentPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: DeviceEnrollmentPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -9179,174 +9625,93 @@ export namespace ApplicationListResponse {
     policies?: Array<DeviceEnrollmentPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: DeviceEnrollmentPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace DeviceEnrollmentPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -9357,7 +9722,7 @@ export namespace ApplicationListResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -9366,11 +9731,6 @@ export namespace ApplicationListResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -9384,32 +9744,27 @@ export namespace ApplicationListResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<BrowserIsolationPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: BrowserIsolationPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -9419,180 +9774,99 @@ export namespace ApplicationListResponse {
     policies?: Array<BrowserIsolationPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BrowserIsolationPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace BrowserIsolationPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
   export interface BookmarkApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -9605,8 +9879,6 @@ export namespace ApplicationListResponse {
      * Audience tag.
      */
     aud?: string;
-
-    created_at?: string;
 
     /**
      * The URL or domain of the bookmark.
@@ -9624,12 +9896,6 @@ export namespace ApplicationListResponse {
     name?: string;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BookmarkApplication.SCIMConfig;
-
-    /**
      * The tags you want assigned to an application. Tags are used to filter
      * applications in the App Launcher dashboard.
      */
@@ -9638,110 +9904,7 @@ export namespace ApplicationListResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
-  }
-
-  export namespace BookmarkApplication {
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export interface InfrastructureApplication {
@@ -9753,7 +9916,7 @@ export namespace ApplicationListResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -9762,22 +9925,12 @@ export namespace ApplicationListResponse {
      */
     aud?: string;
 
-    created_at?: string;
-
     /**
      * The name of the application.
      */
     name?: string;
 
     policies?: Array<InfrastructureApplication.Policy>;
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: InfrastructureApplication.SCIMConfig;
-
-    updated_at?: string;
   }
 
   export namespace InfrastructureApplication {
@@ -9791,12 +9944,12 @@ export namespace ApplicationListResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'SSH';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     export interface Policy {
@@ -9876,105 +10029,6 @@ export namespace ApplicationListResponse {
         }
       }
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
   export interface BrowserRdpApplication {
@@ -9989,10 +10043,10 @@ export namespace ApplicationListResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -10003,6 +10057,11 @@ export namespace ApplicationListResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -10027,8 +10086,6 @@ export namespace ApplicationListResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -10097,6 +10154,17 @@ export namespace ApplicationListResponse {
     policies?: Array<BrowserRdpApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -10124,7 +10192,7 @@ export namespace ApplicationListResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -10138,8 +10206,6 @@ export namespace ApplicationListResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserRdpApplication {
@@ -10153,12 +10219,12 @@ export namespace ApplicationListResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'RDP';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     /**
@@ -10211,12 +10277,85 @@ export namespace ApplicationListResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -10322,7 +10461,7 @@ export namespace ApplicationListResponse {
 
 export interface ApplicationDeleteResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 }
@@ -10350,10 +10489,10 @@ export namespace ApplicationGetResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -10364,6 +10503,11 @@ export namespace ApplicationGetResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -10388,8 +10532,6 @@ export namespace ApplicationGetResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -10458,6 +10600,17 @@ export namespace ApplicationGetResponse {
     policies?: Array<SelfHostedApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -10485,7 +10638,7 @@ export namespace ApplicationGetResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -10499,8 +10652,6 @@ export namespace ApplicationGetResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace SelfHostedApplication {
@@ -10554,12 +10705,85 @@ export namespace ApplicationGetResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -10664,7 +10888,7 @@ export namespace ApplicationGetResponse {
 
   export interface SaaSApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -10689,8 +10913,6 @@ export namespace ApplicationGetResponse {
      * login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
-
-    created_at?: string;
 
     /**
      * The custom pages that will be displayed when applicable for this application
@@ -10726,18 +10948,89 @@ export namespace ApplicationGetResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export namespace SaaSApplication {
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -10850,10 +11143,21 @@ export namespace ApplicationGetResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -10864,6 +11168,11 @@ export namespace ApplicationGetResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -10888,8 +11197,6 @@ export namespace ApplicationGetResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -10958,6 +11265,17 @@ export namespace ApplicationGetResponse {
     policies?: Array<BrowserSSHApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -10985,7 +11303,7 @@ export namespace ApplicationGetResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -10999,8 +11317,6 @@ export namespace ApplicationGetResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserSSHApplication {
@@ -11054,12 +11370,85 @@ export namespace ApplicationGetResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -11172,10 +11561,21 @@ export namespace ApplicationGetResponse {
     /**
      * The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -11186,6 +11586,11 @@ export namespace ApplicationGetResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -11210,8 +11615,6 @@ export namespace ApplicationGetResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -11280,6 +11683,17 @@ export namespace ApplicationGetResponse {
     policies?: Array<BrowserVNCApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -11307,7 +11721,7 @@ export namespace ApplicationGetResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -11321,8 +11735,6 @@ export namespace ApplicationGetResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserVNCApplication {
@@ -11376,12 +11788,85 @@ export namespace ApplicationGetResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -11488,10 +11973,21 @@ export namespace ApplicationGetResponse {
     /**
      * The application type.
      */
-    type: ApplicationsAPI.ApplicationType;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -11522,7 +12018,22 @@ export namespace ApplicationGetResponse {
      */
     bg_color?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
+     */
+    custom_deny_url?: string;
+
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
@@ -11553,15 +12064,9 @@ export namespace ApplicationGetResponse {
     policies?: Array<AppLauncherApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: AppLauncherApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -11569,8 +12074,6 @@ export namespace ApplicationGetResponse {
      * Determines when to skip the App Launcher landing page.
      */
     skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace AppLauncherApplication {
@@ -11616,111 +12119,85 @@ export namespace ApplicationGetResponse {
       title?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -11731,7 +12208,7 @@ export namespace ApplicationGetResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -11740,11 +12217,6 @@ export namespace ApplicationGetResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -11758,32 +12230,27 @@ export namespace ApplicationGetResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<DeviceEnrollmentPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: DeviceEnrollmentPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -11793,174 +12260,93 @@ export namespace ApplicationGetResponse {
     policies?: Array<DeviceEnrollmentPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: DeviceEnrollmentPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace DeviceEnrollmentPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
@@ -11971,7 +12357,7 @@ export namespace ApplicationGetResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -11980,11 +12366,6 @@ export namespace ApplicationGetResponse {
      * application. Defaults to all IdPs configured in your account.
      */
     allowed_idps?: Array<ApplicationsAPI.AllowedIdPs>;
-
-    /**
-     * The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
 
     /**
      * Audience tag.
@@ -11998,32 +12379,27 @@ export namespace ApplicationGetResponse {
     auto_redirect_to_identity?: boolean;
 
     /**
-     * The background color of the App Launcher page.
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
-    created_at?: string;
+    /**
+     * The custom URL a user is redirected to when they are denied access to the
+     * application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * The custom pages that will be displayed when applicable for this application
+     */
+    custom_pages?: Array<string>;
 
     /**
      * The primary hostname and path secured by Access. This domain will be displayed
      * if the app is visible in the App Launcher.
      */
     domain?: string;
-
-    /**
-     * The links in the App Launcher footer.
-     */
-    footer_links?: Array<BrowserIsolationPermissionsApplication.FooterLink>;
-
-    /**
-     * The background color of the App Launcher header.
-     */
-    header_bg_color?: string;
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    landing_page_design?: BrowserIsolationPermissionsApplication.LandingPageDesign;
 
     /**
      * The name of the application.
@@ -12033,180 +12409,99 @@ export namespace ApplicationGetResponse {
     policies?: Array<BrowserIsolationPermissionsApplication.Policy>;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BrowserIsolationPermissionsApplication.SCIMConfig;
-
-    /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
-
-    updated_at?: string;
   }
 
   export namespace BrowserIsolationPermissionsApplication {
-    export interface FooterLink {
+    export interface Policy {
       /**
-       * The hypertext in the footer link.
+       * The UUID of the policy
        */
-      name: string;
+      id?: string;
 
       /**
-       * the hyperlink in the footer link.
+       * Administrators who can approve a temporary authentication request.
        */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
 
       /**
-       * The color of the text in the log in button on the landing page.
+       * Requires the user to request access from an administrator at the start of each
+       * session.
        */
-      button_text_color?: string;
+      approval_required?: boolean;
+
+      created_at?: string;
 
       /**
-       * The URL of the image shown on the landing page.
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
        */
-      image_url?: string;
+      decision?: ApplicationsAPI.Decision;
 
       /**
-       * The message shown on the landing page.
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
        */
-      message?: string;
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * The title shown on the landing page.
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
        */
-      title?: string;
-    }
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
 
       /**
-       * The base URI for the application's SCIM-compatible API.
+       * A custom message that will appear on the purpose justification screen.
        */
-      remote_uri: string;
+      purpose_justification_prompt?: string;
 
       /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
+       * Require users to enter a justification when they log in to the application.
        */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
+      purpose_justification_required?: boolean;
 
       /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
        */
-      deactivate_on_delete?: boolean;
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
 
       /**
-       * Whether SCIM provisioning is turned on for this application.
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
        */
-      enabled?: boolean;
+      session_duration?: string;
 
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
+      updated_at?: string;
     }
   }
 
   export interface BookmarkApplication {
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -12219,8 +12514,6 @@ export namespace ApplicationGetResponse {
      * Audience tag.
      */
     aud?: string;
-
-    created_at?: string;
 
     /**
      * The URL or domain of the bookmark.
@@ -12238,12 +12531,6 @@ export namespace ApplicationGetResponse {
     name?: string;
 
     /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: BookmarkApplication.SCIMConfig;
-
-    /**
      * The tags you want assigned to an application. Tags are used to filter
      * applications in the App Launcher dashboard.
      */
@@ -12252,110 +12539,7 @@ export namespace ApplicationGetResponse {
     /**
      * The application type.
      */
-    type?: string;
-
-    updated_at?: string;
-  }
-
-  export namespace BookmarkApplication {
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
+    type?: ApplicationsAPI.ApplicationType;
   }
 
   export interface InfrastructureApplication {
@@ -12367,7 +12551,7 @@ export namespace ApplicationGetResponse {
     type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -12376,22 +12560,12 @@ export namespace ApplicationGetResponse {
      */
     aud?: string;
 
-    created_at?: string;
-
     /**
      * The name of the application.
      */
     name?: string;
 
     policies?: Array<InfrastructureApplication.Policy>;
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    scim_config?: InfrastructureApplication.SCIMConfig;
-
-    updated_at?: string;
   }
 
   export namespace InfrastructureApplication {
@@ -12405,12 +12579,12 @@ export namespace ApplicationGetResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'SSH';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     export interface Policy {
@@ -12490,105 +12664,6 @@ export namespace ApplicationGetResponse {
         }
       }
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasic
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerToken
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMapping>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
   export interface BrowserRdpApplication {
@@ -12603,10 +12678,10 @@ export namespace ApplicationGetResponse {
     /**
      * The application type.
      */
-    type: string;
+    type: ApplicationsAPI.ApplicationType;
 
     /**
-     * UUID
+     * UUID.
      */
     id?: string;
 
@@ -12617,6 +12692,11 @@ export namespace ApplicationGetResponse {
      * authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * The identity providers your users can select when connecting to this
@@ -12641,8 +12721,6 @@ export namespace ApplicationGetResponse {
     auto_redirect_to_identity?: boolean;
 
     cors_headers?: ApplicationsAPI.CORSHeaders;
-
-    created_at?: string;
 
     /**
      * The custom error message shown to a user when they are denied access to the
@@ -12711,6 +12789,17 @@ export namespace ApplicationGetResponse {
     policies?: Array<BrowserRdpApplication.Policy>;
 
     /**
+     * Allows matching Access Service Tokens passed HTTP in a single header with this
+     * name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Sets the SameSite cookie setting, which provides increased security against CSRF
      * attacks.
      */
@@ -12738,7 +12827,7 @@ export namespace ApplicationGetResponse {
     /**
      * The amount of time that tokens issued for this application will be valid. Must
      * be in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms,
-     * s, m, h.
+     * s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -12752,8 +12841,6 @@ export namespace ApplicationGetResponse {
      * applications in the App Launcher dashboard.
      */
     tags?: Array<string>;
-
-    updated_at?: string;
   }
 
   export namespace BrowserRdpApplication {
@@ -12767,12 +12854,12 @@ export namespace ApplicationGetResponse {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'RDP';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     /**
@@ -12825,12 +12912,85 @@ export namespace ApplicationGetResponse {
       vnet_id?: string;
     }
 
-    export interface Policy extends ApplicationsAPI.ApplicationPolicy {
+    export interface Policy {
+      /**
+       * The UUID of the policy
+       */
+      id?: string;
+
+      /**
+       * Administrators who can approve a temporary authentication request.
+       */
+      approval_groups?: Array<PoliciesAPI.ApprovalGroup>;
+
+      /**
+       * Requires the user to request access from an administrator at the start of each
+       * session.
+       */
+      approval_required?: boolean;
+
+      created_at?: string;
+
+      /**
+       * The action Access will take if a user matches this policy. Infrastructure
+       * application policies can only use the Allow action.
+       */
+      decision?: ApplicationsAPI.Decision;
+
+      /**
+       * Rules evaluated with a NOT logical operator. To match the policy, a user cannot
+       * meet any of the Exclude rules.
+       */
+      exclude?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Rules evaluated with an OR logical operator. A user needs to meet only one of
+       * the Include rules.
+       */
+      include?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * Require this application to be served in an isolated browser for users matching
+       * this policy. 'Client Web Isolation' must be on for the account in order to use
+       * this feature.
+       */
+      isolation_required?: boolean;
+
+      /**
+       * The name of the Access policy.
+       */
+      name?: string;
+
       /**
        * The order of execution for this policy. Must be unique for each policy within an
        * app.
        */
       precedence?: number;
+
+      /**
+       * A custom message that will appear on the purpose justification screen.
+       */
+      purpose_justification_prompt?: string;
+
+      /**
+       * Require users to enter a justification when they log in to the application.
+       */
+      purpose_justification_required?: boolean;
+
+      /**
+       * Rules evaluated with an AND logical operator. To match the policy, a user must
+       * meet all of the Require rules.
+       */
+      require?: Array<ApplicationsPoliciesAPI.AccessRule>;
+
+      /**
+       * The amount of time that tokens issued for the application will be valid. Must be
+       * in the format `300ms` or `2h45m`. Valid time units are: ns, us (or µs), ms, s,
+       * m, h.
+       */
+      session_duration?: string;
+
+      updated_at?: string;
     }
 
     /**
@@ -12944,7 +13104,7 @@ export type ApplicationCreateParams =
   | ApplicationCreateParams.AppLauncherApplication
   | ApplicationCreateParams.DeviceEnrollmentPermissionsApplication
   | ApplicationCreateParams.BrowserIsolationPermissionsApplication
-  | ApplicationCreateParams.BookmarkApplication
+  | ApplicationCreateParams.AccessBookmarkProps
   | ApplicationCreateParams.InfrastructureApplication
   | ApplicationCreateParams.BrowserRdpApplication;
 
@@ -12959,7 +13119,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type: ApplicationTypeParam;
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -12980,6 +13140,11 @@ export declare namespace ApplicationCreateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -13077,6 +13242,17 @@ export declare namespace ApplicationCreateParams {
     policies?: Array<SelfHostedApplication.AccessAppPolicyLink | string | SelfHostedApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -13089,10 +13265,10 @@ export declare namespace ApplicationCreateParams {
     scim_config?: SelfHostedApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -13105,7 +13281,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -13409,7 +13585,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The application type.
      */
-    type?: string;
+    type?: ApplicationTypeParam;
   }
 
   export namespace SaaSApplication {
@@ -13587,7 +13763,18 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -13608,6 +13795,11 @@ export declare namespace ApplicationCreateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -13705,6 +13897,17 @@ export declare namespace ApplicationCreateParams {
     policies?: Array<BrowserSSHApplication.AccessAppPolicyLink | string | BrowserSSHApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -13717,10 +13920,10 @@ export declare namespace ApplicationCreateParams {
     scim_config?: BrowserSSHApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -13733,7 +13936,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -13974,7 +14177,18 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -13995,6 +14209,11 @@ export declare namespace ApplicationCreateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -14092,6 +14311,17 @@ export declare namespace ApplicationCreateParams {
     policies?: Array<BrowserVNCApplication.AccessAppPolicyLink | string | BrowserVNCApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -14104,10 +14334,10 @@ export declare namespace ApplicationCreateParams {
     scim_config?: BrowserVNCApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -14120,7 +14350,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -14355,7 +14585,18 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The application type.
      */
-    type: ApplicationTypeParam;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -14392,6 +14633,24 @@ export declare namespace ApplicationCreateParams {
     bg_color?: string;
 
     /**
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing identity-based rules.
+     */
+    custom_deny_url?: string;
+
+    /**
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * Body param: The custom pages that will be displayed when applicable for this
+     * application
+     */
+    custom_pages?: Array<string>;
+
+    /**
      * Body param: The links in the App Launcher footer.
      */
     footer_links?: Array<AppLauncherApplication.FooterLink>;
@@ -14417,15 +14676,9 @@ export declare namespace ApplicationCreateParams {
     >;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: AppLauncherApplication.SCIMConfig;
-
-    /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -14541,105 +14794,6 @@ export declare namespace ApplicationCreateParams {
        */
       session_duration?: string;
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
   export interface DeviceEnrollmentPermissionsApplication {
@@ -14667,36 +14821,28 @@ export declare namespace ApplicationCreateParams {
     allowed_idps?: Array<AllowedIdPsParam>;
 
     /**
-     * Body param: The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
-
-    /**
      * Body param: When set to `true`, users skip the identity provider selection step
      * during login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
 
     /**
-     * Body param: The background color of the App Launcher page.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
     /**
-     * Body param: The links in the App Launcher footer.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing non-identity rules.
      */
-    footer_links?: Array<DeviceEnrollmentPermissionsApplication.FooterLink>;
+    custom_non_identity_deny_url?: string;
 
     /**
-     * Body param: The background color of the App Launcher header.
+     * Body param: The custom pages that will be displayed when applicable for this
+     * application
      */
-    header_bg_color?: string;
-
-    /**
-     * Body param: The design of the App Launcher landing page shown to users when they
-     * log in.
-     */
-    landing_page_design?: DeviceEnrollmentPermissionsApplication.LandingPageDesign;
+    custom_pages?: Array<string>;
 
     /**
      * Body param: The policies that Access applies to the application, in ascending
@@ -14710,67 +14856,14 @@ export declare namespace ApplicationCreateParams {
     >;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: DeviceEnrollmentPermissionsApplication.SCIMConfig;
-
-    /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Body param: Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
   }
 
   export namespace DeviceEnrollmentPermissionsApplication {
-    export interface FooterLink {
-      /**
-       * The hypertext in the footer link.
-       */
-      name: string;
-
-      /**
-       * the hyperlink in the footer link.
-       */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
-
-      /**
-       * The color of the text in the log in button on the landing page.
-       */
-      button_text_color?: string;
-
-      /**
-       * The URL of the image shown on the landing page.
-       */
-      image_url?: string;
-
-      /**
-       * The message shown on the landing page.
-       */
-      message?: string;
-
-      /**
-       * The title shown on the landing page.
-       */
-      title?: string;
-    }
-
     /**
      * A JSON that links a reusable policy to an application.
      */
@@ -14833,105 +14926,6 @@ export declare namespace ApplicationCreateParams {
        * m, h.
        */
       session_duration?: string;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
     }
   }
 
@@ -14960,36 +14954,28 @@ export declare namespace ApplicationCreateParams {
     allowed_idps?: Array<AllowedIdPsParam>;
 
     /**
-     * Body param: The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
-
-    /**
      * Body param: When set to `true`, users skip the identity provider selection step
      * during login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
 
     /**
-     * Body param: The background color of the App Launcher page.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
     /**
-     * Body param: The links in the App Launcher footer.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing non-identity rules.
      */
-    footer_links?: Array<BrowserIsolationPermissionsApplication.FooterLink>;
+    custom_non_identity_deny_url?: string;
 
     /**
-     * Body param: The background color of the App Launcher header.
+     * Body param: The custom pages that will be displayed when applicable for this
+     * application
      */
-    header_bg_color?: string;
-
-    /**
-     * Body param: The design of the App Launcher landing page shown to users when they
-     * log in.
-     */
-    landing_page_design?: BrowserIsolationPermissionsApplication.LandingPageDesign;
+    custom_pages?: Array<string>;
 
     /**
      * Body param: The policies that Access applies to the application, in ascending
@@ -15003,67 +14989,14 @@ export declare namespace ApplicationCreateParams {
     >;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: BrowserIsolationPermissionsApplication.SCIMConfig;
-
-    /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Body param: Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
   }
 
   export namespace BrowserIsolationPermissionsApplication {
-    export interface FooterLink {
-      /**
-       * The hypertext in the footer link.
-       */
-      name: string;
-
-      /**
-       * the hyperlink in the footer link.
-       */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
-
-      /**
-       * The color of the text in the log in button on the landing page.
-       */
-      button_text_color?: string;
-
-      /**
-       * The URL of the image shown on the landing page.
-       */
-      image_url?: string;
-
-      /**
-       * The message shown on the landing page.
-       */
-      message?: string;
-
-      /**
-       * The title shown on the landing page.
-       */
-      title?: string;
-    }
-
     /**
      * A JSON that links a reusable policy to an application.
      */
@@ -15127,108 +15060,9 @@ export declare namespace ApplicationCreateParams {
        */
       session_duration?: string;
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
-  export interface BookmarkApplication {
+  export interface AccessBookmarkProps {
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
      * Zone ID.
@@ -15262,12 +15096,6 @@ export declare namespace ApplicationCreateParams {
     name?: string;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: BookmarkApplication.SCIMConfig;
-
-    /**
      * Body param: The tags you want assigned to an application. Tags are used to
      * filter applications in the App Launcher dashboard.
      */
@@ -15276,108 +15104,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The application type.
      */
-    type?: string;
-  }
-
-  export namespace BookmarkApplication {
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
+    type?: ApplicationTypeParam;
   }
 
   export interface InfrastructureApplication {
@@ -15425,12 +15152,12 @@ export declare namespace ApplicationCreateParams {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'SSH';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     export interface Policy {
@@ -15518,7 +15245,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type: ApplicationTypeParam;
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -15539,6 +15266,11 @@ export declare namespace ApplicationCreateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -15636,6 +15368,17 @@ export declare namespace ApplicationCreateParams {
     policies?: Array<BrowserRdpApplication.AccessAppPolicyLink | string | BrowserRdpApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -15648,10 +15391,10 @@ export declare namespace ApplicationCreateParams {
     scim_config?: BrowserRdpApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -15664,7 +15407,7 @@ export declare namespace ApplicationCreateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -15691,12 +15434,12 @@ export declare namespace ApplicationCreateParams {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'RDP';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     /**
@@ -15922,7 +15665,7 @@ export type ApplicationUpdateParams =
   | ApplicationUpdateParams.AppLauncherApplication
   | ApplicationUpdateParams.DeviceEnrollmentPermissionsApplication
   | ApplicationUpdateParams.BrowserIsolationPermissionsApplication
-  | ApplicationUpdateParams.BookmarkApplication
+  | ApplicationUpdateParams.AccessBookmarkProps
   | ApplicationUpdateParams.InfrastructureApplication
   | ApplicationUpdateParams.BrowserRdpApplication;
 
@@ -15937,7 +15680,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type: ApplicationTypeParam;
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -15958,6 +15701,11 @@ export declare namespace ApplicationUpdateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -16055,6 +15803,17 @@ export declare namespace ApplicationUpdateParams {
     policies?: Array<SelfHostedApplication.AccessAppPolicyLink | string | SelfHostedApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -16067,10 +15826,10 @@ export declare namespace ApplicationUpdateParams {
     scim_config?: SelfHostedApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -16083,7 +15842,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -16387,7 +16146,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The application type.
      */
-    type?: string;
+    type?: ApplicationTypeParam;
   }
 
   export namespace SaaSApplication {
@@ -16565,7 +16324,18 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -16586,6 +16356,11 @@ export declare namespace ApplicationUpdateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -16683,6 +16458,17 @@ export declare namespace ApplicationUpdateParams {
     policies?: Array<BrowserSSHApplication.AccessAppPolicyLink | string | BrowserSSHApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -16695,10 +16481,10 @@ export declare namespace ApplicationUpdateParams {
     scim_config?: BrowserSSHApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -16711,7 +16497,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -16952,7 +16738,18 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -16973,6 +16770,11 @@ export declare namespace ApplicationUpdateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -17070,6 +16872,17 @@ export declare namespace ApplicationUpdateParams {
     policies?: Array<BrowserVNCApplication.AccessAppPolicyLink | string | BrowserVNCApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -17082,10 +16895,10 @@ export declare namespace ApplicationUpdateParams {
     scim_config?: BrowserVNCApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -17098,7 +16911,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -17333,7 +17146,18 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The application type.
      */
-    type: ApplicationTypeParam;
+    type:
+      | 'self_hosted'
+      | 'saas'
+      | 'ssh'
+      | 'vnc'
+      | 'app_launcher'
+      | 'warp'
+      | 'biso'
+      | 'bookmark'
+      | 'dash_sso'
+      | 'infrastructure'
+      | 'rdp';
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -17370,6 +17194,24 @@ export declare namespace ApplicationUpdateParams {
     bg_color?: string;
 
     /**
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing identity-based rules.
+     */
+    custom_deny_url?: string;
+
+    /**
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing non-identity rules.
+     */
+    custom_non_identity_deny_url?: string;
+
+    /**
+     * Body param: The custom pages that will be displayed when applicable for this
+     * application
+     */
+    custom_pages?: Array<string>;
+
+    /**
      * Body param: The links in the App Launcher footer.
      */
     footer_links?: Array<AppLauncherApplication.FooterLink>;
@@ -17395,15 +17237,9 @@ export declare namespace ApplicationUpdateParams {
     >;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: AppLauncherApplication.SCIMConfig;
-
-    /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -17519,105 +17355,6 @@ export declare namespace ApplicationUpdateParams {
        */
       session_duration?: string;
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
   export interface DeviceEnrollmentPermissionsApplication {
@@ -17645,36 +17382,28 @@ export declare namespace ApplicationUpdateParams {
     allowed_idps?: Array<AllowedIdPsParam>;
 
     /**
-     * Body param: The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
-
-    /**
      * Body param: When set to `true`, users skip the identity provider selection step
      * during login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
 
     /**
-     * Body param: The background color of the App Launcher page.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
     /**
-     * Body param: The links in the App Launcher footer.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing non-identity rules.
      */
-    footer_links?: Array<DeviceEnrollmentPermissionsApplication.FooterLink>;
+    custom_non_identity_deny_url?: string;
 
     /**
-     * Body param: The background color of the App Launcher header.
+     * Body param: The custom pages that will be displayed when applicable for this
+     * application
      */
-    header_bg_color?: string;
-
-    /**
-     * Body param: The design of the App Launcher landing page shown to users when they
-     * log in.
-     */
-    landing_page_design?: DeviceEnrollmentPermissionsApplication.LandingPageDesign;
+    custom_pages?: Array<string>;
 
     /**
      * Body param: The policies that Access applies to the application, in ascending
@@ -17688,67 +17417,14 @@ export declare namespace ApplicationUpdateParams {
     >;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: DeviceEnrollmentPermissionsApplication.SCIMConfig;
-
-    /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Body param: Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
   }
 
   export namespace DeviceEnrollmentPermissionsApplication {
-    export interface FooterLink {
-      /**
-       * The hypertext in the footer link.
-       */
-      name: string;
-
-      /**
-       * the hyperlink in the footer link.
-       */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
-
-      /**
-       * The color of the text in the log in button on the landing page.
-       */
-      button_text_color?: string;
-
-      /**
-       * The URL of the image shown on the landing page.
-       */
-      image_url?: string;
-
-      /**
-       * The message shown on the landing page.
-       */
-      message?: string;
-
-      /**
-       * The title shown on the landing page.
-       */
-      title?: string;
-    }
-
     /**
      * A JSON that links a reusable policy to an application.
      */
@@ -17811,105 +17487,6 @@ export declare namespace ApplicationUpdateParams {
        * m, h.
        */
       session_duration?: string;
-    }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
     }
   }
 
@@ -17938,36 +17515,28 @@ export declare namespace ApplicationUpdateParams {
     allowed_idps?: Array<AllowedIdPsParam>;
 
     /**
-     * Body param: The image URL of the logo shown in the App Launcher header.
-     */
-    app_launcher_logo_url?: string;
-
-    /**
      * Body param: When set to `true`, users skip the identity provider selection step
      * during login. You must specify only one identity provider in allowed_idps.
      */
     auto_redirect_to_identity?: boolean;
 
     /**
-     * Body param: The background color of the App Launcher page.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing identity-based rules.
      */
-    bg_color?: string;
+    custom_deny_url?: string;
 
     /**
-     * Body param: The links in the App Launcher footer.
+     * Body param: The custom URL a user is redirected to when they are denied access
+     * to the application when failing non-identity rules.
      */
-    footer_links?: Array<BrowserIsolationPermissionsApplication.FooterLink>;
+    custom_non_identity_deny_url?: string;
 
     /**
-     * Body param: The background color of the App Launcher header.
+     * Body param: The custom pages that will be displayed when applicable for this
+     * application
      */
-    header_bg_color?: string;
-
-    /**
-     * Body param: The design of the App Launcher landing page shown to users when they
-     * log in.
-     */
-    landing_page_design?: BrowserIsolationPermissionsApplication.LandingPageDesign;
+    custom_pages?: Array<string>;
 
     /**
      * Body param: The policies that Access applies to the application, in ascending
@@ -17981,67 +17550,14 @@ export declare namespace ApplicationUpdateParams {
     >;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: BrowserIsolationPermissionsApplication.SCIMConfig;
-
-    /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
-
-    /**
-     * Body param: Determines when to skip the App Launcher landing page.
-     */
-    skip_app_launcher_login_page?: boolean;
   }
 
   export namespace BrowserIsolationPermissionsApplication {
-    export interface FooterLink {
-      /**
-       * The hypertext in the footer link.
-       */
-      name: string;
-
-      /**
-       * the hyperlink in the footer link.
-       */
-      url: string;
-    }
-
-    /**
-     * The design of the App Launcher landing page shown to users when they log in.
-     */
-    export interface LandingPageDesign {
-      /**
-       * The background color of the log in button on the landing page.
-       */
-      button_color?: string;
-
-      /**
-       * The color of the text in the log in button on the landing page.
-       */
-      button_text_color?: string;
-
-      /**
-       * The URL of the image shown on the landing page.
-       */
-      image_url?: string;
-
-      /**
-       * The message shown on the landing page.
-       */
-      message?: string;
-
-      /**
-       * The title shown on the landing page.
-       */
-      title?: string;
-    }
-
     /**
      * A JSON that links a reusable policy to an application.
      */
@@ -18105,108 +17621,9 @@ export declare namespace ApplicationUpdateParams {
        */
       session_duration?: string;
     }
-
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
   }
 
-  export interface BookmarkApplication {
+  export interface AccessBookmarkProps {
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
      * Zone ID.
@@ -18240,12 +17657,6 @@ export declare namespace ApplicationUpdateParams {
     name?: string;
 
     /**
-     * Body param: Configuration for provisioning to this application via SCIM. This is
-     * currently in closed beta.
-     */
-    scim_config?: BookmarkApplication.SCIMConfig;
-
-    /**
      * Body param: The tags you want assigned to an application. Tags are used to
      * filter applications in the App Launcher dashboard.
      */
@@ -18254,108 +17665,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The application type.
      */
-    type?: string;
-  }
-
-  export namespace BookmarkApplication {
-    /**
-     * Configuration for provisioning to this application via SCIM. This is currently
-     * in closed beta.
-     */
-    export interface SCIMConfig {
-      /**
-       * The UID of the IdP to use as the source for SCIM resources to provision to this
-       * application.
-       */
-      idp_uid: string;
-
-      /**
-       * The base URI for the application's SCIM-compatible API.
-       */
-      remote_uri: string;
-
-      /**
-       * Attributes for configuring HTTP Basic authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      authentication?:
-        | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-        | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-        | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-        | Array<
-            | ApplicationsAPI.SCIMConfigAuthenticationHTTPBasicParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOAuthBearerTokenParam
-            | ApplicationsAPI.SCIMConfigAuthenticationOauth2Param
-            | SCIMConfig.AccessSCIMConfigAuthenticationAccessServiceToken
-          >;
-
-      /**
-       * If false, propagates DELETE requests to the target application for SCIM
-       * resources. If true, sets 'active' to false on the SCIM resource. Note: Some
-       * targets do not support DELETE operations.
-       */
-      deactivate_on_delete?: boolean;
-
-      /**
-       * Whether SCIM provisioning is turned on for this application.
-       */
-      enabled?: boolean;
-
-      /**
-       * A list of mappings to apply to SCIM resources before provisioning them in this
-       * application. These can transform or filter the resources to be provisioned.
-       */
-      mappings?: Array<ApplicationsAPI.SCIMConfigMappingParam>;
-    }
-
-    export namespace SCIMConfig {
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-
-      /**
-       * Attributes for configuring Access Service Token authentication scheme for SCIM
-       * provisioning to an application.
-       */
-      export interface AccessSCIMConfigAuthenticationAccessServiceToken {
-        /**
-         * Client ID of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_id: string;
-
-        /**
-         * Client secret of the Access service token used to authenticate with the remote
-         * service.
-         */
-        client_secret: string;
-
-        /**
-         * The authentication scheme to use when making SCIM requests to this application.
-         */
-        scheme: 'access_service_token';
-      }
-    }
+    type?: ApplicationTypeParam;
   }
 
   export interface InfrastructureApplication {
@@ -18403,12 +17713,12 @@ export declare namespace ApplicationUpdateParams {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'SSH';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     export interface Policy {
@@ -18496,7 +17806,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The application type.
      */
-    type: string;
+    type: ApplicationTypeParam;
 
     /**
      * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
@@ -18517,6 +17827,11 @@ export declare namespace ApplicationUpdateParams {
      * setting for WARP authentication.
      */
     allow_authenticate_via_warp?: boolean;
+
+    /**
+     * Body param: Enables loading application content in an iFrame.
+     */
+    allow_iframe?: boolean;
 
     /**
      * Body param: The identity providers your users can select when connecting to this
@@ -18614,6 +17929,17 @@ export declare namespace ApplicationUpdateParams {
     policies?: Array<BrowserRdpApplication.AccessAppPolicyLink | string | BrowserRdpApplication.UnionMember2>;
 
     /**
+     * Body param: Allows matching Access Service Tokens passed HTTP in a single header
+     * with this name. This works as an alternative to the (CF-Access-Client-Id,
+     * CF-Access-Client-Secret) pair of headers. The header value will be interpreted
+     * as a json object similar to: { "cf-access-client-id":
+     * "88bf3b6d86161464f6509f7219099e57.access.example.com",
+     * "cf-access-client-secret":
+     * "bdd31cbc4dec990953e39163fbbb194c93313ca9f0a6e420346af9d326b1d2a5" }
+     */
+    read_service_tokens_from_header?: string;
+
+    /**
      * Body param: Sets the SameSite cookie setting, which provides increased security
      * against CSRF attacks.
      */
@@ -18626,10 +17952,10 @@ export declare namespace ApplicationUpdateParams {
     scim_config?: BrowserRdpApplication.SCIMConfig;
 
     /**
-     * Body param: List of public domains that Access will secure. This field is
-     * deprecated in favor of `destinations` and will be supported until **November
-     * 21, 2025.** If `destinations` are provided, then `self_hosted_domains` will be
-     * ignored.
+     * @deprecated Body param: List of public domains that Access will secure. This
+     * field is deprecated in favor of `destinations` and will be supported until
+     * **November 21, 2025.** If `destinations` are provided, then
+     * `self_hosted_domains` will be ignored.
      */
     self_hosted_domains?: Array<SelfHostedDomainsParam>;
 
@@ -18642,7 +17968,7 @@ export declare namespace ApplicationUpdateParams {
     /**
      * Body param: The amount of time that tokens issued for this application will be
      * valid. Must be in the format `300ms` or `2h45m`. Valid time units are: ns, us
-     * (or µs), ms, s, m, h.
+     * (or µs), ms, s, m, h. Note: unsupported for infrastructure type applications.
      */
     session_duration?: string;
 
@@ -18669,12 +17995,12 @@ export declare namespace ApplicationUpdateParams {
       /**
        * The communication protocol your application secures.
        */
-      protocol: 'ssh';
+      protocol: 'RDP';
 
       /**
        * Contains a map of target attribute keys to target attribute values.
        */
-      target_attributes: Record<string, Array<string>>;
+      target_attributes: { [key: string]: Array<string> };
     }
 
     /**
@@ -18892,7 +18218,7 @@ export declare namespace ApplicationUpdateParams {
   }
 }
 
-export interface ApplicationListParams {
+export interface ApplicationListParams extends V4PagePaginationArrayParams {
   /**
    * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
    * Zone ID.
@@ -18914,6 +18240,12 @@ export interface ApplicationListParams {
    * Query param: The domain of the app.
    */
   domain?: string;
+
+  /**
+   * Query param: True for only exact string matches against passed name/domain query
+   * parameters.
+   */
+  exact?: boolean;
 
   /**
    * Query param: The name of the app.
@@ -18962,13 +18294,14 @@ export interface ApplicationRevokeTokensParams {
   zone_id?: string;
 }
 
-Applications.ApplicationListResponsesSinglePage = ApplicationListResponsesSinglePage;
+Applications.ApplicationListResponsesV4PagePaginationArray = ApplicationListResponsesV4PagePaginationArray;
 Applications.CAs = CAs;
-Applications.CAsSinglePage = CAsSinglePage;
+Applications.CAsV4PagePaginationArray = CAsV4PagePaginationArray;
 Applications.UserPolicyChecks = UserPolicyChecks;
 Applications.Policies = Policies;
-Applications.PolicyListResponsesSinglePage = PolicyListResponsesSinglePage;
+Applications.PolicyListResponsesV4PagePaginationArray = PolicyListResponsesV4PagePaginationArray;
 Applications.PolicyTests = PolicyTests;
+Applications.Settings = Settings;
 
 export declare namespace Applications {
   export {
@@ -18997,7 +18330,7 @@ export declare namespace Applications {
     type ApplicationDeleteResponse as ApplicationDeleteResponse,
     type ApplicationGetResponse as ApplicationGetResponse,
     type ApplicationRevokeTokensResponse as ApplicationRevokeTokensResponse,
-    ApplicationListResponsesSinglePage as ApplicationListResponsesSinglePage,
+    ApplicationListResponsesV4PagePaginationArray as ApplicationListResponsesV4PagePaginationArray,
     type ApplicationCreateParams as ApplicationCreateParams,
     type ApplicationUpdateParams as ApplicationUpdateParams,
     type ApplicationListParams as ApplicationListParams,
@@ -19010,7 +18343,7 @@ export declare namespace Applications {
     CAs as CAs,
     type CA as CA,
     type CADeleteResponse as CADeleteResponse,
-    CAsSinglePage as CAsSinglePage,
+    CAsV4PagePaginationArray as CAsV4PagePaginationArray,
     type CACreateParams as CACreateParams,
     type CAListParams as CAListParams,
     type CADeleteParams as CADeleteParams,
@@ -19051,7 +18384,7 @@ export declare namespace Applications {
     type PolicyListResponse as PolicyListResponse,
     type PolicyDeleteResponse as PolicyDeleteResponse,
     type PolicyGetResponse as PolicyGetResponse,
-    PolicyListResponsesSinglePage as PolicyListResponsesSinglePage,
+    PolicyListResponsesV4PagePaginationArray as PolicyListResponsesV4PagePaginationArray,
     type PolicyCreateParams as PolicyCreateParams,
     type PolicyUpdateParams as PolicyUpdateParams,
     type PolicyListParams as PolicyListParams,
@@ -19065,5 +18398,13 @@ export declare namespace Applications {
     type PolicyTestGetResponse as PolicyTestGetResponse,
     type PolicyTestCreateParams as PolicyTestCreateParams,
     type PolicyTestGetParams as PolicyTestGetParams,
+  };
+
+  export {
+    Settings as Settings,
+    type SettingUpdateResponse as SettingUpdateResponse,
+    type SettingEditResponse as SettingEditResponse,
+    type SettingUpdateParams as SettingUpdateParams,
+    type SettingEditParams as SettingEditParams,
   };
 }

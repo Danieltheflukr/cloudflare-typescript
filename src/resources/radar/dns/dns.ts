@@ -63,6 +63,11 @@ export class DNS extends APIResource {
 
   /**
    * Retrieves normalized query volume to the 1.1.1.1 DNS resolver over time.
+   *
+   * @example
+   * ```ts
+   * const response = await client.radar.dns.timeseries();
+   * ```
    */
   timeseries(
     query?: DNSTimeseriesParams,
@@ -85,23 +90,92 @@ export class DNS extends APIResource {
 }
 
 export interface DNSTimeseriesResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: DNSTimeseriesResponse.Meta;
 
-  serie_0: DNSTimeseriesResponse.Serie0;
+  [k: string]:
+    | DNSTimeseriesResponse.unnamed_schema_ref_75bae70cf28e6bcef364b9840db3bdeb
+    | DNSTimeseriesResponse.Meta
+    | undefined;
 }
 
 export namespace DNSTimeseriesResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
-    aggInterval: string;
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
 
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -114,32 +188,14 @@ export namespace DNSTimeseriesResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
-  export interface Serie0 {
+  export interface unnamed_schema_ref_75bae70cf28e6bcef364b9840db3bdeb {
     timestamps: Array<string>;
 
     values: Array<string>;
@@ -148,23 +204,24 @@ export namespace DNSTimeseriesResponse {
 
 export interface DNSTimeseriesParams {
   /**
-   * Aggregation interval results should be returned in (for example, in 15 minutes
-   * or 1 hour intervals). Refer to
+   * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+   * Refer to
    * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
    */
   aggInterval?: '15m' | '1h' | '1d' | '1w';
 
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -174,9 +231,9 @@ export interface DNSTimeseriesParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -191,9 +248,9 @@ export interface DNSTimeseriesParams {
   format?: 'JSON' | 'CSV';
 
   /**
-   * Comma-separated list of locations (alpha-2 codes). Prefix with `-` to exclude
-   * locations from results. For example, `-US,PT` excludes results from the US, but
-   * includes results from PT.
+   * Filters results by location. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude locations from results. For example, `-US,PT`
+   * excludes results from the US, but includes results from PT.
    */
   location?: Array<string>;
 
@@ -203,7 +260,7 @@ export interface DNSTimeseriesParams {
   name?: Array<string>;
 
   /**
-   * Includes empty DNS responses (NODATA).
+   * Specifies whether the response includes empty DNS responses (NODATA).
    */
   nodata?: boolean;
 

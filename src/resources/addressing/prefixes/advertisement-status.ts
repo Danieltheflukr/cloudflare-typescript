@@ -9,6 +9,8 @@ export class AdvertisementStatus extends APIResource {
    *
    * **Deprecated:** Prefer the BGP Prefixes endpoints, which additionally allow for
    * advertising and withdrawing subnets of an IP prefix.
+   *
+   * @deprecated
    */
   edit(
     prefixId: string,
@@ -29,6 +31,8 @@ export class AdvertisementStatus extends APIResource {
    *
    * **Deprecated:** Prefer the BGP Prefixes endpoints, which additionally allow for
    * advertising and withdrawing subnets of an IP prefix.
+   *
+   * @deprecated
    */
   get(
     prefixId: string,

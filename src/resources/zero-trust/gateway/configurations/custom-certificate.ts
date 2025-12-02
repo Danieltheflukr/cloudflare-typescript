@@ -6,12 +6,14 @@ import * as ConfigurationsAPI from './configurations';
 
 export class CustomCertificate extends APIResource {
   /**
-   * Fetches the current Zero Trust certificate configuration.
+   * Retrieve the current Zero Trust certificate configuration.
+   *
+   * @deprecated
    */
   get(
     params: CustomCertificateGetParams,
     options?: Core.RequestOptions,
-  ): Core.APIPromise<ConfigurationsAPI.CustomCertificateSettings> {
+  ): Core.APIPromise<ConfigurationsAPI.CustomCertificateSettings | null> {
     const { account_id } = params;
     return this._client.get(`/accounts/${account_id}/gateway/configuration/custom_certificate`, options);
   }

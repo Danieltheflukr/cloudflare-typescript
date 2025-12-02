@@ -19,12 +19,10 @@ import { RoleGetParams, RoleListParams, Roles } from './roles';
 import * as SubscriptionsAPI from './subscriptions';
 import {
   SubscriptionCreateParams,
-  SubscriptionCreateResponse,
   SubscriptionDeleteParams,
   SubscriptionDeleteResponse,
   SubscriptionGetParams,
   SubscriptionUpdateParams,
-  SubscriptionUpdateResponse,
   Subscriptions,
 } from './subscriptions';
 import * as LogsAPI from './logs/logs';
@@ -53,6 +51,13 @@ export class Accounts extends APIResource {
 
   /**
    * Create an account (only available for tenant admins at this time)
+   *
+   * @example
+   * ```ts
+   * const account = await client.accounts.create({
+   *   name: 'name',
+   * });
+   * ```
    */
   create(body: AccountCreateParams, options?: Core.RequestOptions): Core.APIPromise<Account> {
     return (
@@ -62,6 +67,16 @@ export class Accounts extends APIResource {
 
   /**
    * Update an existing account.
+   *
+   * @example
+   * ```ts
+   * const account = await client.accounts.update({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   name: 'Demo Account',
+   *   type: 'standard',
+   * });
+   * ```
    */
   update(params: AccountUpdateParams, options?: Core.RequestOptions): Core.APIPromise<Account> {
     const { account_id, ...body } = params;
@@ -74,6 +89,14 @@ export class Accounts extends APIResource {
 
   /**
    * List all accounts you have ownership or verified access to.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const account of client.accounts.list()) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     query?: AccountListParams,
@@ -94,6 +117,13 @@ export class Accounts extends APIResource {
    * Delete a specific account (only available for tenant admins at this time). This
    * is a permanent operation that will delete any zones or other resources under the
    * account
+   *
+   * @example
+   * ```ts
+   * const account = await client.accounts.delete({
+   *   account_id: 'account_id',
+   * });
+   * ```
    */
   delete(
     params: AccountDeleteParams,
@@ -109,6 +139,13 @@ export class Accounts extends APIResource {
 
   /**
    * Get information about a specific account that you are a member of.
+   *
+   * @example
+   * ```ts
+   * const account = await client.accounts.get({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   get(params: AccountGetParams, options?: Core.RequestOptions): Core.APIPromise<Account> {
     const { account_id } = params;
@@ -130,6 +167,8 @@ export interface Account {
    * Account name
    */
   name: string;
+
+  type: 'standard' | 'enterprise';
 
   /**
    * Timestamp for the creation of the account
@@ -153,36 +192,10 @@ export namespace Account {
     abuse_contact_email?: string;
 
     /**
-     * @deprecated Specifies the default nameservers to be used for new zones added to
-     * this account.
-     *
-     * - `cloudflare.standard` for Cloudflare-branded nameservers
-     * - `custom.account` for account custom nameservers
-     * - `custom.tenant` for tenant custom nameservers
-     *
-     * See
-     * [Custom Nameservers](https://developers.cloudflare.com/dns/additional-options/custom-nameservers/)
-     * for more information.
-     *
-     * Deprecated in favor of
-     * [DNS Settings](https://developers.cloudflare.com/api/operations/dns-settings-for-an-account-update-dns-settings).
-     */
-    default_nameservers?: 'cloudflare.standard' | 'custom.account' | 'custom.tenant';
-
-    /**
      * Indicates whether membership in this account requires that Two-Factor
      * Authentication is enabled
      */
     enforce_twofactor?: boolean;
-
-    /**
-     * @deprecated Indicates whether new zones should use the account-level custom
-     * nameservers by default.
-     *
-     * Deprecated in favor of
-     * [DNS Settings](https://developers.cloudflare.com/api/operations/dns-settings-for-an-account-update-dns-settings).
-     */
-    use_account_custom_ns_by_default?: boolean;
   }
 }
 
@@ -199,11 +212,7 @@ export interface AccountCreateParams {
    */
   name: string;
 
-  /**
-   * the type of account being created. For self-serve customers, use standard. for
-   * enterprise customers, use enterprise.
-   */
-  type: 'standard' | 'enterprise';
+  type?: 'standard' | 'enterprise';
 
   /**
    * information related to the tenant unit, and optionally, an id of the unit to
@@ -234,9 +243,19 @@ export interface AccountUpdateParams {
   account_id: string;
 
   /**
+   * Body param: Identifier
+   */
+  id: string;
+
+  /**
    * Body param: Account name
    */
   name: string;
+
+  /**
+   * Body param:
+   */
+  type: 'standard' | 'enterprise';
 
   /**
    * Body param: Account settings
@@ -255,36 +274,10 @@ export namespace AccountUpdateParams {
     abuse_contact_email?: string;
 
     /**
-     * @deprecated Specifies the default nameservers to be used for new zones added to
-     * this account.
-     *
-     * - `cloudflare.standard` for Cloudflare-branded nameservers
-     * - `custom.account` for account custom nameservers
-     * - `custom.tenant` for tenant custom nameservers
-     *
-     * See
-     * [Custom Nameservers](https://developers.cloudflare.com/dns/additional-options/custom-nameservers/)
-     * for more information.
-     *
-     * Deprecated in favor of
-     * [DNS Settings](https://developers.cloudflare.com/api/operations/dns-settings-for-an-account-update-dns-settings).
-     */
-    default_nameservers?: 'cloudflare.standard' | 'custom.account' | 'custom.tenant';
-
-    /**
      * Indicates whether membership in this account requires that Two-Factor
      * Authentication is enabled
      */
     enforce_twofactor?: boolean;
-
-    /**
-     * @deprecated Indicates whether new zones should use the account-level custom
-     * nameservers by default.
-     *
-     * Deprecated in favor of
-     * [DNS Settings](https://developers.cloudflare.com/api/operations/dns-settings-for-an-account-update-dns-settings).
-     */
-    use_account_custom_ns_by_default?: boolean;
   }
 }
 
@@ -314,6 +307,7 @@ export interface AccountGetParams {
   account_id: string;
 }
 
+Accounts.AccountsV4PagePaginationArray = AccountsV4PagePaginationArray;
 Accounts.Members = Members;
 Accounts.Roles = Roles;
 Accounts.Subscriptions = Subscriptions;
@@ -321,6 +315,17 @@ Accounts.Tokens = Tokens;
 Accounts.Logs = Logs;
 
 export declare namespace Accounts {
+  export {
+    type Account as Account,
+    type AccountDeleteResponse as AccountDeleteResponse,
+    AccountsV4PagePaginationArray as AccountsV4PagePaginationArray,
+    type AccountCreateParams as AccountCreateParams,
+    type AccountUpdateParams as AccountUpdateParams,
+    type AccountListParams as AccountListParams,
+    type AccountDeleteParams as AccountDeleteParams,
+    type AccountGetParams as AccountGetParams,
+  };
+
   export {
     Members as Members,
     type Status as Status,
@@ -336,8 +341,6 @@ export declare namespace Accounts {
 
   export {
     Subscriptions as Subscriptions,
-    type SubscriptionCreateResponse as SubscriptionCreateResponse,
-    type SubscriptionUpdateResponse as SubscriptionUpdateResponse,
     type SubscriptionDeleteResponse as SubscriptionDeleteResponse,
     type SubscriptionCreateParams as SubscriptionCreateParams,
     type SubscriptionUpdateParams as SubscriptionUpdateParams,

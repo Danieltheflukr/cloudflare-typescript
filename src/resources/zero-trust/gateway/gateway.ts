@@ -136,7 +136,14 @@ export class Gateway extends APIResource {
   certificates: CertificatesAPI.Certificates = new CertificatesAPI.Certificates(this._client);
 
   /**
-   * Creates a Zero Trust account with an existing Cloudflare account.
+   * Create a Zero Trust account for an existing Cloudflare account.
+   *
+   * @example
+   * ```ts
+   * const gateway = await client.zeroTrust.gateway.create({
+   *   account_id: '699d98642c564d2e855e9661899b7252',
+   * });
+   * ```
    */
   create(params: GatewayCreateParams, options?: Core.RequestOptions): Core.APIPromise<GatewayCreateResponse> {
     const { account_id } = params;
@@ -148,7 +155,14 @@ export class Gateway extends APIResource {
   }
 
   /**
-   * Gets information about the current Zero Trust account.
+   * Retrieve information about the current Zero Trust account.
+   *
+   * @example
+   * ```ts
+   * const gateways = await client.zeroTrust.gateway.list({
+   *   account_id: '699d98642c564d2e855e9661899b7252',
+   * });
+   * ```
    */
   list(params: GatewayListParams, options?: Core.RequestOptions): Core.APIPromise<GatewayListResponse> {
     const { account_id } = params;
@@ -162,34 +176,34 @@ export class Gateway extends APIResource {
 
 export interface GatewayCreateResponse {
   /**
-   * Cloudflare account ID.
+   * Specify the Cloudflare account ID.
    */
   id?: string;
 
   /**
-   * Gateway internal ID.
+   * Specify the gateway internal ID.
    */
   gateway_tag?: string;
 
   /**
-   * The name of the provider. Usually Cloudflare.
+   * Specify the provider name (usually Cloudflare).
    */
   provider_name?: string;
 }
 
 export interface GatewayListResponse {
   /**
-   * Cloudflare account ID.
+   * Specify the Cloudflare account ID.
    */
   id?: string;
 
   /**
-   * Gateway internal ID.
+   * Specify the gateway internal ID.
    */
   gateway_tag?: string;
 
   /**
-   * The name of the provider. Usually Cloudflare.
+   * Specify the provider name (usually Cloudflare).
    */
   provider_name?: string;
 }

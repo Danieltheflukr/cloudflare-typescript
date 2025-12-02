@@ -6,6 +6,8 @@ import * as Core from '../../../core';
 export class SchemaValidation extends APIResource {
   /**
    * Updates operation-level schema validation settings on the zone
+   *
+   * @deprecated Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead.
    */
   update(
     operationId: string,
@@ -21,6 +23,8 @@ export class SchemaValidation extends APIResource {
 
   /**
    * Updates multiple operation-level schema validation settings on the zone
+   *
+   * @deprecated Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead.
    */
   edit(
     params: SchemaValidationEditParams,
@@ -37,6 +41,8 @@ export class SchemaValidation extends APIResource {
 
   /**
    * Retrieves operation-level schema validation settings on the zone
+   *
+   * @deprecated Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead.
    */
   get(
     operationId: string,
@@ -51,7 +57,7 @@ export class SchemaValidation extends APIResource {
   }
 }
 
-export type SettingsMultipleRequest = Record<string, SettingsMultipleRequest.item>;
+export type SettingsMultipleRequest = { [key: string]: SettingsMultipleRequest.item };
 
 export namespace SettingsMultipleRequest {
   /**
@@ -72,7 +78,7 @@ export namespace SettingsMultipleRequest {
   }
 }
 
-export type SettingsMultipleRequestParam = Record<string, SettingsMultipleRequestParam.item>;
+export type SettingsMultipleRequestParam = { [key: string]: SettingsMultipleRequestParam.item };
 
 export namespace SettingsMultipleRequestParam {
   /**
@@ -105,6 +111,11 @@ export interface SchemaValidationUpdateResponse {
    *   Level Schema Validation Settings for mitigation action that will be applied
    */
   mitigation_action?: 'log' | 'block' | 'none' | null;
+
+  /**
+   * UUID.
+   */
+  operation_id?: string;
 }
 
 export interface SchemaValidationGetResponse {
@@ -119,11 +130,16 @@ export interface SchemaValidationGetResponse {
    *   Level Schema Validation Settings for mitigation action that will be applied
    */
   mitigation_action?: 'log' | 'block' | 'none' | null;
+
+  /**
+   * UUID.
+   */
+  operation_id?: string;
 }
 
 export interface SchemaValidationUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -142,7 +158,7 @@ export interface SchemaValidationUpdateParams {
 
 export interface SchemaValidationEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -154,7 +170,7 @@ export interface SchemaValidationEditParams {
 
 export interface SchemaValidationGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

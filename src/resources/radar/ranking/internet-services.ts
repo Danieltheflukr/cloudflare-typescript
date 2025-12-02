@@ -7,6 +7,12 @@ import * as Core from '../../../core';
 export class InternetServices extends APIResource {
   /**
    * Retrieves the list of Internet services categories.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.ranking.internetServices.categories();
+   * ```
    */
   categories(
     query?: InternetServiceCategoriesParams,
@@ -30,6 +36,12 @@ export class InternetServices extends APIResource {
 
   /**
    * Retrieves Internet Services rank update changes over time.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.ranking.internetServices.timeseriesGroups();
+   * ```
    */
   timeseriesGroups(
     query?: InternetServiceTimeseriesGroupsParams,
@@ -53,6 +65,12 @@ export class InternetServices extends APIResource {
 
   /**
    * Retrieves top Internet services based on their rank.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.ranking.internetServices.top();
+   * ```
    */
   top(
     query?: InternetServiceTopParams,
@@ -85,17 +103,89 @@ export namespace InternetServiceCategoriesResponse {
 }
 
 export interface InternetServiceTimeseriesGroupsResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: InternetServiceTimeseriesGroupsResponse.Meta;
 
   serie_0: InternetServiceTimeseriesGroupsResponse.Serie0;
 }
 
 export namespace InternetServiceTimeseriesGroupsResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    /**
+     * Aggregation interval of the results (e.g., in 15 minutes or 1 hour intervals).
+     * Refer to
+     * [Aggregation intervals](https://developers.cloudflare.com/radar/concepts/aggregation-intervals/).
+     */
+    aggInterval: 'FIFTEEN_MINUTES' | 'ONE_HOUR' | 'ONE_DAY' | 'ONE_WEEK' | 'ONE_MONTH';
+
+    confidenceInfo: Meta.ConfidenceInfo;
+
     dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -107,10 +197,17 @@ export namespace InternetServiceTimeseriesGroupsResponse {
        */
       startTime: string;
     }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
+    }
   }
 
   export interface Serie0 {
     timestamps: Array<string>;
+
     [k: string]: Array<string | number> | Array<string> | undefined;
   }
 }
@@ -123,14 +220,85 @@ export interface InternetServiceTopResponse {
 
 export namespace InternetServiceTopResponse {
   export interface Meta {
-    top_0: Meta.Top0;
+    confidenceInfo: Meta.ConfidenceInfo | null;
+
+    dateRange: Array<Meta.DateRange>;
+
+    /**
+     * Timestamp of the last dataset update.
+     */
+    lastUpdated: string;
+
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
-    export interface Top0 {
-      date: string;
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
 
-      serviceCategory: string;
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
+    export interface DateRange {
+      /**
+       * Adjusted end of date range.
+       */
+      endTime: string;
+
+      /**
+       * Adjusted start of date range.
+       */
+      startTime: string;
+    }
+
+    export interface Unit {
+      name: string;
+
+      value: string;
     }
   }
 
@@ -143,7 +311,7 @@ export namespace InternetServiceTopResponse {
 
 export interface InternetServiceCategoriesParams {
   /**
-   * Array of dates to filter the results.
+   * Filters results by the specified array of dates.
    */
   date?: Array<string>;
 
@@ -170,9 +338,9 @@ export interface InternetServiceTimeseriesGroupsParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -204,7 +372,7 @@ export interface InternetServiceTimeseriesGroupsParams {
 
 export interface InternetServiceTopParams {
   /**
-   * Array of dates to filter the results.
+   * Filters results by the specified array of dates.
    */
   date?: Array<string>;
 

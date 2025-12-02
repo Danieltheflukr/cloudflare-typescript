@@ -7,9 +7,20 @@ import * as MagicTransitAPI from './magic-transit';
 
 export class IPSECTunnels extends APIResource {
   /**
-   * Creates new IPsec tunnels associated with an account. Use `?validate_only=true`
+   * Creates a new IPsec tunnel associated with an account. Use `?validate_only=true`
    * as an optional query parameter to only run validation without persisting
    * changes.
+   *
+   * @example
+   * ```ts
+   * const ipsecTunnel =
+   *   await client.magicTransit.ipsecTunnels.create({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     cloudflare_endpoint: '203.0.113.1',
+   *     interface_address: '192.0.2.0/31',
+   *     name: 'IPsec_1',
+   *   });
+   * ```
    */
   create(
     params: IPSECTunnelCreateParams,
@@ -34,6 +45,20 @@ export class IPSECTunnels extends APIResource {
    * Updates a specific IPsec tunnel associated with an account. Use
    * `?validate_only=true` as an optional query parameter to only run validation
    * without persisting changes.
+   *
+   * @example
+   * ```ts
+   * const ipsecTunnel =
+   *   await client.magicTransit.ipsecTunnels.update(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     {
+   *       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *       cloudflare_endpoint: '203.0.113.1',
+   *       interface_address: '192.0.2.0/31',
+   *       name: 'IPsec_1',
+   *     },
+   *   );
+   * ```
    */
   update(
     ipsecTunnelId: string,
@@ -57,6 +82,14 @@ export class IPSECTunnels extends APIResource {
 
   /**
    * Lists IPsec tunnels associated with an account.
+   *
+   * @example
+   * ```ts
+   * const ipsecTunnels =
+   *   await client.magicTransit.ipsecTunnels.list({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   list(
     params: IPSECTunnelListParams,
@@ -80,6 +113,15 @@ export class IPSECTunnels extends APIResource {
    * Disables and removes a specific static IPsec Tunnel associated with an account.
    * Use `?validate_only=true` as an optional query parameter to only run validation
    * without persisting changes.
+   *
+   * @example
+   * ```ts
+   * const ipsecTunnel =
+   *   await client.magicTransit.ipsecTunnels.delete(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   delete(
     ipsecTunnelId: string,
@@ -104,6 +146,15 @@ export class IPSECTunnels extends APIResource {
    * Update multiple IPsec tunnels associated with an account. Use
    * `?validate_only=true` as an optional query parameter to only run validation
    * without persisting changes.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.magicTransit.ipsecTunnels.bulkUpdate({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     body: {},
+   *   });
+   * ```
    */
   bulkUpdate(
     params: IPSECTunnelBulkUpdateParams,
@@ -126,6 +177,15 @@ export class IPSECTunnels extends APIResource {
 
   /**
    * Lists details for a specific IPsec tunnel.
+   *
+   * @example
+   * ```ts
+   * const ipsecTunnel =
+   *   await client.magicTransit.ipsecTunnels.get(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     ipsecTunnelId: string,
@@ -152,6 +212,18 @@ export class IPSECTunnels extends APIResource {
    * without persisting changes. After a PSK is generated, the PSK is immediately
    * persisted to Cloudflare's edge and cannot be retrieved later. Note the PSK in a
    * safe place.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.magicTransit.ipsecTunnels.pskGenerate(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     {
+   *       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *       body: {},
+   *     },
+   *   );
+   * ```
    */
   pskGenerate(
     ipsecTunnelId: string,
@@ -179,133 +251,214 @@ export interface PSKMetadata {
 }
 
 export interface IPSECTunnelCreateResponse {
-  ipsec_tunnels?: Array<IPSECTunnelCreateResponse.IPSECTunnel>;
+  /**
+   * Identifier
+   */
+  id: string;
+
+  /**
+   * The IP address assigned to the Cloudflare side of the IPsec tunnel.
+   */
+  cloudflare_endpoint: string;
+
+  /**
+   * A 31-bit prefix (/31 in CIDR notation) supporting two hosts, one for each side
+   * of the tunnel. Select the subnet from the following private IP space:
+   * 10.0.0.0–10.255.255.255, 172.16.0.0–172.31.255.255, 192.168.0.0–192.168.255.255.
+   */
+  interface_address: string;
+
+  /**
+   * The name of the IPsec tunnel. The name cannot share a name with other tunnels.
+   */
+  name: string;
+
+  /**
+   * When `true`, the tunnel can use a null-cipher (`ENCR_NULL`) in the ESP tunnel
+   * (Phase 2).
+   */
+  allow_null_cipher?: boolean;
+
+  /**
+   * True if automatic stateful return routing should be enabled for a tunnel, false
+   * otherwise.
+   */
+  automatic_return_routing?: boolean;
+
+  bgp?: IPSECTunnelCreateResponse.BGP;
+
+  bgp_status?: IPSECTunnelCreateResponse.BGPStatus;
+
+  /**
+   * The date and time the tunnel was created.
+   */
+  created_on?: string;
+
+  custom_remote_identities?: IPSECTunnelCreateResponse.CustomRemoteIdentities;
+
+  /**
+   * The IP address assigned to the customer side of the IPsec tunnel. Not required,
+   * but must be set for proactive traceroutes to work.
+   */
+  customer_endpoint?: string;
+
+  /**
+   * An optional description forthe IPsec tunnel.
+   */
+  description?: string;
+
+  health_check?: IPSECTunnelCreateResponse.HealthCheck;
+
+  /**
+   * A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space with the
+   * address being the first IP of the subnet and not same as the address of
+   * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+   * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+   */
+  interface_address6?: string;
+
+  /**
+   * The date and time the tunnel was last modified.
+   */
+  modified_on?: string;
+
+  /**
+   * The PSK metadata that includes when the PSK was generated.
+   */
+  psk_metadata?: PSKMetadata;
+
+  /**
+   * If `true`, then IPsec replay protection will be supported in the
+   * Cloudflare-to-customer direction.
+   */
+  replay_protection?: boolean;
 }
 
 export namespace IPSECTunnelCreateResponse {
-  export interface IPSECTunnel {
+  export interface BGP {
     /**
-     * The IP address assigned to the Cloudflare side of the IPsec tunnel.
+     * ASN used on the customer end of the BGP session
      */
-    cloudflare_endpoint: string;
+    customer_asn: number;
 
     /**
-     * A 31-bit prefix (/31 in CIDR notation) supporting two hosts, one for each side
-     * of the tunnel. Select the subnet from the following private IP space:
-     * 10.0.0.0–10.255.255.255, 172.16.0.0–172.31.255.255, 192.168.0.0–192.168.255.255.
+     * Prefixes in this list will be advertised to the customer device, in addition to
+     * the routes in the Magic routing table.
      */
-    interface_address: string;
+    extra_prefixes?: Array<string>;
 
     /**
-     * The name of the IPsec tunnel. The name cannot share a name with other tunnels.
+     * MD5 key to use for session authentication.
+     *
+     * Note that _this is not a security measure_. MD5 is not a valid security
+     * mechanism, and the key is not treated as a secret value. This is _only_
+     * supported for preventing misconfiguration, not for defending against malicious
+     * attacks.
+     *
+     * The MD5 key, if set, must be of non-zero length and consist only of the
+     * following types of character:
+     *
+     * - ASCII alphanumerics: `[a-zA-Z0-9]`
+     * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+     *
+     * In other words, MD5 keys may contain any printable ASCII character aside from
+     * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+     * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+     * specifying an MD5 key with one or more of these disallowed characters will be
+     * rejected.
      */
-    name: string;
-
-    /**
-     * Tunnel identifier tag.
-     */
-    id?: string;
-
-    /**
-     * When `true`, the tunnel can use a null-cipher (`ENCR_NULL`) in the ESP tunnel
-     * (Phase 2).
-     */
-    allow_null_cipher?: boolean;
-
-    /**
-     * The date and time the tunnel was created.
-     */
-    created_on?: string;
-
-    /**
-     * The IP address assigned to the customer side of the IPsec tunnel. Not required,
-     * but must be set for proactive traceroutes to work.
-     */
-    customer_endpoint?: string;
-
-    /**
-     * An optional description forthe IPsec tunnel.
-     */
-    description?: string;
-
-    health_check?: IPSECTunnel.HealthCheck;
-
-    /**
-     * The date and time the tunnel was last modified.
-     */
-    modified_on?: string;
-
-    /**
-     * The PSK metadata that includes when the PSK was generated.
-     */
-    psk_metadata?: IPSECTunnelsAPI.PSKMetadata;
-
-    /**
-     * If `true`, then IPsec replay protection will be supported in the
-     * Cloudflare-to-customer direction.
-     */
-    replay_protection?: boolean;
+    md5_key?: string;
   }
 
-  export namespace IPSECTunnel {
-    export interface HealthCheck {
+  export interface BGPStatus {
+    state: 'BGP_DOWN' | 'BGP_UP' | 'BGP_ESTABLISHING';
+
+    tcp_established: boolean;
+
+    updated_at: string;
+
+    bgp_state?: string;
+
+    cf_speaker_ip?: string;
+
+    cf_speaker_port?: number;
+
+    customer_speaker_ip?: string;
+
+    customer_speaker_port?: number;
+  }
+
+  export interface CustomRemoteIdentities {
+    /**
+     * A custom IKE ID of type FQDN that may be used to identity the IPsec tunnel. The
+     * generated IKE IDs can still be used even if this custom value is specified.
+     *
+     * Must be of the form `<custom label>.<account ID>.custom.ipsec.cloudflare.com`.
+     *
+     * This custom ID does not need to be unique. Two IPsec tunnels may have the same
+     * custom fqdn_id. However, if another IPsec tunnel has the same value then the two
+     * tunnels cannot have the same cloudflare_endpoint.
+     */
+    fqdn_id?: string;
+  }
+
+  export interface HealthCheck {
+    /**
+     * The direction of the flow of the healthcheck. Either unidirectional, where the
+     * probe comes to you via the tunnel and the result comes back to Cloudflare via
+     * the open Internet, or bidirectional where both the probe and result come and go
+     * via the tunnel.
+     */
+    direction?: 'unidirectional' | 'bidirectional';
+
+    /**
+     * Determines whether to run healthchecks for a tunnel.
+     */
+    enabled?: boolean;
+
+    /**
+     * How frequent the health check is run. The default value is `mid`.
+     */
+    rate?: MagicTransitAPI.HealthCheckRate;
+
+    /**
+     * The destination address in a request type health check. After the healthcheck is
+     * decapsulated at the customer end of the tunnel, the ICMP echo will be forwarded
+     * to this address. This field defaults to `customer_gre_endpoint address`. This
+     * field is ignored for bidirectional healthchecks as the interface_address (not
+     * assigned to the Cloudflare side of the tunnel) is used as the target. Must be in
+     * object form if the x-magic-new-hc-target header is set to true and string form
+     * if x-magic-new-hc-target is absent or set to false.
+     */
+    target?: HealthCheck.MagicHealthCheckTarget | string;
+
+    /**
+     * The type of healthcheck to run, reply or request. The default value is `reply`.
+     */
+    type?: MagicTransitAPI.HealthCheckType;
+  }
+
+  export namespace HealthCheck {
+    /**
+     * The destination address in a request type health check. After the healthcheck is
+     * decapsulated at the customer end of the tunnel, the ICMP echo will be forwarded
+     * to this address. This field defaults to `customer_gre_endpoint address`. This
+     * field is ignored for bidirectional healthchecks as the interface_address (not
+     * assigned to the Cloudflare side of the tunnel) is used as the target.
+     */
+    export interface MagicHealthCheckTarget {
       /**
-       * The direction of the flow of the healthcheck. Either unidirectional, where the
-       * probe comes to you via the tunnel and the result comes back to Cloudflare via
-       * the open Internet, or bidirectional where both the probe and result come and go
-       * via the tunnel.
+       * The effective health check target. If 'saved' is empty, then this field will be
+       * populated with the calculated default value on GET requests. Ignored in POST,
+       * PUT, and PATCH requests.
        */
-      direction?: 'unidirectional' | 'bidirectional';
+      effective?: string;
 
       /**
-       * Determines whether to run healthchecks for a tunnel.
+       * The saved health check target. Setting the value to the empty string indicates
+       * that the calculated default value will be used.
        */
-      enabled?: boolean;
-
-      /**
-       * How frequent the health check is run. The default value is `mid`.
-       */
-      rate?: MagicTransitAPI.HealthCheckRate;
-
-      /**
-       * The destination address in a request type health check. After the healthcheck is
-       * decapsulated at the customer end of the tunnel, the ICMP echo will be forwarded
-       * to this address. This field defaults to `customer_gre_endpoint address`. This
-       * field is ignored for bidirectional healthchecks as the interface_address (not
-       * assigned to the Cloudflare side of the tunnel) is used as the target. Must be in
-       * object form if the x-magic-new-hc-target header is set to true and string form
-       * if x-magic-new-hc-target is absent or set to false.
-       */
-      target?: HealthCheck.MagicHealthCheckTarget | string;
-
-      /**
-       * The type of healthcheck to run, reply or request. The default value is `reply`.
-       */
-      type?: MagicTransitAPI.HealthCheckType;
-    }
-
-    export namespace HealthCheck {
-      /**
-       * The destination address in a request type health check. After the healthcheck is
-       * decapsulated at the customer end of the tunnel, the ICMP echo will be forwarded
-       * to this address. This field defaults to `customer_gre_endpoint address`. This
-       * field is ignored for bidirectional healthchecks as the interface_address (not
-       * assigned to the Cloudflare side of the tunnel) is used as the target.
-       */
-      export interface MagicHealthCheckTarget {
-        /**
-         * The effective health check target. If 'saved' is empty, then this field will be
-         * populated with the calculated default value on GET requests. Ignored in POST,
-         * PUT, and PATCH requests.
-         */
-        effective?: string;
-
-        /**
-         * The saved health check target. Setting the value to the empty string indicates
-         * that the calculated default value will be used.
-         */
-        saved?: string;
-      }
+      saved?: string;
     }
   }
 }
@@ -319,6 +472,11 @@ export interface IPSECTunnelUpdateResponse {
 export namespace IPSECTunnelUpdateResponse {
   export interface ModifiedIPSECTunnel {
     /**
+     * Identifier
+     */
+    id: string;
+
+    /**
      * The IP address assigned to the Cloudflare side of the IPsec tunnel.
      */
     cloudflare_endpoint: string;
@@ -336,20 +494,27 @@ export namespace IPSECTunnelUpdateResponse {
     name: string;
 
     /**
-     * Tunnel identifier tag.
-     */
-    id?: string;
-
-    /**
      * When `true`, the tunnel can use a null-cipher (`ENCR_NULL`) in the ESP tunnel
      * (Phase 2).
      */
     allow_null_cipher?: boolean;
 
     /**
+     * True if automatic stateful return routing should be enabled for a tunnel, false
+     * otherwise.
+     */
+    automatic_return_routing?: boolean;
+
+    bgp?: ModifiedIPSECTunnel.BGP;
+
+    bgp_status?: ModifiedIPSECTunnel.BGPStatus;
+
+    /**
      * The date and time the tunnel was created.
      */
     created_on?: string;
+
+    custom_remote_identities?: ModifiedIPSECTunnel.CustomRemoteIdentities;
 
     /**
      * The IP address assigned to the customer side of the IPsec tunnel. Not required,
@@ -363,6 +528,14 @@ export namespace IPSECTunnelUpdateResponse {
     description?: string;
 
     health_check?: ModifiedIPSECTunnel.HealthCheck;
+
+    /**
+     * A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space with the
+     * address being the first IP of the subnet and not same as the address of
+     * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+     * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+     */
+    interface_address6?: string;
 
     /**
      * The date and time the tunnel was last modified.
@@ -382,6 +555,73 @@ export namespace IPSECTunnelUpdateResponse {
   }
 
   export namespace ModifiedIPSECTunnel {
+    export interface BGP {
+      /**
+       * ASN used on the customer end of the BGP session
+       */
+      customer_asn: number;
+
+      /**
+       * Prefixes in this list will be advertised to the customer device, in addition to
+       * the routes in the Magic routing table.
+       */
+      extra_prefixes?: Array<string>;
+
+      /**
+       * MD5 key to use for session authentication.
+       *
+       * Note that _this is not a security measure_. MD5 is not a valid security
+       * mechanism, and the key is not treated as a secret value. This is _only_
+       * supported for preventing misconfiguration, not for defending against malicious
+       * attacks.
+       *
+       * The MD5 key, if set, must be of non-zero length and consist only of the
+       * following types of character:
+       *
+       * - ASCII alphanumerics: `[a-zA-Z0-9]`
+       * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+       *
+       * In other words, MD5 keys may contain any printable ASCII character aside from
+       * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+       * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+       * specifying an MD5 key with one or more of these disallowed characters will be
+       * rejected.
+       */
+      md5_key?: string;
+    }
+
+    export interface BGPStatus {
+      state: 'BGP_DOWN' | 'BGP_UP' | 'BGP_ESTABLISHING';
+
+      tcp_established: boolean;
+
+      updated_at: string;
+
+      bgp_state?: string;
+
+      cf_speaker_ip?: string;
+
+      cf_speaker_port?: number;
+
+      customer_speaker_ip?: string;
+
+      customer_speaker_port?: number;
+    }
+
+    export interface CustomRemoteIdentities {
+      /**
+       * A custom IKE ID of type FQDN that may be used to identity the IPsec tunnel. The
+       * generated IKE IDs can still be used even if this custom value is specified.
+       *
+       * Must be of the form `<custom label>.<account ID>.custom.ipsec.cloudflare.com`.
+       *
+       * This custom ID does not need to be unique. Two IPsec tunnels may have the same
+       * custom fqdn_id. However, if another IPsec tunnel has the same value then the two
+       * tunnels cannot have the same cloudflare_endpoint.
+       */
+      fqdn_id?: string;
+    }
+
     export interface HealthCheck {
       /**
        * The direction of the flow of the healthcheck. Either unidirectional, where the
@@ -451,6 +691,11 @@ export interface IPSECTunnelListResponse {
 export namespace IPSECTunnelListResponse {
   export interface IPSECTunnel {
     /**
+     * Identifier
+     */
+    id: string;
+
+    /**
      * The IP address assigned to the Cloudflare side of the IPsec tunnel.
      */
     cloudflare_endpoint: string;
@@ -468,20 +713,27 @@ export namespace IPSECTunnelListResponse {
     name: string;
 
     /**
-     * Tunnel identifier tag.
-     */
-    id?: string;
-
-    /**
      * When `true`, the tunnel can use a null-cipher (`ENCR_NULL`) in the ESP tunnel
      * (Phase 2).
      */
     allow_null_cipher?: boolean;
 
     /**
+     * True if automatic stateful return routing should be enabled for a tunnel, false
+     * otherwise.
+     */
+    automatic_return_routing?: boolean;
+
+    bgp?: IPSECTunnel.BGP;
+
+    bgp_status?: IPSECTunnel.BGPStatus;
+
+    /**
      * The date and time the tunnel was created.
      */
     created_on?: string;
+
+    custom_remote_identities?: IPSECTunnel.CustomRemoteIdentities;
 
     /**
      * The IP address assigned to the customer side of the IPsec tunnel. Not required,
@@ -495,6 +747,14 @@ export namespace IPSECTunnelListResponse {
     description?: string;
 
     health_check?: IPSECTunnel.HealthCheck;
+
+    /**
+     * A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space with the
+     * address being the first IP of the subnet and not same as the address of
+     * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+     * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+     */
+    interface_address6?: string;
 
     /**
      * The date and time the tunnel was last modified.
@@ -514,6 +774,73 @@ export namespace IPSECTunnelListResponse {
   }
 
   export namespace IPSECTunnel {
+    export interface BGP {
+      /**
+       * ASN used on the customer end of the BGP session
+       */
+      customer_asn: number;
+
+      /**
+       * Prefixes in this list will be advertised to the customer device, in addition to
+       * the routes in the Magic routing table.
+       */
+      extra_prefixes?: Array<string>;
+
+      /**
+       * MD5 key to use for session authentication.
+       *
+       * Note that _this is not a security measure_. MD5 is not a valid security
+       * mechanism, and the key is not treated as a secret value. This is _only_
+       * supported for preventing misconfiguration, not for defending against malicious
+       * attacks.
+       *
+       * The MD5 key, if set, must be of non-zero length and consist only of the
+       * following types of character:
+       *
+       * - ASCII alphanumerics: `[a-zA-Z0-9]`
+       * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+       *
+       * In other words, MD5 keys may contain any printable ASCII character aside from
+       * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+       * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+       * specifying an MD5 key with one or more of these disallowed characters will be
+       * rejected.
+       */
+      md5_key?: string;
+    }
+
+    export interface BGPStatus {
+      state: 'BGP_DOWN' | 'BGP_UP' | 'BGP_ESTABLISHING';
+
+      tcp_established: boolean;
+
+      updated_at: string;
+
+      bgp_state?: string;
+
+      cf_speaker_ip?: string;
+
+      cf_speaker_port?: number;
+
+      customer_speaker_ip?: string;
+
+      customer_speaker_port?: number;
+    }
+
+    export interface CustomRemoteIdentities {
+      /**
+       * A custom IKE ID of type FQDN that may be used to identity the IPsec tunnel. The
+       * generated IKE IDs can still be used even if this custom value is specified.
+       *
+       * Must be of the form `<custom label>.<account ID>.custom.ipsec.cloudflare.com`.
+       *
+       * This custom ID does not need to be unique. Two IPsec tunnels may have the same
+       * custom fqdn_id. However, if another IPsec tunnel has the same value then the two
+       * tunnels cannot have the same cloudflare_endpoint.
+       */
+      fqdn_id?: string;
+    }
+
     export interface HealthCheck {
       /**
        * The direction of the flow of the healthcheck. Either unidirectional, where the
@@ -585,6 +912,11 @@ export interface IPSECTunnelDeleteResponse {
 export namespace IPSECTunnelDeleteResponse {
   export interface DeletedIPSECTunnel {
     /**
+     * Identifier
+     */
+    id: string;
+
+    /**
      * The IP address assigned to the Cloudflare side of the IPsec tunnel.
      */
     cloudflare_endpoint: string;
@@ -602,20 +934,27 @@ export namespace IPSECTunnelDeleteResponse {
     name: string;
 
     /**
-     * Tunnel identifier tag.
-     */
-    id?: string;
-
-    /**
      * When `true`, the tunnel can use a null-cipher (`ENCR_NULL`) in the ESP tunnel
      * (Phase 2).
      */
     allow_null_cipher?: boolean;
 
     /**
+     * True if automatic stateful return routing should be enabled for a tunnel, false
+     * otherwise.
+     */
+    automatic_return_routing?: boolean;
+
+    bgp?: DeletedIPSECTunnel.BGP;
+
+    bgp_status?: DeletedIPSECTunnel.BGPStatus;
+
+    /**
      * The date and time the tunnel was created.
      */
     created_on?: string;
+
+    custom_remote_identities?: DeletedIPSECTunnel.CustomRemoteIdentities;
 
     /**
      * The IP address assigned to the customer side of the IPsec tunnel. Not required,
@@ -629,6 +968,14 @@ export namespace IPSECTunnelDeleteResponse {
     description?: string;
 
     health_check?: DeletedIPSECTunnel.HealthCheck;
+
+    /**
+     * A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space with the
+     * address being the first IP of the subnet and not same as the address of
+     * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+     * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+     */
+    interface_address6?: string;
 
     /**
      * The date and time the tunnel was last modified.
@@ -648,6 +995,73 @@ export namespace IPSECTunnelDeleteResponse {
   }
 
   export namespace DeletedIPSECTunnel {
+    export interface BGP {
+      /**
+       * ASN used on the customer end of the BGP session
+       */
+      customer_asn: number;
+
+      /**
+       * Prefixes in this list will be advertised to the customer device, in addition to
+       * the routes in the Magic routing table.
+       */
+      extra_prefixes?: Array<string>;
+
+      /**
+       * MD5 key to use for session authentication.
+       *
+       * Note that _this is not a security measure_. MD5 is not a valid security
+       * mechanism, and the key is not treated as a secret value. This is _only_
+       * supported for preventing misconfiguration, not for defending against malicious
+       * attacks.
+       *
+       * The MD5 key, if set, must be of non-zero length and consist only of the
+       * following types of character:
+       *
+       * - ASCII alphanumerics: `[a-zA-Z0-9]`
+       * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+       *
+       * In other words, MD5 keys may contain any printable ASCII character aside from
+       * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+       * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+       * specifying an MD5 key with one or more of these disallowed characters will be
+       * rejected.
+       */
+      md5_key?: string;
+    }
+
+    export interface BGPStatus {
+      state: 'BGP_DOWN' | 'BGP_UP' | 'BGP_ESTABLISHING';
+
+      tcp_established: boolean;
+
+      updated_at: string;
+
+      bgp_state?: string;
+
+      cf_speaker_ip?: string;
+
+      cf_speaker_port?: number;
+
+      customer_speaker_ip?: string;
+
+      customer_speaker_port?: number;
+    }
+
+    export interface CustomRemoteIdentities {
+      /**
+       * A custom IKE ID of type FQDN that may be used to identity the IPsec tunnel. The
+       * generated IKE IDs can still be used even if this custom value is specified.
+       *
+       * Must be of the form `<custom label>.<account ID>.custom.ipsec.cloudflare.com`.
+       *
+       * This custom ID does not need to be unique. Two IPsec tunnels may have the same
+       * custom fqdn_id. However, if another IPsec tunnel has the same value then the two
+       * tunnels cannot have the same cloudflare_endpoint.
+       */
+      fqdn_id?: string;
+    }
+
     export interface HealthCheck {
       /**
        * The direction of the flow of the healthcheck. Either unidirectional, where the
@@ -719,6 +1133,11 @@ export interface IPSECTunnelBulkUpdateResponse {
 export namespace IPSECTunnelBulkUpdateResponse {
   export interface ModifiedIPSECTunnel {
     /**
+     * Identifier
+     */
+    id: string;
+
+    /**
      * The IP address assigned to the Cloudflare side of the IPsec tunnel.
      */
     cloudflare_endpoint: string;
@@ -736,20 +1155,27 @@ export namespace IPSECTunnelBulkUpdateResponse {
     name: string;
 
     /**
-     * Tunnel identifier tag.
-     */
-    id?: string;
-
-    /**
      * When `true`, the tunnel can use a null-cipher (`ENCR_NULL`) in the ESP tunnel
      * (Phase 2).
      */
     allow_null_cipher?: boolean;
 
     /**
+     * True if automatic stateful return routing should be enabled for a tunnel, false
+     * otherwise.
+     */
+    automatic_return_routing?: boolean;
+
+    bgp?: ModifiedIPSECTunnel.BGP;
+
+    bgp_status?: ModifiedIPSECTunnel.BGPStatus;
+
+    /**
      * The date and time the tunnel was created.
      */
     created_on?: string;
+
+    custom_remote_identities?: ModifiedIPSECTunnel.CustomRemoteIdentities;
 
     /**
      * The IP address assigned to the customer side of the IPsec tunnel. Not required,
@@ -763,6 +1189,14 @@ export namespace IPSECTunnelBulkUpdateResponse {
     description?: string;
 
     health_check?: ModifiedIPSECTunnel.HealthCheck;
+
+    /**
+     * A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space with the
+     * address being the first IP of the subnet and not same as the address of
+     * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+     * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+     */
+    interface_address6?: string;
 
     /**
      * The date and time the tunnel was last modified.
@@ -782,6 +1216,73 @@ export namespace IPSECTunnelBulkUpdateResponse {
   }
 
   export namespace ModifiedIPSECTunnel {
+    export interface BGP {
+      /**
+       * ASN used on the customer end of the BGP session
+       */
+      customer_asn: number;
+
+      /**
+       * Prefixes in this list will be advertised to the customer device, in addition to
+       * the routes in the Magic routing table.
+       */
+      extra_prefixes?: Array<string>;
+
+      /**
+       * MD5 key to use for session authentication.
+       *
+       * Note that _this is not a security measure_. MD5 is not a valid security
+       * mechanism, and the key is not treated as a secret value. This is _only_
+       * supported for preventing misconfiguration, not for defending against malicious
+       * attacks.
+       *
+       * The MD5 key, if set, must be of non-zero length and consist only of the
+       * following types of character:
+       *
+       * - ASCII alphanumerics: `[a-zA-Z0-9]`
+       * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+       *
+       * In other words, MD5 keys may contain any printable ASCII character aside from
+       * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+       * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+       * specifying an MD5 key with one or more of these disallowed characters will be
+       * rejected.
+       */
+      md5_key?: string;
+    }
+
+    export interface BGPStatus {
+      state: 'BGP_DOWN' | 'BGP_UP' | 'BGP_ESTABLISHING';
+
+      tcp_established: boolean;
+
+      updated_at: string;
+
+      bgp_state?: string;
+
+      cf_speaker_ip?: string;
+
+      cf_speaker_port?: number;
+
+      customer_speaker_ip?: string;
+
+      customer_speaker_port?: number;
+    }
+
+    export interface CustomRemoteIdentities {
+      /**
+       * A custom IKE ID of type FQDN that may be used to identity the IPsec tunnel. The
+       * generated IKE IDs can still be used even if this custom value is specified.
+       *
+       * Must be of the form `<custom label>.<account ID>.custom.ipsec.cloudflare.com`.
+       *
+       * This custom ID does not need to be unique. Two IPsec tunnels may have the same
+       * custom fqdn_id. However, if another IPsec tunnel has the same value then the two
+       * tunnels cannot have the same cloudflare_endpoint.
+       */
+      fqdn_id?: string;
+    }
+
     export interface HealthCheck {
       /**
        * The direction of the flow of the healthcheck. Either unidirectional, where the
@@ -851,6 +1352,11 @@ export interface IPSECTunnelGetResponse {
 export namespace IPSECTunnelGetResponse {
   export interface IPSECTunnel {
     /**
+     * Identifier
+     */
+    id: string;
+
+    /**
      * The IP address assigned to the Cloudflare side of the IPsec tunnel.
      */
     cloudflare_endpoint: string;
@@ -868,20 +1374,27 @@ export namespace IPSECTunnelGetResponse {
     name: string;
 
     /**
-     * Tunnel identifier tag.
-     */
-    id?: string;
-
-    /**
      * When `true`, the tunnel can use a null-cipher (`ENCR_NULL`) in the ESP tunnel
      * (Phase 2).
      */
     allow_null_cipher?: boolean;
 
     /**
+     * True if automatic stateful return routing should be enabled for a tunnel, false
+     * otherwise.
+     */
+    automatic_return_routing?: boolean;
+
+    bgp?: IPSECTunnel.BGP;
+
+    bgp_status?: IPSECTunnel.BGPStatus;
+
+    /**
      * The date and time the tunnel was created.
      */
     created_on?: string;
+
+    custom_remote_identities?: IPSECTunnel.CustomRemoteIdentities;
 
     /**
      * The IP address assigned to the customer side of the IPsec tunnel. Not required,
@@ -895,6 +1408,14 @@ export namespace IPSECTunnelGetResponse {
     description?: string;
 
     health_check?: IPSECTunnel.HealthCheck;
+
+    /**
+     * A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space with the
+     * address being the first IP of the subnet and not same as the address of
+     * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+     * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+     */
+    interface_address6?: string;
 
     /**
      * The date and time the tunnel was last modified.
@@ -914,6 +1435,73 @@ export namespace IPSECTunnelGetResponse {
   }
 
   export namespace IPSECTunnel {
+    export interface BGP {
+      /**
+       * ASN used on the customer end of the BGP session
+       */
+      customer_asn: number;
+
+      /**
+       * Prefixes in this list will be advertised to the customer device, in addition to
+       * the routes in the Magic routing table.
+       */
+      extra_prefixes?: Array<string>;
+
+      /**
+       * MD5 key to use for session authentication.
+       *
+       * Note that _this is not a security measure_. MD5 is not a valid security
+       * mechanism, and the key is not treated as a secret value. This is _only_
+       * supported for preventing misconfiguration, not for defending against malicious
+       * attacks.
+       *
+       * The MD5 key, if set, must be of non-zero length and consist only of the
+       * following types of character:
+       *
+       * - ASCII alphanumerics: `[a-zA-Z0-9]`
+       * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+       *
+       * In other words, MD5 keys may contain any printable ASCII character aside from
+       * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+       * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+       * specifying an MD5 key with one or more of these disallowed characters will be
+       * rejected.
+       */
+      md5_key?: string;
+    }
+
+    export interface BGPStatus {
+      state: 'BGP_DOWN' | 'BGP_UP' | 'BGP_ESTABLISHING';
+
+      tcp_established: boolean;
+
+      updated_at: string;
+
+      bgp_state?: string;
+
+      cf_speaker_ip?: string;
+
+      cf_speaker_port?: number;
+
+      customer_speaker_ip?: string;
+
+      customer_speaker_port?: number;
+    }
+
+    export interface CustomRemoteIdentities {
+      /**
+       * A custom IKE ID of type FQDN that may be used to identity the IPsec tunnel. The
+       * generated IKE IDs can still be used even if this custom value is specified.
+       *
+       * Must be of the form `<custom label>.<account ID>.custom.ipsec.cloudflare.com`.
+       *
+       * This custom ID does not need to be unique. Two IPsec tunnels may have the same
+       * custom fqdn_id. However, if another IPsec tunnel has the same value then the two
+       * tunnels cannot have the same cloudflare_endpoint.
+       */
+      fqdn_id?: string;
+    }
+
     export interface HealthCheck {
       /**
        * The direction of the flow of the healthcheck. Either unidirectional, where the
@@ -1018,6 +1606,17 @@ export interface IPSECTunnelCreateParams {
   name: string;
 
   /**
+   * Body param: True if automatic stateful return routing should be enabled for a
+   * tunnel, false otherwise.
+   */
+  automatic_return_routing?: boolean;
+
+  /**
+   * Body param:
+   */
+  bgp?: IPSECTunnelCreateParams.BGP;
+
+  /**
    * Body param: The IP address assigned to the customer side of the IPsec tunnel.
    * Not required, but must be set for proactive traceroutes to work.
    */
@@ -1032,6 +1631,14 @@ export interface IPSECTunnelCreateParams {
    * Body param:
    */
   health_check?: IPSECTunnelCreateParams.HealthCheck;
+
+  /**
+   * Body param: A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space
+   * with the address being the first IP of the subnet and not same as the address of
+   * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+   * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+   */
+  interface_address6?: string;
 
   /**
    * Body param: A randomly generated or provided string for use in the IPsec tunnel.
@@ -1052,6 +1659,41 @@ export interface IPSECTunnelCreateParams {
 }
 
 export namespace IPSECTunnelCreateParams {
+  export interface BGP {
+    /**
+     * ASN used on the customer end of the BGP session
+     */
+    customer_asn: number;
+
+    /**
+     * Prefixes in this list will be advertised to the customer device, in addition to
+     * the routes in the Magic routing table.
+     */
+    extra_prefixes?: Array<string>;
+
+    /**
+     * MD5 key to use for session authentication.
+     *
+     * Note that _this is not a security measure_. MD5 is not a valid security
+     * mechanism, and the key is not treated as a secret value. This is _only_
+     * supported for preventing misconfiguration, not for defending against malicious
+     * attacks.
+     *
+     * The MD5 key, if set, must be of non-zero length and consist only of the
+     * following types of character:
+     *
+     * - ASCII alphanumerics: `[a-zA-Z0-9]`
+     * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+     *
+     * In other words, MD5 keys may contain any printable ASCII character aside from
+     * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+     * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+     * specifying an MD5 key with one or more of these disallowed characters will be
+     * rejected.
+     */
+    md5_key?: string;
+  }
+
   export interface HealthCheck {
     /**
      * The direction of the flow of the healthcheck. Either unidirectional, where the
@@ -1131,6 +1773,17 @@ export interface IPSECTunnelUpdateParams {
   name: string;
 
   /**
+   * Body param: True if automatic stateful return routing should be enabled for a
+   * tunnel, false otherwise.
+   */
+  automatic_return_routing?: boolean;
+
+  /**
+   * Body param:
+   */
+  bgp?: IPSECTunnelUpdateParams.BGP;
+
+  /**
    * Body param: The IP address assigned to the customer side of the IPsec tunnel.
    * Not required, but must be set for proactive traceroutes to work.
    */
@@ -1145,6 +1798,14 @@ export interface IPSECTunnelUpdateParams {
    * Body param:
    */
   health_check?: IPSECTunnelUpdateParams.HealthCheck;
+
+  /**
+   * Body param: A 127 bit IPV6 prefix from within the virtual_subnet6 prefix space
+   * with the address being the first IP of the subnet and not same as the address of
+   * virtual_subnet6. Eg if virtual_subnet6 is 2606:54c1:7:0:a9fe:12d2::/127 ,
+   * interface_address6 could be 2606:54c1:7:0:a9fe:12d2:1:200/127
+   */
+  interface_address6?: string;
 
   /**
    * Body param: A randomly generated or provided string for use in the IPsec tunnel.
@@ -1165,6 +1826,41 @@ export interface IPSECTunnelUpdateParams {
 }
 
 export namespace IPSECTunnelUpdateParams {
+  export interface BGP {
+    /**
+     * ASN used on the customer end of the BGP session
+     */
+    customer_asn: number;
+
+    /**
+     * Prefixes in this list will be advertised to the customer device, in addition to
+     * the routes in the Magic routing table.
+     */
+    extra_prefixes?: Array<string>;
+
+    /**
+     * MD5 key to use for session authentication.
+     *
+     * Note that _this is not a security measure_. MD5 is not a valid security
+     * mechanism, and the key is not treated as a secret value. This is _only_
+     * supported for preventing misconfiguration, not for defending against malicious
+     * attacks.
+     *
+     * The MD5 key, if set, must be of non-zero length and consist only of the
+     * following types of character:
+     *
+     * - ASCII alphanumerics: `[a-zA-Z0-9]`
+     * - Special characters in the set `'!@#$%^&*()+[]{}<>/.,;:_-~`= \|`
+     *
+     * In other words, MD5 keys may contain any printable ASCII character aside from
+     * newline (0x0A), quotation mark (`"`), vertical tab (0x0B), carriage return
+     * (0x0D), tab (0x09), form feed (0x0C), and the question mark (`?`). Requests
+     * specifying an MD5 key with one or more of these disallowed characters will be
+     * rejected.
+     */
+    md5_key?: string;
+  }
+
   export interface HealthCheck {
     /**
      * The direction of the flow of the healthcheck. Either unidirectional, where the

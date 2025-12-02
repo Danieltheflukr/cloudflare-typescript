@@ -7,6 +7,15 @@ export class Health extends APIResource {
   /**
    * Preview pool health using provided monitor details. The returned preview_id can
    * be used in the preview endpoint to retrieve the results.
+   *
+   * @example
+   * ```ts
+   * const health =
+   *   await client.loadBalancers.pools.health.create(
+   *     '17b5962d775c646f3f9725cbc7a53df4',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   create(
     poolId: string,
@@ -24,6 +33,14 @@ export class Health extends APIResource {
 
   /**
    * Fetch the latest pool health status for a single pool.
+   *
+   * @example
+   * ```ts
+   * const health = await client.loadBalancers.pools.health.get(
+   *   '17b5962d775c646f3f9725cbc7a53df4',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     poolId: string,
@@ -44,7 +61,7 @@ export interface HealthCreateResponse {
   /**
    * Monitored pool IDs mapped to their respective names.
    */
-  pools?: Record<string, string>;
+  pools?: { [key: string]: string };
 
   preview_id?: string;
 }
@@ -55,7 +72,7 @@ export interface HealthCreateResponse {
  */
 export interface HealthGetResponse {
   /**
-   * Pool ID
+   * Pool ID.
    */
   pool_id?: string;
 
@@ -111,7 +128,7 @@ export namespace HealthGetResponse {
 
 export interface HealthCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -162,7 +179,7 @@ export interface HealthCreateParams {
    * recommended you set a Host header by default. The User-Agent header cannot be
    * overridden. This parameter is only valid for HTTP and HTTPS monitors.
    */
-  header?: Record<string, Array<string>>;
+  header?: { [key: string]: Array<string> };
 
   /**
    * Body param: The interval between each health check. Shorter intervals may
@@ -217,7 +234,7 @@ export interface HealthCreateParams {
 
 export interface HealthGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }

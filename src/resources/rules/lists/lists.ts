@@ -3,17 +3,18 @@
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
 import * as BulkOperationsAPI from './bulk-operations';
-import { BulkOperationGetResponse, BulkOperations, OperationStatus } from './bulk-operations';
+import { BulkOperationGetParams, BulkOperationGetResponse, BulkOperations } from './bulk-operations';
 import * as ItemsAPI from './items';
 import {
   ItemCreateParams,
   ItemCreateResponse,
   ItemDeleteParams,
   ItemDeleteResponse,
+  ItemGetParams,
   ItemGetResponse,
   ItemListParams,
   ItemListResponse,
-  ItemListResponsesCursorPagination,
+  ItemListResponsesCursorPaginationAfter,
   ItemUpdateParams,
   ItemUpdateResponse,
   Items,
@@ -27,36 +28,63 @@ export class Lists extends APIResource {
   items: ItemsAPI.Items = new ItemsAPI.Items(this._client);
 
   /**
-   * Creates a new list of the specified type.
+   * Creates a new list of the specified kind.
+   *
+   * @example
+   * ```ts
+   * const list = await client.rules.lists.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   kind: 'ip',
+   *   name: 'list1',
+   * });
+   * ```
    */
-  create(params: ListCreateParams, options?: Core.RequestOptions): Core.APIPromise<ListsList> {
+  create(params: ListCreateParams, options?: Core.RequestOptions): Core.APIPromise<ListCreateResponse> {
     const { account_id, ...body } = params;
     return (
       this._client.post(`/accounts/${account_id}/rules/lists`, { body, ...options }) as Core.APIPromise<{
-        result: ListsList;
+        result: ListCreateResponse;
       }>
     )._thenUnwrap((obj) => obj.result);
   }
 
   /**
    * Updates the description of a list.
+   *
+   * @example
+   * ```ts
+   * const list = await client.rules.lists.update(
+   *   '2c0fc9fa937b11eaa1b71c4d701ab86e',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   update(
     listId: string,
     params: ListUpdateParams,
     options?: Core.RequestOptions,
-  ): Core.APIPromise<ListsList> {
+  ): Core.APIPromise<ListUpdateResponse> {
     const { account_id, ...body } = params;
     return (
       this._client.put(`/accounts/${account_id}/rules/lists/${listId}`, {
         body,
         ...options,
-      }) as Core.APIPromise<{ result: ListsList }>
+      }) as Core.APIPromise<{ result: ListUpdateResponse }>
     )._thenUnwrap((obj) => obj.result);
   }
 
   /**
    * Fetches all lists in the account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const listsList of client.rules.lists.list({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * })) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: ListListParams,
@@ -68,6 +96,14 @@ export class Lists extends APIResource {
 
   /**
    * Deletes a specific list and all its items.
+   *
+   * @example
+   * ```ts
+   * const list = await client.rules.lists.delete(
+   *   '2c0fc9fa937b11eaa1b71c4d701ab86e',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     listId: string,
@@ -84,12 +120,24 @@ export class Lists extends APIResource {
 
   /**
    * Fetches the details of a list.
+   *
+   * @example
+   * ```ts
+   * const list = await client.rules.lists.get(
+   *   '2c0fc9fa937b11eaa1b71c4d701ab86e',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
-  get(listId: string, params: ListGetParams, options?: Core.RequestOptions): Core.APIPromise<ListsList> {
+  get(
+    listId: string,
+    params: ListGetParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<ListGetResponse> {
     const { account_id } = params;
     return (
       this._client.get(`/accounts/${account_id}/rules/lists/${listId}`, options) as Core.APIPromise<{
-        result: ListsList;
+        result: ListGetResponse;
       }>
     )._thenUnwrap((obj) => obj.result);
   }
@@ -103,6 +151,13 @@ export class ListsListsSinglePage extends SinglePage<ListsList> {}
  */
 export interface Hostname {
   url_hostname: string;
+
+  /**
+   * Only applies to wildcard hostnames (e.g., \*.example.com). When true (default),
+   * only subdomains are blocked. When false, both the root domain and subdomains are
+   * blocked.
+   */
+  exclude_exact_hostname?: boolean;
 }
 
 /**
@@ -111,49 +166,56 @@ export interface Hostname {
  */
 export interface HostnameParam {
   url_hostname: string;
+
+  /**
+   * Only applies to wildcard hostnames (e.g., \*.example.com). When true (default),
+   * only subdomains are blocked. When false, both the root domain and subdomains are
+   * blocked.
+   */
+  exclude_exact_hostname?: boolean;
 }
 
 export interface ListsList {
   /**
    * The unique ID of the list.
    */
-  id?: string;
+  id: string;
 
   /**
    * The RFC 3339 timestamp of when the list was created.
    */
-  created_on?: string;
-
-  /**
-   * An informative summary of the list.
-   */
-  description?: string;
+  created_on: string;
 
   /**
    * The type of the list. Each type supports specific list items (IP addresses,
    * ASNs, hostnames or redirects).
    */
-  kind?: 'ip' | 'redirect' | 'hostname' | 'asn';
+  kind: 'ip' | 'redirect' | 'hostname' | 'asn';
 
   /**
    * The RFC 3339 timestamp of when the list was last modified.
    */
-  modified_on?: string;
+  modified_on: string;
 
   /**
    * An informative name for the list. Use this name in filter and rule expressions.
    */
-  name?: string;
+  name: string;
 
   /**
    * The number of items in the list.
    */
-  num_items?: number;
+  num_items: number;
 
   /**
-   * The number of [filters](/operations/filters-list-filters) referencing the list.
+   * The number of [filters](/api/resources/filters/) referencing the list.
    */
-  num_referencing_filters?: number;
+  num_referencing_filters: number;
+
+  /**
+   * An informative summary of the list.
+   */
+  description?: string;
 }
 
 /**
@@ -194,16 +256,145 @@ export interface RedirectParam {
   subpath_matching?: boolean;
 }
 
+export interface ListCreateResponse {
+  /**
+   * The unique ID of the list.
+   */
+  id: string;
+
+  /**
+   * The RFC 3339 timestamp of when the list was created.
+   */
+  created_on: string;
+
+  /**
+   * The type of the list. Each type supports specific list items (IP addresses,
+   * ASNs, hostnames or redirects).
+   */
+  kind: 'ip' | 'redirect' | 'hostname' | 'asn';
+
+  /**
+   * The RFC 3339 timestamp of when the list was last modified.
+   */
+  modified_on: string;
+
+  /**
+   * An informative name for the list. Use this name in filter and rule expressions.
+   */
+  name: string;
+
+  /**
+   * The number of items in the list.
+   */
+  num_items: number;
+
+  /**
+   * The number of [filters](/api/resources/filters/) referencing the list.
+   */
+  num_referencing_filters: number;
+
+  /**
+   * An informative summary of the list.
+   */
+  description?: string;
+}
+
+export interface ListUpdateResponse {
+  /**
+   * The unique ID of the list.
+   */
+  id: string;
+
+  /**
+   * The RFC 3339 timestamp of when the list was created.
+   */
+  created_on: string;
+
+  /**
+   * The type of the list. Each type supports specific list items (IP addresses,
+   * ASNs, hostnames or redirects).
+   */
+  kind: 'ip' | 'redirect' | 'hostname' | 'asn';
+
+  /**
+   * The RFC 3339 timestamp of when the list was last modified.
+   */
+  modified_on: string;
+
+  /**
+   * An informative name for the list. Use this name in filter and rule expressions.
+   */
+  name: string;
+
+  /**
+   * The number of items in the list.
+   */
+  num_items: number;
+
+  /**
+   * The number of [filters](/api/resources/filters/) referencing the list.
+   */
+  num_referencing_filters: number;
+
+  /**
+   * An informative summary of the list.
+   */
+  description?: string;
+}
+
 export interface ListDeleteResponse {
   /**
-   * The unique ID of the item in the List.
+   * The unique ID of the list.
    */
-  id?: string;
+  id: string;
+}
+
+export interface ListGetResponse {
+  /**
+   * The unique ID of the list.
+   */
+  id: string;
+
+  /**
+   * The RFC 3339 timestamp of when the list was created.
+   */
+  created_on: string;
+
+  /**
+   * The type of the list. Each type supports specific list items (IP addresses,
+   * ASNs, hostnames or redirects).
+   */
+  kind: 'ip' | 'redirect' | 'hostname' | 'asn';
+
+  /**
+   * The RFC 3339 timestamp of when the list was last modified.
+   */
+  modified_on: string;
+
+  /**
+   * An informative name for the list. Use this name in filter and rule expressions.
+   */
+  name: string;
+
+  /**
+   * The number of items in the list.
+   */
+  num_items: number;
+
+  /**
+   * The number of [filters](/api/resources/filters/) referencing the list.
+   */
+  num_referencing_filters: number;
+
+  /**
+   * An informative summary of the list.
+   */
+  description?: string;
 }
 
 export interface ListCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: The Account ID for this resource.
    */
   account_id: string;
 
@@ -227,7 +418,7 @@ export interface ListCreateParams {
 
 export interface ListUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: The Account ID for this resource.
    */
   account_id: string;
 
@@ -239,21 +430,21 @@ export interface ListUpdateParams {
 
 export interface ListListParams {
   /**
-   * Identifier
+   * The Account ID for this resource.
    */
   account_id: string;
 }
 
 export interface ListDeleteParams {
   /**
-   * Identifier
+   * The Account ID for this resource.
    */
   account_id: string;
 }
 
 export interface ListGetParams {
   /**
-   * Identifier
+   * The Account ID for this resource.
    */
   account_id: string;
 }
@@ -261,14 +452,17 @@ export interface ListGetParams {
 Lists.ListsListsSinglePage = ListsListsSinglePage;
 Lists.BulkOperations = BulkOperations;
 Lists.Items = Items;
-Lists.ItemListResponsesCursorPagination = ItemListResponsesCursorPagination;
+Lists.ItemListResponsesCursorPaginationAfter = ItemListResponsesCursorPaginationAfter;
 
 export declare namespace Lists {
   export {
     type Hostname as Hostname,
     type ListsList as ListsList,
     type Redirect as Redirect,
+    type ListCreateResponse as ListCreateResponse,
+    type ListUpdateResponse as ListUpdateResponse,
     type ListDeleteResponse as ListDeleteResponse,
+    type ListGetResponse as ListGetResponse,
     ListsListsSinglePage as ListsListsSinglePage,
     type ListCreateParams as ListCreateParams,
     type ListUpdateParams as ListUpdateParams,
@@ -279,8 +473,8 @@ export declare namespace Lists {
 
   export {
     BulkOperations as BulkOperations,
-    type OperationStatus as OperationStatus,
     type BulkOperationGetResponse as BulkOperationGetResponse,
+    type BulkOperationGetParams as BulkOperationGetParams,
   };
 
   export {
@@ -292,10 +486,11 @@ export declare namespace Lists {
     type ItemListResponse as ItemListResponse,
     type ItemDeleteResponse as ItemDeleteResponse,
     type ItemGetResponse as ItemGetResponse,
-    ItemListResponsesCursorPagination as ItemListResponsesCursorPagination,
+    ItemListResponsesCursorPaginationAfter as ItemListResponsesCursorPaginationAfter,
     type ItemCreateParams as ItemCreateParams,
     type ItemUpdateParams as ItemUpdateParams,
     type ItemListParams as ItemListParams,
     type ItemDeleteParams as ItemDeleteParams,
+    type ItemGetParams as ItemGetParams,
   };
 }

@@ -7,6 +7,21 @@ import { SinglePage } from '../../../../../pagination';
 export class Secrets extends APIResource {
   /**
    * Add a secret to a script uploaded to a Workers for Platforms namespace.
+   *
+   * @example
+   * ```ts
+   * const secret =
+   *   await client.workersForPlatforms.dispatch.namespaces.scripts.secrets.update(
+   *     'my-dispatch-namespace',
+   *     'this-is_my_script-01',
+   *     {
+   *       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *       name: 'myBinding',
+   *       text: 'My secret.',
+   *       type: 'secret_text',
+   *     },
+   *   );
+   * ```
    */
   update(
     dispatchNamespace: string,
@@ -25,6 +40,18 @@ export class Secrets extends APIResource {
 
   /**
    * List secrets bound to a script uploaded to a Workers for Platforms namespace.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const secretListResponse of client.workersForPlatforms.dispatch.namespaces.scripts.secrets.list(
+   *   'my-dispatch-namespace',
+   *   'this-is_my_script-01',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     dispatchNamespace: string,
@@ -42,6 +69,17 @@ export class Secrets extends APIResource {
 
   /**
    * Remove a secret from a script uploaded to a Workers for Platforms namespace.
+   *
+   * @example
+   * ```ts
+   * const secret =
+   *   await client.workersForPlatforms.dispatch.namespaces.scripts.secrets.delete(
+   *     'my-dispatch-namespace',
+   *     'this-is_my_script-01',
+   *     'mySecret',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   delete(
     dispatchNamespace: string,
@@ -50,11 +88,11 @@ export class Secrets extends APIResource {
     params: SecretDeleteParams,
     options?: Core.RequestOptions,
   ): Core.APIPromise<SecretDeleteResponse | null> {
-    const { account_id } = params;
+    const { account_id, url_encoded } = params;
     return (
       this._client.delete(
         `/accounts/${account_id}/workers/dispatch/namespaces/${dispatchNamespace}/scripts/${scriptName}/secrets/${secretName}`,
-        options,
+        { query: { url_encoded }, ...options },
       ) as Core.APIPromise<{ result: SecretDeleteResponse | null }>
     )._thenUnwrap((obj) => obj.result);
   }
@@ -62,6 +100,17 @@ export class Secrets extends APIResource {
   /**
    * Get a given secret binding (value omitted) on a script uploaded to a Workers for
    * Platforms namespace.
+   *
+   * @example
+   * ```ts
+   * const secret =
+   *   await client.workersForPlatforms.dispatch.namespaces.scripts.secrets.get(
+   *     'my-dispatch-namespace',
+   *     'this-is_my_script-01',
+   *     'mySecret',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     dispatchNamespace: string,
@@ -70,11 +119,11 @@ export class Secrets extends APIResource {
     params: SecretGetParams,
     options?: Core.RequestOptions,
   ): Core.APIPromise<SecretGetResponse> {
-    const { account_id } = params;
+    const { account_id, ...query } = params;
     return (
       this._client.get(
         `/accounts/${account_id}/workers/dispatch/namespaces/${dispatchNamespace}/scripts/${scriptName}/secrets/${secretName}`,
-        options,
+        { query, ...options },
       ) as Core.APIPromise<{ result: SecretGetResponse }>
     )._thenUnwrap((obj) => obj.result);
   }
@@ -82,89 +131,274 @@ export class Secrets extends APIResource {
 
 export class SecretListResponsesSinglePage extends SinglePage<SecretListResponse> {}
 
-export interface SecretUpdateResponse {
-  /**
-   * The name of this secret, this is what will be used to access it inside the
-   * Worker.
-   */
-  name?: string;
+/**
+ * A secret value accessible through a binding.
+ */
+export type SecretUpdateResponse =
+  | SecretUpdateResponse.WorkersBindingKindSecretText
+  | SecretUpdateResponse.WorkersBindingKindSecretKey;
 
-  /**
-   * The type of secret.
-   */
-  type?: 'secret_text';
+export namespace SecretUpdateResponse {
+  export interface WorkersBindingKindSecretText {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secret_text';
+  }
+
+  export interface WorkersBindingKindSecretKey {
+    /**
+     * Algorithm-specific key parameters.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#algorithm).
+     */
+    algorithm: unknown;
+
+    /**
+     * Data format of the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#format).
+     */
+    format: 'raw' | 'pkcs8' | 'spki' | 'jwk';
+
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secret_key';
+
+    /**
+     * Allowed operations with the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#keyUsages).
+     */
+    usages: Array<
+      'encrypt' | 'decrypt' | 'sign' | 'verify' | 'deriveKey' | 'deriveBits' | 'wrapKey' | 'unwrapKey'
+    >;
+  }
 }
 
-export interface SecretListResponse {
-  /**
-   * The name of this secret, this is what will be used to access it inside the
-   * Worker.
-   */
-  name?: string;
+/**
+ * A secret value accessible through a binding.
+ */
+export type SecretListResponse =
+  | SecretListResponse.WorkersBindingKindSecretText
+  | SecretListResponse.WorkersBindingKindSecretKey;
 
-  /**
-   * The type of secret.
-   */
-  type?: 'secret_text';
+export namespace SecretListResponse {
+  export interface WorkersBindingKindSecretText {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secret_text';
+  }
+
+  export interface WorkersBindingKindSecretKey {
+    /**
+     * Algorithm-specific key parameters.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#algorithm).
+     */
+    algorithm: unknown;
+
+    /**
+     * Data format of the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#format).
+     */
+    format: 'raw' | 'pkcs8' | 'spki' | 'jwk';
+
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secret_key';
+
+    /**
+     * Allowed operations with the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#keyUsages).
+     */
+    usages: Array<
+      'encrypt' | 'decrypt' | 'sign' | 'verify' | 'deriveKey' | 'deriveBits' | 'wrapKey' | 'unwrapKey'
+    >;
+  }
 }
 
 export type SecretDeleteResponse = unknown;
 
-export interface SecretGetResponse {
-  /**
-   * The name of this secret, this is what will be used to access it inside the
-   * Worker.
-   */
-  name?: string;
+/**
+ * A secret value accessible through a binding.
+ */
+export type SecretGetResponse =
+  | SecretGetResponse.WorkersBindingKindSecretText
+  | SecretGetResponse.WorkersBindingKindSecretKey;
 
-  /**
-   * The type of secret.
-   */
-  type?: 'secret_text';
+export namespace SecretGetResponse {
+  export interface WorkersBindingKindSecretText {
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secret_text';
+  }
+
+  export interface WorkersBindingKindSecretKey {
+    /**
+     * Algorithm-specific key parameters.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#algorithm).
+     */
+    algorithm: unknown;
+
+    /**
+     * Data format of the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#format).
+     */
+    format: 'raw' | 'pkcs8' | 'spki' | 'jwk';
+
+    /**
+     * A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * The kind of resource that the binding provides.
+     */
+    type: 'secret_key';
+
+    /**
+     * Allowed operations with the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#keyUsages).
+     */
+    usages: Array<
+      'encrypt' | 'decrypt' | 'sign' | 'verify' | 'deriveKey' | 'deriveBits' | 'wrapKey' | 'unwrapKey'
+    >;
+  }
 }
 
-export interface SecretUpdateParams {
-  /**
-   * Path param: Identifier
-   */
-  account_id: string;
+export type SecretUpdateParams =
+  | SecretUpdateParams.WorkersBindingKindSecretText
+  | SecretUpdateParams.WorkersBindingKindSecretKey;
 
-  /**
-   * Body param: The name of this secret, this is what will be used to access it
-   * inside the Worker.
-   */
-  name?: string;
+export declare namespace SecretUpdateParams {
+  export interface WorkersBindingKindSecretText {
+    /**
+     * Path param: Identifier.
+     */
+    account_id: string;
 
-  /**
-   * Body param: The value of the secret.
-   */
-  text?: string;
+    /**
+     * Body param: A JavaScript variable name for the binding.
+     */
+    name: string;
 
-  /**
-   * Body param: The type of secret to put.
-   */
-  type?: 'secret_text';
+    /**
+     * Body param: The secret value to use.
+     */
+    text: string;
+
+    /**
+     * Body param: The kind of resource that the binding provides.
+     */
+    type: 'secret_text';
+  }
+
+  export interface WorkersBindingKindSecretKey {
+    /**
+     * Path param: Identifier.
+     */
+    account_id: string;
+
+    /**
+     * Body param: Algorithm-specific key parameters.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#algorithm).
+     */
+    algorithm: unknown;
+
+    /**
+     * Body param: Data format of the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#format).
+     */
+    format: 'raw' | 'pkcs8' | 'spki' | 'jwk';
+
+    /**
+     * Body param: A JavaScript variable name for the binding.
+     */
+    name: string;
+
+    /**
+     * Body param: The kind of resource that the binding provides.
+     */
+    type: 'secret_key';
+
+    /**
+     * Body param: Allowed operations with the key.
+     * [Learn more](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#keyUsages).
+     */
+    usages: Array<
+      'encrypt' | 'decrypt' | 'sign' | 'verify' | 'deriveKey' | 'deriveBits' | 'wrapKey' | 'unwrapKey'
+    >;
+
+    /**
+     * Body param: Base64-encoded key data. Required if `format` is "raw", "pkcs8", or
+     * "spki".
+     */
+    key_base64?: string;
+
+    /**
+     * Body param: Key data in
+     * [JSON Web Key](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/importKey#json_web_key)
+     * format. Required if `format` is "jwk".
+     */
+    key_jwk?: unknown;
+  }
 }
 
 export interface SecretListParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
 export interface SecretDeleteParams {
   /**
-   * Identifier
+   * Path param: Identifier.
    */
   account_id: string;
+
+  /**
+   * Query param: Flag that indicates whether the secret name is URL encoded.
+   */
+  url_encoded?: boolean;
 }
 
 export interface SecretGetParams {
   /**
-   * Identifier
+   * Path param: Identifier.
    */
   account_id: string;
+
+  /**
+   * Query param: Flag that indicates whether the secret name is URL encoded.
+   */
+  url_encoded?: boolean;
 }
 
 Secrets.SecretListResponsesSinglePage = SecretListResponsesSinglePage;

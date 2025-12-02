@@ -12,7 +12,8 @@ const client = new Cloudflare({
 describe('resource resourceGroups', () => {
   test('create: only required params', async () => {
     const responsePromise = client.iam.resourceGroups.create({
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      name: 'NewResourceGroup',
       scope: {
         key: 'com.cloudflare.api.account.eb78d65290b24279ba6f44721b3ea3c4',
         objects: [{ key: 'com.cloudflare.api.account.zone.23f8d65290b24279ba6f44721b3eaad5' }],
@@ -29,22 +30,18 @@ describe('resource resourceGroups', () => {
 
   test('create: required and optional params', async () => {
     const response = await client.iam.resourceGroups.create({
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      name: 'NewResourceGroup',
       scope: {
         key: 'com.cloudflare.api.account.eb78d65290b24279ba6f44721b3ea3c4',
         objects: [{ key: 'com.cloudflare.api.account.zone.23f8d65290b24279ba6f44721b3eaad5' }],
       },
-      meta: { editable: 'false' },
     });
   });
 
   test('update: only required params', async () => {
-    const responsePromise = client.iam.resourceGroups.update('6d7f2f5f5b1d4a0e9081fdc98d432fd1', {
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
-      scope: {
-        key: 'com.cloudflare.api.account.eb78d65290b24279ba6f44721b3ea3c4',
-        objects: [{ key: 'com.cloudflare.api.account.zone.23f8d65290b24279ba6f44721b3eaad5' }],
-      },
+    const responsePromise = client.iam.resourceGroups.update('023e105f4ecef8ad9ca31a8372d0c353', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -56,19 +53,19 @@ describe('resource resourceGroups', () => {
   });
 
   test('update: required and optional params', async () => {
-    const response = await client.iam.resourceGroups.update('6d7f2f5f5b1d4a0e9081fdc98d432fd1', {
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+    const response = await client.iam.resourceGroups.update('023e105f4ecef8ad9ca31a8372d0c353', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      name: 'UpdatedResourceGroup',
       scope: {
         key: 'com.cloudflare.api.account.eb78d65290b24279ba6f44721b3ea3c4',
         objects: [{ key: 'com.cloudflare.api.account.zone.23f8d65290b24279ba6f44721b3eaad5' }],
       },
-      meta: { editable: 'false' },
     });
   });
 
   test('list: only required params', async () => {
     const responsePromise = client.iam.resourceGroups.list({
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -81,17 +78,15 @@ describe('resource resourceGroups', () => {
 
   test('list: required and optional params', async () => {
     const response = await client.iam.resourceGroups.list({
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
-      id: '6d7f2f5f5b1d4a0e9081fdc98d432fd1',
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+      id: '023e105f4ecef8ad9ca31a8372d0c353',
       name: 'NameOfTheResourceGroup',
-      page: 1,
-      per_page: 5,
     });
   });
 
   test('delete: only required params', async () => {
-    const responsePromise = client.iam.resourceGroups.delete('6d7f2f5f5b1d4a0e9081fdc98d432fd1', {
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+    const responsePromise = client.iam.resourceGroups.delete('023e105f4ecef8ad9ca31a8372d0c353', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -103,14 +98,14 @@ describe('resource resourceGroups', () => {
   });
 
   test('delete: required and optional params', async () => {
-    const response = await client.iam.resourceGroups.delete('6d7f2f5f5b1d4a0e9081fdc98d432fd1', {
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+    const response = await client.iam.resourceGroups.delete('023e105f4ecef8ad9ca31a8372d0c353', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
     });
   });
 
   test('get: only required params', async () => {
-    const responsePromise = client.iam.resourceGroups.get('6d7f2f5f5b1d4a0e9081fdc98d432fd1', {
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+    const responsePromise = client.iam.resourceGroups.get('023e105f4ecef8ad9ca31a8372d0c353', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -122,8 +117,8 @@ describe('resource resourceGroups', () => {
   });
 
   test('get: required and optional params', async () => {
-    const response = await client.iam.resourceGroups.get('6d7f2f5f5b1d4a0e9081fdc98d432fd1', {
-      account_id: 'eb78d65290b24279ba6f44721b3ea3c4',
+    const response = await client.iam.resourceGroups.get('023e105f4ecef8ad9ca31a8372d0c353', {
+      account_id: '023e105f4ecef8ad9ca31a8372d0c353',
     });
   });
 });

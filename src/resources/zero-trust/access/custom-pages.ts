@@ -2,11 +2,23 @@
 
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
-import { SinglePage } from '../../../pagination';
+import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../../pagination';
 
 export class CustomPages extends APIResource {
   /**
    * Create a custom page
+   *
+   * @example
+   * ```ts
+   * const customPageWithoutHTML =
+   *   await client.zeroTrust.access.customPages.create({
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     custom_html:
+   *       '<html><body><h1>Access Denied</h1></body></html>',
+   *     name: 'name',
+   *     type: 'identity_denied',
+   *   });
+   * ```
    */
   create(
     params: CustomPageCreateParams,
@@ -23,6 +35,21 @@ export class CustomPages extends APIResource {
 
   /**
    * Update a custom page
+   *
+   * @example
+   * ```ts
+   * const customPageWithoutHTML =
+   *   await client.zeroTrust.access.customPages.update(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     {
+   *       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *       custom_html:
+   *         '<html><body><h1>Access Denied</h1></body></html>',
+   *       name: 'name',
+   *       type: 'identity_denied',
+   *     },
+   *   );
+   * ```
    */
   update(
     customPageId: string,
@@ -40,21 +67,40 @@ export class CustomPages extends APIResource {
 
   /**
    * List custom pages
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const customPageWithoutHTML of client.zeroTrust.access.customPages.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: CustomPageListParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<CustomPageWithoutHTMLsSinglePage, CustomPageWithoutHTML> {
-    const { account_id } = params;
+  ): Core.PagePromise<CustomPageWithoutHTMLsV4PagePaginationArray, CustomPageWithoutHTML> {
+    const { account_id, ...query } = params;
     return this._client.getAPIList(
       `/accounts/${account_id}/access/custom_pages`,
-      CustomPageWithoutHTMLsSinglePage,
-      options,
+      CustomPageWithoutHTMLsV4PagePaginationArray,
+      { query, ...options },
     );
   }
 
   /**
    * Delete a custom page
+   *
+   * @example
+   * ```ts
+   * const customPage =
+   *   await client.zeroTrust.access.customPages.delete(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   delete(
     customPageId: string,
@@ -72,6 +118,15 @@ export class CustomPages extends APIResource {
 
   /**
    * Fetches a custom page and also returns its HTML.
+   *
+   * @example
+   * ```ts
+   * const customPage =
+   *   await client.zeroTrust.access.customPages.get(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     customPageId: string,
@@ -88,7 +143,7 @@ export class CustomPages extends APIResource {
   }
 }
 
-export class CustomPageWithoutHTMLsSinglePage extends SinglePage<CustomPageWithoutHTML> {}
+export class CustomPageWithoutHTMLsV4PagePaginationArray extends V4PagePaginationArray<CustomPageWithoutHTML> {}
 
 export interface CustomPage {
   /**
@@ -107,18 +162,9 @@ export interface CustomPage {
   type: 'identity_denied' | 'forbidden';
 
   /**
-   * Number of apps the custom page is assigned to.
-   */
-  app_count?: number;
-
-  created_at?: string;
-
-  /**
-   * UUID
+   * UUID.
    */
   uid?: string;
-
-  updated_at?: string;
 }
 
 export interface CustomPageWithoutHTML {
@@ -133,30 +179,21 @@ export interface CustomPageWithoutHTML {
   type: 'identity_denied' | 'forbidden';
 
   /**
-   * Number of apps the custom page is assigned to.
-   */
-  app_count?: number;
-
-  created_at?: string;
-
-  /**
-   * UUID
+   * UUID.
    */
   uid?: string;
-
-  updated_at?: string;
 }
 
 export interface CustomPageDeleteResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 }
 
 export interface CustomPageCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -174,16 +211,11 @@ export interface CustomPageCreateParams {
    * Body param: Custom page type.
    */
   type: 'identity_denied' | 'forbidden';
-
-  /**
-   * Body param: Number of apps the custom page is assigned to.
-   */
-  app_count?: number;
 }
 
 export interface CustomPageUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -201,42 +233,37 @@ export interface CustomPageUpdateParams {
    * Body param: Custom page type.
    */
   type: 'identity_denied' | 'forbidden';
-
-  /**
-   * Body param: Number of apps the custom page is assigned to.
-   */
-  app_count?: number;
 }
 
-export interface CustomPageListParams {
+export interface CustomPageListParams extends V4PagePaginationArrayParams {
   /**
-   * Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 }
 
 export interface CustomPageDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
 export interface CustomPageGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
-CustomPages.CustomPageWithoutHTMLsSinglePage = CustomPageWithoutHTMLsSinglePage;
+CustomPages.CustomPageWithoutHTMLsV4PagePaginationArray = CustomPageWithoutHTMLsV4PagePaginationArray;
 
 export declare namespace CustomPages {
   export {
     type CustomPage as CustomPage,
     type CustomPageWithoutHTML as CustomPageWithoutHTML,
     type CustomPageDeleteResponse as CustomPageDeleteResponse,
-    CustomPageWithoutHTMLsSinglePage as CustomPageWithoutHTMLsSinglePage,
+    CustomPageWithoutHTMLsV4PagePaginationArray as CustomPageWithoutHTMLsV4PagePaginationArray,
     type CustomPageCreateParams as CustomPageCreateParams,
     type CustomPageUpdateParams as CustomPageUpdateParams,
     type CustomPageListParams as CustomPageListParams,

@@ -8,6 +8,7 @@ export {
   type AccountSettingGetParams,
 } from './account-settings';
 export { Assets } from './assets/index';
+export { Beta } from './beta/index';
 export {
   DomainsSinglePage,
   Domains,
@@ -17,6 +18,7 @@ export {
   type DomainDeleteParams,
   type DomainGetParams,
 } from './domains';
+export { Observability } from './observability/index';
 export {
   RouteListResponsesSinglePage,
   Routes,
@@ -37,11 +39,14 @@ export {
   type Script,
   type ScriptSetting,
   type ScriptUpdateResponse,
+  type ScriptDeleteResponse,
   type ScriptGetResponse,
+  type ScriptSearchResponse,
   type ScriptUpdateParams,
   type ScriptListParams,
   type ScriptDeleteParams,
   type ScriptGetParams,
+  type ScriptSearchParams,
 } from './scripts/index';
 export {
   Subdomains,

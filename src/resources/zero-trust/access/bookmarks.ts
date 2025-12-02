@@ -7,6 +7,8 @@ import { SinglePage } from '../../../pagination';
 export class Bookmarks extends APIResource {
   /**
    * Create a new Bookmark application.
+   *
+   * @deprecated
    */
   create(
     bookmarkId: string,
@@ -24,6 +26,8 @@ export class Bookmarks extends APIResource {
 
   /**
    * Updates a configured Bookmark application.
+   *
+   * @deprecated
    */
   update(
     bookmarkId: string,
@@ -41,6 +45,8 @@ export class Bookmarks extends APIResource {
 
   /**
    * Lists Bookmark applications.
+   *
+   * @deprecated
    */
   list(
     params: BookmarkListParams,
@@ -52,6 +58,8 @@ export class Bookmarks extends APIResource {
 
   /**
    * Deletes a Bookmark application.
+   *
+   * @deprecated
    */
   delete(
     bookmarkId: string,
@@ -69,6 +77,8 @@ export class Bookmarks extends APIResource {
 
   /**
    * Fetches a single Bookmark application.
+   *
+   * @deprecated
    */
   get(
     bookmarkId: string,
@@ -97,8 +107,6 @@ export interface Bookmark {
    */
   app_launcher_visible?: boolean;
 
-  created_at?: string;
-
   /**
    * The domain of the Bookmark application.
    */
@@ -113,13 +121,11 @@ export interface Bookmark {
    * The name of the Bookmark application.
    */
   name?: string;
-
-  updated_at?: string;
 }
 
 export interface BookmarkDeleteResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 }

@@ -7,6 +7,16 @@ import { V4PagePagination, type V4PagePaginationParams } from '../../pagination'
 export class Searches extends APIResource {
   /**
    * Search for Load Balancing resources.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const searchListResponse of client.loadBalancers.searches.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: SearchListParams,
@@ -61,28 +71,20 @@ export namespace SearchListResponse {
 
 export interface SearchListParams extends V4PagePaginationParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
   /**
-   * Query param:
+   * Query param: Search query term.
    */
-  search_params?: SearchListParams.SearchParams;
-}
+  query?: string;
 
-export namespace SearchListParams {
-  export interface SearchParams {
-    /**
-     * Search query term.
-     */
-    query?: string;
-
-    /**
-     * The type of references to include ("\*" for all).
-     */
-    references?: '' | '*' | 'referral' | 'referrer';
-  }
+  /**
+   * Query param: The type of references to include. "\*" to include both referral
+   * and referrer references. "" to not include any reference information.
+   */
+  references?: '' | '*' | 'referral' | 'referrer';
 }
 
 Searches.SearchListResponsesV4PagePagination = SearchListResponsesV4PagePagination;

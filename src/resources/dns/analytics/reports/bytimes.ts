@@ -2,7 +2,6 @@
 
 import { APIResource } from '../../../../resource';
 import * as Core from '../../../../core';
-import * as DNSAPI from '../../dns';
 
 export class Bytimes extends APIResource {
   /**
@@ -11,6 +10,14 @@ export class Bytimes extends APIResource {
    * See
    * [Analytics API properties](https://developers.cloudflare.com/dns/reference/analytics-api-properties/)
    * for detailed information about the available query parameters.
+   *
+   * @example
+   * ```ts
+   * const byTime =
+   *   await client.dns.analytics.reports.bytimes.get({
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   get(params: BytimeGetParams, options?: Core.RequestOptions): Core.APIPromise<ByTime> {
     const { zone_id, ...query } = params;
@@ -47,7 +54,7 @@ export interface ByTime {
    */
   min: unknown;
 
-  query: DNSAPI.DNSAnalyticsQuery;
+  query: ByTime.Query;
 
   /**
    * Total number of rows in the result.
@@ -79,13 +86,66 @@ export namespace ByTime {
      * Array with one item per requested metric. Each item is an array of values,
      * broken down by time interval.
      */
-    metrics: Array<DNSAPI.DNSAnalyticsNominalMetric>;
+    metrics: Array<Array<number>>;
+  }
+
+  export interface Query {
+    /**
+     * Array of dimension names.
+     */
+    dimensions: Array<string>;
+
+    /**
+     * Limit number of returned metrics.
+     */
+    limit: number;
+
+    /**
+     * Array of metric names.
+     */
+    metrics: Array<string>;
+
+    /**
+     * Start date and time of requesting data period in ISO 8601 format.
+     */
+    since: string;
+
+    /**
+     * Unit of time to group data by.
+     */
+    time_delta:
+      | 'all'
+      | 'auto'
+      | 'year'
+      | 'quarter'
+      | 'month'
+      | 'week'
+      | 'day'
+      | 'hour'
+      | 'dekaminute'
+      | 'minute';
+
+    /**
+     * End date and time of requesting data period in ISO 8601 format.
+     */
+    until: string;
+
+    /**
+     * Segmentation filter in 'attribute operator value' format.
+     */
+    filters?: string;
+
+    /**
+     * Array of dimensions to sort by, where each dimension may be prefixed by -
+     * (descending) or + (ascending).
+     */
+    sort?: Array<string>;
   }
 }
 
 export interface BytimeGetParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 

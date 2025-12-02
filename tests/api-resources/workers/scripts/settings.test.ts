@@ -27,7 +27,18 @@ describe('resource settings', () => {
     const response = await client.workers.scripts.settings.edit('this-is_my_script-01', {
       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
       logpush: false,
-      observability: { enabled: true, head_sampling_rate: 0.1 },
+      observability: {
+        enabled: true,
+        head_sampling_rate: 0.1,
+        logs: {
+          enabled: true,
+          invocation_logs: true,
+          destinations: ['cloudflare'],
+          head_sampling_rate: 0.1,
+          persist: true,
+        },
+      },
+      tags: ['my-team', 'my-public-api'],
       tail_consumers: [{ service: 'my-log-consumer', environment: 'production', namespace: 'my-namespace' }],
     });
   });

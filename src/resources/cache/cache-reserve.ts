@@ -9,6 +9,14 @@ export class CacheReserveResource extends APIResource {
    * disable Cache Reserve. In most cases, this will be accomplished within 24 hours.
    * You cannot re-enable Cache Reserve while this process is ongoing. Keep in mind
    * that you cannot undo or cancel this operation.
+   *
+   * @example
+   * ```ts
+   * const response = await client.cache.cacheReserve.clear({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   body: {},
+   * });
+   * ```
    */
   clear(
     params: CacheReserveClearParams,
@@ -30,6 +38,14 @@ export class CacheReserveResource extends APIResource {
    * to reduce Reserve operations costs. See the
    * [developer docs](https://developers.cloudflare.com/cache/about/cache-reserve)
    * for more information.
+   *
+   * @example
+   * ```ts
+   * const response = await client.cache.cacheReserve.edit({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   value: 'on',
+   * });
+   * ```
    */
   edit(
     params: CacheReserveEditParams,
@@ -50,6 +66,13 @@ export class CacheReserveResource extends APIResource {
    * to reduce Reserve operations costs. See the
    * [developer docs](https://developers.cloudflare.com/cache/about/cache-reserve)
    * for more information.
+   *
+   * @example
+   * ```ts
+   * const cacheReserve = await client.cache.cacheReserve.get({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   get(
     params: CacheReserveGetParams,
@@ -68,6 +91,13 @@ export class CacheReserveResource extends APIResource {
    * disable Cache Reserve. In most cases, this will be accomplished within 24 hours.
    * You cannot re-enable Cache Reserve while this process is ongoing. Keep in mind
    * that you cannot undo or cancel this operation.
+   *
+   * @example
+   * ```ts
+   * const response = await client.cache.cacheReserve.status({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   status(
     params: CacheReserveStatusParams,
@@ -83,7 +113,7 @@ export class CacheReserveResource extends APIResource {
 }
 
 /**
- * ID of the zone setting.
+ * The identifier of the caching setting.
  */
 export type CacheReserve = 'cache_reserve';
 
@@ -132,17 +162,17 @@ export interface CacheReserveClearResponse {
 
 export interface CacheReserveEditResponse {
   /**
-   * ID of the zone setting.
+   * The identifier of the caching setting.
    */
   id: CacheReserve;
 
   /**
-   * Whether the setting is editable
+   * Whether the setting is editable.
    */
   editable: boolean;
 
   /**
-   * The value of the feature
+   * Value of the Cache Reserve zone setting.
    */
   value: 'on' | 'off';
 
@@ -154,17 +184,17 @@ export interface CacheReserveEditResponse {
 
 export interface CacheReserveGetResponse {
   /**
-   * ID of the zone setting.
+   * The identifier of the caching setting.
    */
   id: CacheReserve;
 
   /**
-   * Whether the setting is editable
+   * Whether the setting is editable.
    */
   editable: boolean;
 
   /**
-   * The value of the feature
+   * Value of the Cache Reserve zone setting.
    */
   value: 'on' | 'off';
 
@@ -209,7 +239,7 @@ export interface CacheReserveStatusResponse {
 
 export interface CacheReserveClearParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -221,7 +251,7 @@ export interface CacheReserveClearParams {
 
 export interface CacheReserveEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -233,14 +263,14 @@ export interface CacheReserveEditParams {
 
 export interface CacheReserveGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }
 
 export interface CacheReserveStatusParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

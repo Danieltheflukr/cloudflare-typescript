@@ -9,6 +9,12 @@ export class Locations extends APIResource {
    * Retrieves the top origin locations of layer 7 attacks. Values are percentages of
    * the total layer 7 attacks, with the origin location determined by the client IP
    * address.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.top.locations.origin();
+   * ```
    */
   origin(
     query?: LocationOriginParams,
@@ -34,6 +40,12 @@ export class Locations extends APIResource {
    * Retrieves the top target locations of and by layer 7 attacks. Values are a
    * percentage out of the total layer 7 attacks. The target location is determined
    * by the attacked zone's billing country, when available.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.radar.attacks.layer7.top.locations.target();
+   * ```
    */
   target(
     query?: LocationTargetParams,
@@ -57,21 +69,82 @@ export class Locations extends APIResource {
 }
 
 export interface LocationOriginResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: LocationOriginResponse.Meta;
 
   top_0: Array<LocationOriginResponse.Top0>;
 }
 
 export namespace LocationOriginResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo | null;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -84,28 +157,10 @@ export namespace LocationOriginResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
@@ -121,21 +176,82 @@ export namespace LocationOriginResponse {
 }
 
 export interface LocationTargetResponse {
+  /**
+   * Metadata for the results.
+   */
   meta: LocationTargetResponse.Meta;
 
   top_0: Array<LocationTargetResponse.Top0>;
 }
 
 export namespace LocationTargetResponse {
+  /**
+   * Metadata for the results.
+   */
   export interface Meta {
+    confidenceInfo: Meta.ConfidenceInfo | null;
+
     dateRange: Array<Meta.DateRange>;
 
+    /**
+     * Timestamp of the last dataset update.
+     */
     lastUpdated: string;
 
-    confidenceInfo?: Meta.ConfidenceInfo;
+    /**
+     * Normalization method applied to the results. Refer to
+     * [Normalization methods](https://developers.cloudflare.com/radar/concepts/normalization/).
+     */
+    normalization:
+      | 'PERCENTAGE'
+      | 'MIN0_MAX'
+      | 'MIN_MAX'
+      | 'RAW_VALUES'
+      | 'PERCENTAGE_CHANGE'
+      | 'ROLLING_AVERAGE'
+      | 'OVERLAPPED_PERCENTAGE'
+      | 'RATIO';
+
+    /**
+     * Measurement units for the results.
+     */
+    units: Array<Meta.Unit>;
   }
 
   export namespace Meta {
+    export interface ConfidenceInfo {
+      annotations: Array<ConfidenceInfo.Annotation>;
+
+      /**
+       * Provides an indication of how much confidence Cloudflare has in the data.
+       */
+      level: number;
+    }
+
+    export namespace ConfidenceInfo {
+      /**
+       * Annotation associated with the result (e.g. outage or other type of event).
+       */
+      export interface Annotation {
+        dataSource: string;
+
+        description: string;
+
+        endDate: string;
+
+        eventType: string;
+
+        /**
+         * Whether event is a single point in time or a time range.
+         */
+        isInstantaneous: boolean;
+
+        linkedUrl: string;
+
+        startDate: string;
+      }
+    }
+
     export interface DateRange {
       /**
        * Adjusted end of date range.
@@ -148,28 +264,10 @@ export namespace LocationTargetResponse {
       startTime: string;
     }
 
-    export interface ConfidenceInfo {
-      annotations?: Array<ConfidenceInfo.Annotation>;
+    export interface Unit {
+      name: string;
 
-      level?: number;
-    }
-
-    export namespace ConfidenceInfo {
-      export interface Annotation {
-        dataSource: string;
-
-        description: string;
-
-        eventType: string;
-
-        isInstantaneous: boolean;
-
-        endTime?: string;
-
-        linkedUrl?: string;
-
-        startTime?: string;
-      }
+      value: string;
     }
   }
 
@@ -186,16 +284,17 @@ export namespace LocationTargetResponse {
 
 export interface LocationOriginParams {
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs). Prefix with `-` to
-   * exclude ASNs from results. For example, `-174, 3356` excludes results from
-   * AS174, but includes results from AS3356.
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list. Prefix with `-` to exclude ASNs from
+   * results. For example, `-174, 3356` excludes results from AS174, but includes
+   * results from AS3356.
    */
   asn?: Array<string>;
 
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -205,9 +304,9 @@ export interface LocationOriginParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -289,7 +388,7 @@ export interface LocationOriginParams {
   limit?: number;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'
@@ -309,9 +408,9 @@ export interface LocationOriginParams {
 
 export interface LocationTargetParams {
   /**
-   * Comma-separated list of continents (alpha-2 continent codes). Prefix with `-` to
-   * exclude continents from results. For example, `-EU,NA` excludes results from EU,
-   * but includes results from NA.
+   * Filters results by continent. Specify a comma-separated list of alpha-2 codes.
+   * Prefix with `-` to exclude continents from results. For example, `-EU,NA`
+   * excludes results from EU, but includes results from NA.
    */
   continent?: Array<string>;
 
@@ -321,9 +420,9 @@ export interface LocationTargetParams {
   dateEnd?: Array<string>;
 
   /**
-   * Filters results by the specified date range. For example, use `7d` and
-   * `7dcontrol` to compare this week with the previous week. Use this parameter or
-   * set specific start and end dates (`dateStart` and `dateEnd` parameters).
+   * Filters results by date range. For example, use `7d` and `7dcontrol` to compare
+   * this week with the previous week. Use this parameter or set specific start and
+   * end dates (`dateStart` and `dateEnd` parameters).
    */
   dateRange?: Array<string>;
 
@@ -343,7 +442,7 @@ export interface LocationTargetParams {
   limit?: number;
 
   /**
-   * Array of L7 mitigation products.
+   * Filters the results by layer 7 mitigation product.
    */
   mitigationProduct?: Array<
     | 'DDOS'

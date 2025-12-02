@@ -7,6 +7,8 @@ import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../.
 export class Hosts extends APIResource {
   /**
    * Retrieve schema hosts in a zone
+   *
+   * @deprecated Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead.
    */
   list(
     params: HostListParams,
@@ -37,14 +39,14 @@ export interface HostListResponse {
   name: string;
 
   /**
-   * UUID
+   * UUID.
    */
   schema_id: string;
 }
 
 export interface HostListParams extends V4PagePaginationArrayParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 }

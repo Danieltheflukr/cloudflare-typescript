@@ -6,6 +6,14 @@ import * as Core from '../../core';
 export class Previews extends APIResource {
   /**
    * Get the result of a previous preview operation using the provided preview_id.
+   *
+   * @example
+   * ```ts
+   * const preview = await client.loadBalancers.previews.get(
+   *   'p1aba936b94213e5b8dca0c0dbf1f9cc',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     previewId: string,
@@ -25,18 +33,18 @@ export class Previews extends APIResource {
 /**
  * Resulting health data from a preview operation.
  */
-export type PreviewGetResponse = Record<string, PreviewGetResponse.item>;
+export type PreviewGetResponse = { [key: string]: PreviewGetResponse.item };
 
 export namespace PreviewGetResponse {
   export interface item {
     healthy?: boolean;
 
-    origins?: Array<Record<string, item.load_balancing_origin_health_data>>;
+    origins?: Array<{ [key: string]: item.load_balancing_origin_health_data }>;
   }
 
   export namespace item {
     /**
-     * The origin ipv4/ipv6 address or domain name mapped to it's health data.
+     * The origin ipv4/ipv6 address or domain name mapped to its health data.
      */
     export interface load_balancing_origin_health_data {
       failure_reason?: string;
@@ -52,7 +60,7 @@ export namespace PreviewGetResponse {
 
 export interface PreviewGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }

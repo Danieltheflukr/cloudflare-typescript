@@ -7,6 +7,16 @@ import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../p
 export class PermissionGroups extends APIResource {
   /**
    * List all the permissions groups for an account.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const permissionGroupListResponse of client.iam.permissionGroups.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: PermissionGroupListParams,
@@ -22,6 +32,15 @@ export class PermissionGroups extends APIResource {
 
   /**
    * Get information about a specific permission group in an account.
+   *
+   * @example
+   * ```ts
+   * const permissionGroup =
+   *   await client.iam.permissionGroups.get(
+   *     '023e105f4ecef8ad9ca31a8372d0c353',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   get(
     permissionGroupId: string,
@@ -41,7 +60,7 @@ export class PermissionGroupListResponsesV4PagePaginationArray extends V4PagePag
  */
 export interface PermissionGroupListResponse {
   /**
-   * Identifier of the group.
+   * Identifier of the permission group.
    */
   id: string;
 
@@ -51,7 +70,7 @@ export interface PermissionGroupListResponse {
   meta?: PermissionGroupListResponse.Meta;
 
   /**
-   * Name of the group.
+   * Name of the permission group.
    */
   name?: string;
 }
@@ -73,7 +92,7 @@ export namespace PermissionGroupListResponse {
  */
 export interface PermissionGroupGetResponse {
   /**
-   * Identifier of the group.
+   * Identifier of the permission group.
    */
   id: string;
 
@@ -83,7 +102,7 @@ export interface PermissionGroupGetResponse {
   meta?: PermissionGroupGetResponse.Meta;
 
   /**
-   * Name of the group.
+   * Name of the permission group.
    */
   name?: string;
 }

@@ -13,6 +13,13 @@ export class V2 extends APIResource {
    * List up to 10000 images with one request. Use the optional parameters below to
    * get a specific range of images. Endpoint returns continuation_token if more
    * images are present.
+   *
+   * @example
+   * ```ts
+   * const v2s = await client.images.v2.list({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   list(params: V2ListParams, options?: Core.RequestOptions): Core.APIPromise<V2ListResponse> {
     const { account_id, ...query } = params;
@@ -45,6 +52,12 @@ export interface V2ListParams {
    * continuation_token
    */
   continuation_token?: string | null;
+
+  /**
+   * Query param: Internal user ID set within the creator field. Setting to empty
+   * string "" will return images where creator field is not set
+   */
+  creator?: string | null;
 
   /**
    * Query param: Number of items per page.

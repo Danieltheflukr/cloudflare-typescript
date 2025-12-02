@@ -9,6 +9,19 @@ import { type Response } from '../../../../../_shims/index';
 export class Content extends APIResource {
   /**
    * Put script content for a script uploaded to a Workers for Platforms namespace.
+   *
+   * @example
+   * ```ts
+   * const script =
+   *   await client.workersForPlatforms.dispatch.namespaces.scripts.content.update(
+   *     'my-dispatch-namespace',
+   *     'this-is_my_script-01',
+   *     {
+   *       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *       metadata: {},
+   *     },
+   *   );
+   * ```
    */
   update(
     dispatchNamespace: string,
@@ -28,6 +41,7 @@ export class Content extends APIResource {
         Core.multipartFormRequestOptions({
           body,
           ...options,
+          __multipartSyntax: 'json',
           headers: {
             ...(cfWorkerBodyPart != null ? { 'CF-WORKER-BODY-PART': cfWorkerBodyPart } : undefined),
             ...(cfWorkerMainModulePart != null ?
@@ -43,6 +57,19 @@ export class Content extends APIResource {
   /**
    * Fetch script content from a script uploaded to a Workers for Platforms
    * namespace.
+   *
+   * @example
+   * ```ts
+   * const content =
+   *   await client.workersForPlatforms.dispatch.namespaces.scripts.content.get(
+   *     'my-dispatch-namespace',
+   *     'this-is_my_script-01',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   *
+   * const data = await content.blob();
+   * console.log(data);
+   * ```
    */
   get(
     dispatchNamespace: string,
@@ -60,15 +87,26 @@ export class Content extends APIResource {
 
 export interface ContentUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
   /**
-   * Body param: JSON encoded metadata about the uploaded parts and Worker
+   * Body param: JSON-encoded metadata about the uploaded parts and Worker
    * configuration.
    */
   metadata: WorkersAPI.WorkerMetadataParam;
+
+  /**
+   * Body param: An array of modules (often JavaScript files) comprising a Worker
+   * script. At least one module must be present and referenced in the metadata as
+   * `main_module` or `body_part` by filename.<br/>Possible Content-Type(s) are:
+   * `application/javascript+module`, `text/javascript+module`,
+   * `application/javascript`, `text/javascript`, `text/x-python`,
+   * `text/x-python-requirement`, `application/wasm`, `text/plain`,
+   * `application/octet-stream`, `application/source-map`.
+   */
+  files?: Array<Core.Uploadable>;
 
   /**
    * Header param: The multipart name of a script upload part containing script
@@ -85,7 +123,7 @@ export interface ContentUpdateParams {
 
 export interface ContentGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }

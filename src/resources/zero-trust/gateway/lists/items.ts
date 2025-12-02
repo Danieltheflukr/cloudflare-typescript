@@ -7,7 +7,18 @@ import { SinglePage } from '../../../../pagination';
 
 export class Items extends APIResource {
   /**
-   * Fetches all items in a single Zero Trust list.
+   * Fetch all items in a single Zero Trust list.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const itemListResponse of client.zeroTrust.gateway.lists.items.list(
+   *   'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *   { account_id: '699d98642c564d2e855e9661899b7252' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     listId: string,
@@ -26,7 +37,7 @@ export class Items extends APIResource {
 export class ItemListResponsesSinglePage extends SinglePage<ItemListResponse> {}
 
 /**
- * The items in the list.
+ * Provide the list items.
  */
 export type ItemListResponse = Array<ListsAPI.GatewayItem>;
 

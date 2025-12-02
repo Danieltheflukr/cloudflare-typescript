@@ -5,30 +5,41 @@ export { Content, type ContentUpdateParams, type ContentGetParams } from './cont
 export {
   Deployments,
   type Deployment,
-  type DeploymentCreateResponse,
-  type DeploymentGetResponse,
+  type DeploymentListResponse,
+  type DeploymentDeleteResponse,
   type DeploymentCreateParams,
+  type DeploymentListParams,
+  type DeploymentDeleteParams,
   type DeploymentGetParams,
 } from './deployments';
 export {
   Schedules,
-  type Schedule,
   type ScheduleUpdateResponse,
   type ScheduleGetResponse,
   type ScheduleUpdateParams,
   type ScheduleGetParams,
 } from './schedules';
 export {
+  ScriptAndVersionSettings,
+  type ScriptAndVersionSettingEditResponse,
+  type ScriptAndVersionSettingGetResponse,
+  type ScriptAndVersionSettingEditParams,
+  type ScriptAndVersionSettingGetParams,
+} from './script-and-version-settings';
+export {
   ScriptsSinglePage,
   Scripts,
   type Script,
   type ScriptSetting,
   type ScriptUpdateResponse,
+  type ScriptDeleteResponse,
   type ScriptGetResponse,
+  type ScriptSearchResponse,
   type ScriptUpdateParams,
   type ScriptListParams,
   type ScriptDeleteParams,
   type ScriptGetParams,
+  type ScriptSearchParams,
 } from './scripts';
 export {
   SecretListResponsesSinglePage,
@@ -46,8 +57,10 @@ export { Settings, type SettingEditParams, type SettingGetParams } from './setti
 export {
   Subdomain,
   type SubdomainCreateResponse,
+  type SubdomainDeleteResponse,
   type SubdomainGetResponse,
   type SubdomainCreateParams,
+  type SubdomainDeleteParams,
   type SubdomainGetParams,
 } from './subdomain';
 export {

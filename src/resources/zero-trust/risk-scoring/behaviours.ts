@@ -6,6 +6,17 @@ import * as Core from '../../../core';
 export class Behaviours extends APIResource {
   /**
    * Update configuration for risk behaviors
+   *
+   * @example
+   * ```ts
+   * const behaviour =
+   *   await client.zeroTrust.riskScoring.behaviours.update({
+   *     account_id: 'account_id',
+   *     behaviors: {
+   *       foo: { enabled: true, risk_level: 'low' },
+   *     },
+   *   });
+   * ```
    */
   update(
     params: BehaviourUpdateParams,
@@ -22,6 +33,14 @@ export class Behaviours extends APIResource {
 
   /**
    * Get all behaviors and associated configuration
+   *
+   * @example
+   * ```ts
+   * const behaviour =
+   *   await client.zeroTrust.riskScoring.behaviours.get({
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   get(params: BehaviourGetParams, options?: Core.RequestOptions): Core.APIPromise<BehaviourGetResponse> {
     const { account_id } = params;
@@ -34,7 +53,7 @@ export class Behaviours extends APIResource {
 }
 
 export interface BehaviourUpdateResponse {
-  behaviors: Record<string, BehaviourUpdateResponse.Behaviors>;
+  behaviors: { [key: string]: BehaviourUpdateResponse.Behaviors };
 }
 
 export namespace BehaviourUpdateResponse {
@@ -46,7 +65,7 @@ export namespace BehaviourUpdateResponse {
 }
 
 export interface BehaviourGetResponse {
-  behaviors: Record<string, BehaviourGetResponse.Behaviors>;
+  behaviors: { [key: string]: BehaviourGetResponse.Behaviors };
 }
 
 export namespace BehaviourGetResponse {
@@ -63,14 +82,14 @@ export namespace BehaviourGetResponse {
 
 export interface BehaviourUpdateParams {
   /**
-   * Path param: Account ID
+   * Path param: Account ID.
    */
   account_id: string;
 
   /**
    * Body param:
    */
-  behaviors: Record<string, BehaviourUpdateParams.Behaviors>;
+  behaviors: { [key: string]: BehaviourUpdateParams.Behaviors };
 }
 
 export namespace BehaviourUpdateParams {

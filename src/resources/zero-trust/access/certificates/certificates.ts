@@ -12,13 +12,24 @@ import {
   Settings,
 } from './settings';
 import { CloudflareError } from '../../../../error';
-import { SinglePage } from '../../../../pagination';
+import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../../../pagination';
 
 export class Certificates extends APIResource {
   settings: SettingsAPI.Settings = new SettingsAPI.Settings(this._client);
 
   /**
    * Adds a new mTLS root certificate to Access.
+   *
+   * @example
+   * ```ts
+   * const certificate =
+   *   await client.zeroTrust.access.certificates.create({
+   *     certificate:
+   *       '-----BEGIN CERTIFICATE-----\nMIIGAjCCA+qgAwIBAgIJAI7kymlF7CWT...N4RI7KKB7nikiuUf8vhULKy5IX10\nDrUtmu/B\n-----END CERTIFICATE-----',
+   *     name: 'Allow devs',
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   create(params: CertificateCreateParams, options?: Core.RequestOptions): Core.APIPromise<Certificate> {
     const { account_id, zone_id, ...body } = params;
@@ -48,6 +59,18 @@ export class Certificates extends APIResource {
 
   /**
    * Updates a configured mTLS certificate.
+   *
+   * @example
+   * ```ts
+   * const certificate =
+   *   await client.zeroTrust.access.certificates.update(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     {
+   *       associated_hostnames: ['admin.example.com'],
+   *       account_id: 'account_id',
+   *     },
+   *   );
+   * ```
    */
   update(
     certificateId: string,
@@ -81,20 +104,30 @@ export class Certificates extends APIResource {
 
   /**
    * Lists all mTLS root certificates.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const certificate of client.zeroTrust.access.certificates.list(
+   *   { account_id: 'account_id' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params?: CertificateListParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<CertificatesSinglePage, Certificate>;
-  list(options?: Core.RequestOptions): Core.PagePromise<CertificatesSinglePage, Certificate>;
+  ): Core.PagePromise<CertificatesV4PagePaginationArray, Certificate>;
+  list(options?: Core.RequestOptions): Core.PagePromise<CertificatesV4PagePaginationArray, Certificate>;
   list(
     params: CertificateListParams | Core.RequestOptions = {},
     options?: Core.RequestOptions,
-  ): Core.PagePromise<CertificatesSinglePage, Certificate> {
+  ): Core.PagePromise<CertificatesV4PagePaginationArray, Certificate> {
     if (isRequestOptions(params)) {
       return this.list({}, params);
     }
-    const { account_id, zone_id } = params;
+    const { account_id, zone_id, ...query } = params;
     if (!account_id && !zone_id) {
       throw new CloudflareError('You must provide either account_id or zone_id.');
     }
@@ -113,13 +146,22 @@ export class Certificates extends APIResource {
         };
     return this._client.getAPIList(
       `/${accountOrZone}/${accountOrZoneId}/access/certificates`,
-      CertificatesSinglePage,
-      options,
+      CertificatesV4PagePaginationArray,
+      { query, ...options },
     );
   }
 
   /**
    * Deletes an mTLS certificate.
+   *
+   * @example
+   * ```ts
+   * const certificate =
+   *   await client.zeroTrust.access.certificates.delete(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   delete(
     certificateId: string,
@@ -162,6 +204,15 @@ export class Certificates extends APIResource {
 
   /**
    * Fetches a single mTLS certificate.
+   *
+   * @example
+   * ```ts
+   * const certificate =
+   *   await client.zeroTrust.access.certificates.get(
+   *     'f174e90a-fafe-4643-bbbc-4a0ed4fc8415',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   get(
     certificateId: string,
@@ -203,7 +254,7 @@ export class Certificates extends APIResource {
   }
 }
 
-export class CertificatesSinglePage extends SinglePage<Certificate> {}
+export class CertificatesV4PagePaginationArray extends V4PagePaginationArray<Certificate> {}
 
 /**
  * A fully-qualified domain name (FQDN).
@@ -226,8 +277,6 @@ export interface Certificate {
    */
   associated_hostnames?: Array<AssociatedHostnames>;
 
-  created_at?: string;
-
   expires_on?: string;
 
   /**
@@ -239,13 +288,11 @@ export interface Certificate {
    * The name of the certificate.
    */
   name?: string;
-
-  updated_at?: string;
 }
 
 export interface CertificateDeleteResponse {
   /**
-   * UUID
+   * UUID.
    */
   id?: string;
 }
@@ -303,14 +350,16 @@ export interface CertificateUpdateParams {
   name?: string;
 }
 
-export interface CertificateListParams {
+export interface CertificateListParams extends V4PagePaginationArrayParams {
   /**
-   * The Account ID to use for this endpoint. Mutually exclusive with the Zone ID.
+   * Path param: The Account ID to use for this endpoint. Mutually exclusive with the
+   * Zone ID.
    */
   account_id?: string;
 
   /**
-   * The Zone ID to use for this endpoint. Mutually exclusive with the Account ID.
+   * Path param: The Zone ID to use for this endpoint. Mutually exclusive with the
+   * Account ID.
    */
   zone_id?: string;
 }
@@ -339,7 +388,7 @@ export interface CertificateGetParams {
   zone_id?: string;
 }
 
-Certificates.CertificatesSinglePage = CertificatesSinglePage;
+Certificates.CertificatesV4PagePaginationArray = CertificatesV4PagePaginationArray;
 Certificates.Settings = Settings;
 Certificates.CertificateSettingsSinglePage = CertificateSettingsSinglePage;
 
@@ -348,7 +397,7 @@ export declare namespace Certificates {
     type AssociatedHostnames as AssociatedHostnames,
     type Certificate as Certificate,
     type CertificateDeleteResponse as CertificateDeleteResponse,
-    CertificatesSinglePage as CertificatesSinglePage,
+    CertificatesV4PagePaginationArray as CertificatesV4PagePaginationArray,
     type CertificateCreateParams as CertificateCreateParams,
     type CertificateUpdateParams as CertificateUpdateParams,
     type CertificateListParams as CertificateListParams,

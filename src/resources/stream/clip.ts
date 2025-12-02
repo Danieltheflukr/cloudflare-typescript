@@ -7,6 +7,16 @@ import * as StreamAPI from './stream';
 export class ClipResource extends APIResource {
   /**
    * Clips a video based on the specified start and end times provided in seconds.
+   *
+   * @example
+   * ```ts
+   * const clip = await client.stream.clip.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   clippedFromVideoUID: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   endTimeSeconds: 0,
+   *   startTimeSeconds: 0,
+   * });
+   * ```
    */
   create(params: ClipCreateParams, options?: Core.RequestOptions): Core.APIPromise<Clip> {
     const { account_id, ...body } = params;
@@ -86,7 +96,7 @@ export interface Clip {
   /**
    * Specifies the processing status for all quality levels for a video.
    */
-  status?: 'pendingupload' | 'downloading' | 'queued' | 'inprogress' | 'ready' | 'error';
+  status?: 'pendingupload' | 'downloading' | 'queued' | 'inprogress' | 'ready' | 'error' | 'live-inprogress';
 
   /**
    * The timestamp for a thumbnail image calculated as a percentage value of the

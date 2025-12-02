@@ -101,6 +101,16 @@ export class Stream extends APIResource {
    * with a status code 201 (created) and includes a `location` header to indicate
    * where the content should be uploaded. Refer to https://tus.io for protocol
    * details.
+   *
+   * @example
+   * ```ts
+   * await client.stream.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   body: {},
+   *   'Tus-Resumable': '1.0.0',
+   *   'Upload-Length': 0,
+   * });
+   * ```
    */
   create(params: StreamCreateParams, options?: Core.RequestOptions): Core.APIPromise<void> {
     const {
@@ -130,6 +140,16 @@ export class Stream extends APIResource {
   /**
    * Lists up to 1000 videos from a single request. For a specific range, refer to
    * the optional parameters.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const video of client.stream.list({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * })) {
+   *   // ...
+   * }
+   * ```
    */
   list(params: StreamListParams, options?: Core.RequestOptions): Core.PagePromise<VideosSinglePage, Video> {
     const { account_id, ...query } = params;
@@ -138,6 +158,14 @@ export class Stream extends APIResource {
 
   /**
    * Deletes a video and its copies from Cloudflare Stream.
+   *
+   * @example
+   * ```ts
+   * await client.stream.delete(
+   *   'ea95132c15732412d22c1476fa83f27a',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     identifier: string,
@@ -153,6 +181,14 @@ export class Stream extends APIResource {
 
   /**
    * Edit details for a single video.
+   *
+   * @example
+   * ```ts
+   * const video = await client.stream.edit(
+   *   'ea95132c15732412d22c1476fa83f27a',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   edit(identifier: string, params: StreamEditParams, options?: Core.RequestOptions): Core.APIPromise<Video> {
     const { account_id, ...body } = params;
@@ -166,6 +202,14 @@ export class Stream extends APIResource {
 
   /**
    * Fetches details for a single video.
+   *
+   * @example
+   * ```ts
+   * const video = await client.stream.get(
+   *   'ea95132c15732412d22c1476fa83f27a',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(identifier: string, params: StreamGetParams, options?: Core.RequestOptions): Core.APIPromise<Video> {
     const { account_id } = params;
@@ -369,7 +413,7 @@ export namespace Video {
     /**
      * Specifies the processing status for all quality levels for a video.
      */
-    state?: 'pendingupload' | 'downloading' | 'queued' | 'inprogress' | 'ready' | 'error';
+    state?: 'pendingupload' | 'downloading' | 'queued' | 'inprogress' | 'ready' | 'error' | 'live-inprogress';
   }
 }
 
@@ -412,7 +456,7 @@ export interface StreamCreateParams {
    * Header param: Comma-separated key-value pairs following the TUS protocol
    * specification. Values are Base-64 encoded. Supported keys: `name`,
    * `requiresignedurls`, `allowedorigins`, `thumbnailtimestamppct`, `watermark`,
-   * `scheduleddeletion`.
+   * `scheduleddeletion`, `maxdurationseconds`.
    */
   'Upload-Metadata'?: string;
 }
@@ -445,8 +489,9 @@ export interface StreamListParams {
   include_counts?: boolean;
 
   /**
-   * Query param: Searches over the `name` key in the `meta` field. This field can be
-   * set with or after the upload request.
+   * Query param: Provides a partial word match of the `name` key in the `meta`
+   * field. Slow for medium to large video libraries. May be unavailable for very
+   * large libraries.
    */
   search?: string;
 
@@ -458,12 +503,18 @@ export interface StreamListParams {
   /**
    * Query param: Specifies the processing status for all quality levels for a video.
    */
-  status?: 'pendingupload' | 'downloading' | 'queued' | 'inprogress' | 'ready' | 'error';
+  status?: 'pendingupload' | 'downloading' | 'queued' | 'inprogress' | 'ready' | 'error' | 'live-inprogress';
 
   /**
    * Query param: Specifies whether the video is `vod` or `live`.
    */
   type?: string;
+
+  /**
+   * Query param: Provides a fast, exact string match on the `name` key in the `meta`
+   * field.
+   */
+  video_name?: string;
 }
 
 export interface StreamDeleteParams {
@@ -543,6 +594,7 @@ export interface StreamGetParams {
   account_id: string;
 }
 
+Stream.VideosSinglePage = VideosSinglePage;
 Stream.AudioTracks = AudioTracks;
 Stream.AudioSinglePage = AudioSinglePage;
 Stream.Videos = Videos;
@@ -561,6 +613,17 @@ Stream.Embed = Embed;
 Stream.Token = Token;
 
 export declare namespace Stream {
+  export {
+    type AllowedOrigins as AllowedOrigins,
+    type Video as Video,
+    VideosSinglePage as VideosSinglePage,
+    type StreamCreateParams as StreamCreateParams,
+    type StreamListParams as StreamListParams,
+    type StreamDeleteParams as StreamDeleteParams,
+    type StreamEditParams as StreamEditParams,
+    type StreamGetParams as StreamGetParams,
+  };
+
   export {
     AudioTracks as AudioTracks,
     type Audio as Audio,

@@ -34,12 +34,12 @@ export interface BytimeGetResponse {
   /**
    * Maximum result for each selected metrics across all data.
    */
-  max: Record<string, number>;
+  max: { [key: string]: number };
 
   /**
    * Minimum result for each selected metrics across all data.
    */
-  min: Record<string, number>;
+  min: { [key: string]: number };
 
   query: BytimeGetResponse.Query;
 
@@ -51,7 +51,7 @@ export interface BytimeGetResponse {
   /**
    * Total result for each selected metrics across all data.
    */
-  totals: Record<string, number>;
+  totals: { [key: string]: number };
 
   /**
    * List of time interval buckets: [start, end]
@@ -148,7 +148,7 @@ export namespace BytimeGetResponse {
 
 export interface BytimeGetParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 

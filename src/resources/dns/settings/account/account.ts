@@ -23,6 +23,13 @@ export class Account extends APIResource {
 
   /**
    * Update DNS settings for an account
+   *
+   * @example
+   * ```ts
+   * const response = await client.dns.settings.account.edit({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   edit(params: AccountEditParams, options?: Core.RequestOptions): Core.APIPromise<AccountEditResponse> {
     const { account_id, ...body } = params;
@@ -35,6 +42,13 @@ export class Account extends APIResource {
 
   /**
    * Show DNS settings for an account
+   *
+   * @example
+   * ```ts
+   * const account = await client.dns.settings.account.get({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   get(params: AccountGetParams, options?: Core.RequestOptions): Core.APIPromise<AccountGetResponse> {
     const { account_id } = params;
@@ -47,7 +61,7 @@ export class Account extends APIResource {
 }
 
 export interface AccountEditResponse {
-  zone_defaults?: AccountEditResponse.ZoneDefaults;
+  zone_defaults: AccountEditResponse.ZoneDefaults;
 }
 
 export namespace AccountEditResponse {
@@ -56,50 +70,50 @@ export namespace AccountEditResponse {
      * Whether to flatten all CNAME records in the zone. Note that, due to DNS
      * limitations, a CNAME record at the zone apex will always be flattened.
      */
-    flatten_all_cnames?: boolean;
+    flatten_all_cnames: boolean;
 
     /**
      * Whether to enable Foundation DNS Advanced Nameservers on the zone.
      */
-    foundation_dns?: boolean;
+    foundation_dns: boolean;
 
     /**
      * Settings for this internal zone.
      */
-    internal_dns?: ZoneDefaults.InternalDNS;
+    internal_dns: ZoneDefaults.InternalDNS;
 
     /**
      * Whether to enable multi-provider DNS, which causes Cloudflare to activate the
      * zone even when non-Cloudflare NS records exist, and to respect NS records at the
      * zone apex during outbound zone transfers.
      */
-    multi_provider?: boolean;
+    multi_provider: boolean;
 
     /**
      * Settings determining the nameservers through which the zone should be available.
      */
-    nameservers?: ZoneDefaults.Nameservers;
+    nameservers: ZoneDefaults.Nameservers;
 
     /**
      * The time to live (TTL) of the zone's nameserver (NS) records.
      */
-    ns_ttl?: number;
+    ns_ttl: number;
 
     /**
      * Allows a Secondary DNS zone to use (proxied) override records and CNAME
      * flattening at the zone apex.
      */
-    secondary_overrides?: boolean;
+    secondary_overrides: boolean;
 
     /**
      * Components of the zone's SOA record.
      */
-    soa?: ZoneDefaults.SOA;
+    soa: ZoneDefaults.SOA;
 
     /**
      * Whether the zone mode is a regular or CDN/DNS only zone.
      */
-    zone_mode?: 'standard' | 'cdn_only' | 'dns_only';
+    zone_mode: 'standard' | 'cdn_only' | 'dns_only';
   }
 
   export namespace ZoneDefaults {
@@ -131,46 +145,47 @@ export namespace AccountEditResponse {
        * Time in seconds of being unable to query the primary server after which
        * secondary servers should stop serving the zone.
        */
-      expire: number;
+      expire?: number;
 
       /**
        * The time to live (TTL) for negative caching of records within the zone.
        */
-      min_ttl: number;
+      min_ttl?: number;
 
       /**
-       * The primary nameserver, which may be used for outbound zone transfers.
+       * The primary nameserver, which may be used for outbound zone transfers. If null,
+       * a Cloudflare-assigned value will be used.
        */
-      mname: string;
+      mname?: string | null;
 
       /**
        * Time in seconds after which secondary servers should re-check the SOA record to
        * see if the zone has been updated.
        */
-      refresh: number;
+      refresh?: number;
 
       /**
        * Time in seconds after which secondary servers should retry queries after the
        * primary server was unresponsive.
        */
-      retry: number;
+      retry?: number;
 
       /**
        * The email address of the zone administrator, with the first label representing
        * the local part of the email address.
        */
-      rname: string;
+      rname?: string;
 
       /**
        * The time to live (TTL) of the SOA record itself.
        */
-      ttl: number;
+      ttl?: number;
     }
   }
 }
 
 export interface AccountGetResponse {
-  zone_defaults?: AccountGetResponse.ZoneDefaults;
+  zone_defaults: AccountGetResponse.ZoneDefaults;
 }
 
 export namespace AccountGetResponse {
@@ -179,50 +194,50 @@ export namespace AccountGetResponse {
      * Whether to flatten all CNAME records in the zone. Note that, due to DNS
      * limitations, a CNAME record at the zone apex will always be flattened.
      */
-    flatten_all_cnames?: boolean;
+    flatten_all_cnames: boolean;
 
     /**
      * Whether to enable Foundation DNS Advanced Nameservers on the zone.
      */
-    foundation_dns?: boolean;
+    foundation_dns: boolean;
 
     /**
      * Settings for this internal zone.
      */
-    internal_dns?: ZoneDefaults.InternalDNS;
+    internal_dns: ZoneDefaults.InternalDNS;
 
     /**
      * Whether to enable multi-provider DNS, which causes Cloudflare to activate the
      * zone even when non-Cloudflare NS records exist, and to respect NS records at the
      * zone apex during outbound zone transfers.
      */
-    multi_provider?: boolean;
+    multi_provider: boolean;
 
     /**
      * Settings determining the nameservers through which the zone should be available.
      */
-    nameservers?: ZoneDefaults.Nameservers;
+    nameservers: ZoneDefaults.Nameservers;
 
     /**
      * The time to live (TTL) of the zone's nameserver (NS) records.
      */
-    ns_ttl?: number;
+    ns_ttl: number;
 
     /**
      * Allows a Secondary DNS zone to use (proxied) override records and CNAME
      * flattening at the zone apex.
      */
-    secondary_overrides?: boolean;
+    secondary_overrides: boolean;
 
     /**
      * Components of the zone's SOA record.
      */
-    soa?: ZoneDefaults.SOA;
+    soa: ZoneDefaults.SOA;
 
     /**
      * Whether the zone mode is a regular or CDN/DNS only zone.
      */
-    zone_mode?: 'standard' | 'cdn_only' | 'dns_only';
+    zone_mode: 'standard' | 'cdn_only' | 'dns_only';
   }
 
   export namespace ZoneDefaults {
@@ -254,47 +269,48 @@ export namespace AccountGetResponse {
        * Time in seconds of being unable to query the primary server after which
        * secondary servers should stop serving the zone.
        */
-      expire: number;
+      expire?: number;
 
       /**
        * The time to live (TTL) for negative caching of records within the zone.
        */
-      min_ttl: number;
+      min_ttl?: number;
 
       /**
-       * The primary nameserver, which may be used for outbound zone transfers.
+       * The primary nameserver, which may be used for outbound zone transfers. If null,
+       * a Cloudflare-assigned value will be used.
        */
-      mname: string;
+      mname?: string | null;
 
       /**
        * Time in seconds after which secondary servers should re-check the SOA record to
        * see if the zone has been updated.
        */
-      refresh: number;
+      refresh?: number;
 
       /**
        * Time in seconds after which secondary servers should retry queries after the
        * primary server was unresponsive.
        */
-      retry: number;
+      retry?: number;
 
       /**
        * The email address of the zone administrator, with the first label representing
        * the local part of the email address.
        */
-      rname: string;
+      rname?: string;
 
       /**
        * The time to live (TTL) of the SOA record itself.
        */
-      ttl: number;
+      ttl?: number;
     }
   }
 }
 
 export interface AccountEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -374,7 +390,7 @@ export namespace AccountEditParams {
       /**
        * Nameserver type
        */
-      type: 'cloudflare.standard' | 'cloudflare.standard.random' | 'custom.account' | 'custom.tenant';
+      type?: 'cloudflare.standard' | 'cloudflare.standard.random' | 'custom.account' | 'custom.tenant';
     }
 
     /**
@@ -385,47 +401,48 @@ export namespace AccountEditParams {
        * Time in seconds of being unable to query the primary server after which
        * secondary servers should stop serving the zone.
        */
-      expire: number;
+      expire?: number;
 
       /**
        * The time to live (TTL) for negative caching of records within the zone.
        */
-      min_ttl: number;
+      min_ttl?: number;
 
       /**
-       * The primary nameserver, which may be used for outbound zone transfers.
+       * The primary nameserver, which may be used for outbound zone transfers. If null,
+       * a Cloudflare-assigned value will be used.
        */
-      mname: string;
+      mname?: string | null;
 
       /**
        * Time in seconds after which secondary servers should re-check the SOA record to
        * see if the zone has been updated.
        */
-      refresh: number;
+      refresh?: number;
 
       /**
        * Time in seconds after which secondary servers should retry queries after the
        * primary server was unresponsive.
        */
-      retry: number;
+      retry?: number;
 
       /**
        * The email address of the zone administrator, with the first label representing
        * the local part of the email address.
        */
-      rname: string;
+      rname?: string;
 
       /**
        * The time to live (TTL) of the SOA record itself.
        */
-      ttl: number;
+      ttl?: number;
     }
   }
 }
 
 export interface AccountGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }

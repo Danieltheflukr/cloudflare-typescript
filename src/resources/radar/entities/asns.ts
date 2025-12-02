@@ -7,6 +7,11 @@ import * as Core from '../../../core';
 export class ASNs extends APIResource {
   /**
    * Retrieves a list of autonomous systems.
+   *
+   * @example
+   * ```ts
+   * const asns = await client.radar.entities.asns.list();
+   * ```
    */
   list(query?: ASNListParams, options?: Core.RequestOptions): Core.APIPromise<ASNListResponse>;
   list(options?: Core.RequestOptions): Core.APIPromise<ASNListResponse>;
@@ -25,10 +30,44 @@ export class ASNs extends APIResource {
   }
 
   /**
+   * Retrieves Internet Routing Registry AS-SETs that an AS is a member of.
+   *
+   * @example
+   * ```ts
+   * const response = await client.radar.entities.asns.asSet(3);
+   * ```
+   */
+  asSet(
+    asn: number,
+    query?: ASNAsSetParams,
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<ASNAsSetResponse>;
+  asSet(asn: number, options?: Core.RequestOptions): Core.APIPromise<ASNAsSetResponse>;
+  asSet(
+    asn: number,
+    query: ASNAsSetParams | Core.RequestOptions = {},
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<ASNAsSetResponse> {
+    if (isRequestOptions(query)) {
+      return this.asSet(asn, {}, query);
+    }
+    return (
+      this._client.get(`/radar/entities/asns/${asn}/as_set`, { query, ...options }) as Core.APIPromise<{
+        result: ASNAsSetResponse;
+      }>
+    )._thenUnwrap((obj) => obj.result);
+  }
+
+  /**
    * Retrieves the requested autonomous system information. (A confidence level below
    * `5` indicates a low level of confidence in the traffic data - normally this
    * happens because Cloudflare has a small amount of traffic from/to this AS).
    * Population estimates come from APNIC (refer to https://labs.apnic.net/?p=526).
+   *
+   * @example
+   * ```ts
+   * const asn = await client.radar.entities.asns.get(174);
+   * ```
    */
   get(asn: number, query?: ASNGetParams, options?: Core.RequestOptions): Core.APIPromise<ASNGetResponse>;
   get(asn: number, options?: Core.RequestOptions): Core.APIPromise<ASNGetResponse>;
@@ -50,6 +89,13 @@ export class ASNs extends APIResource {
   /**
    * Retrieves the requested autonomous system information based on IP address.
    * Population estimates come from APNIC (refer to https://labs.apnic.net/?p=526).
+   *
+   * @example
+   * ```ts
+   * const response = await client.radar.entities.asns.ip({
+   *   ip: '8.8.8.8',
+   * });
+   * ```
    */
   ip(query: ASNIPParams, options?: Core.RequestOptions): Core.APIPromise<ASNIPResponse> {
     return (
@@ -61,6 +107,11 @@ export class ASNs extends APIResource {
 
   /**
    * Retrieves AS-level relationship for given networks.
+   *
+   * @example
+   * ```ts
+   * const response = await client.radar.entities.asns.rel(3);
+   * ```
    */
   rel(asn: number, query?: ASNRelParams, options?: Core.RequestOptions): Core.APIPromise<ASNRelResponse>;
   rel(asn: number, options?: Core.RequestOptions): Core.APIPromise<ASNRelResponse>;
@@ -96,14 +147,57 @@ export namespace ASNListResponse {
 
     aka?: string;
 
-    /**
-     * Deprecated field. Please use 'aka'.
-     */
-    nameLong?: string;
-
     orgName?: string;
 
     website?: string;
+  }
+}
+
+export interface ASNAsSetResponse {
+  as_sets: Array<ASNAsSetResponse.AsSet>;
+
+  /**
+   * Paths from the AS-SET that include the given AS to its upstreams recursively
+   */
+  paths: Array<Array<string>>;
+}
+
+export namespace ASNAsSetResponse {
+  export interface AsSet {
+    /**
+     * The number of AS members in the AS-SET
+     */
+    as_members_count: number;
+
+    /**
+     * The number of AS-SET members in the AS-SET
+     */
+    as_set_members_count: number;
+
+    /**
+     * The number of recursive upstream AS-SETs
+     */
+    as_set_upstreams_count: number;
+
+    /**
+     * The number of unique ASNs in the AS-SETs recursive downstream
+     */
+    asn_cone_size: number;
+
+    /**
+     * The IRR sources of the AS-SET
+     */
+    irr_sources: Array<string>;
+
+    /**
+     * The name of the AS-SET
+     */
+    name: string;
+
+    /**
+     * The inferred AS number of the AS-SET
+     */
+    asn?: number;
   }
 }
 
@@ -130,18 +224,13 @@ export namespace ASNGetResponse {
     related: Array<ASN.Related>;
 
     /**
-     * Regional Internet Registry
+     * Regional Internet Registry.
      */
     source: string;
 
     website: string;
 
     aka?: string;
-
-    /**
-     * Deprecated field. Please use 'aka'.
-     */
-    nameLong?: string;
   }
 
   export namespace ASN {
@@ -149,7 +238,7 @@ export namespace ASNGetResponse {
       locations: Array<EstimatedUsers.Location>;
 
       /**
-       * Total estimated users
+       * Total estimated users.
        */
       estimatedUsers?: number;
     }
@@ -161,7 +250,7 @@ export namespace ASNGetResponse {
         locationName: string;
 
         /**
-         * Estimated users per location
+         * Estimated users per location.
          */
         estimatedUsers?: number;
       }
@@ -175,7 +264,7 @@ export namespace ASNGetResponse {
       aka?: string;
 
       /**
-       * Total estimated users
+       * Total estimated users.
        */
       estimatedUsers?: number;
     }
@@ -203,18 +292,13 @@ export namespace ASNIPResponse {
     related: Array<ASN.Related>;
 
     /**
-     * Regional Internet Registry
+     * Regional Internet Registry.
      */
     source: string;
 
     website: string;
 
     aka?: string;
-
-    /**
-     * Deprecated field. Please use 'aka'.
-     */
-    nameLong?: string;
   }
 
   export namespace ASN {
@@ -222,7 +306,7 @@ export namespace ASNIPResponse {
       locations: Array<EstimatedUsers.Location>;
 
       /**
-       * Total estimated users
+       * Total estimated users.
        */
       estimatedUsers?: number;
     }
@@ -234,7 +318,7 @@ export namespace ASNIPResponse {
         locationName: string;
 
         /**
-         * Estimated users per location
+         * Estimated users per location.
          */
         estimatedUsers?: number;
       }
@@ -248,7 +332,7 @@ export namespace ASNIPResponse {
       aka?: string;
 
       /**
-       * Total estimated users
+       * Total estimated users.
        */
       estimatedUsers?: number;
     }
@@ -289,7 +373,8 @@ export namespace ASNRelResponse {
 
 export interface ASNListParams {
   /**
-   * Comma-separated list of Autonomous System Numbers (ASNs).
+   * Filters results by Autonomous System. Specify one or more Autonomous System
+   * Numbers (ASNs) as a comma-separated list.
    */
   asn?: string;
 
@@ -304,7 +389,7 @@ export interface ASNListParams {
   limit?: number;
 
   /**
-   * Location alpha-2 code.
+   * Filters results by location. Specify an alpha-2 location code.
    */
   location?: string;
 
@@ -314,9 +399,16 @@ export interface ASNListParams {
   offset?: number;
 
   /**
-   * Metric to order the ASNs by.
+   * Specifies the metric to order the ASNs by.
    */
   orderBy?: 'ASN' | 'POPULATION';
+}
+
+export interface ASNAsSetParams {
+  /**
+   * Format in which results will be returned.
+   */
+  format?: 'JSON' | 'CSV';
 }
 
 export interface ASNGetParams {
@@ -353,10 +445,12 @@ export interface ASNRelParams {
 export declare namespace ASNs {
   export {
     type ASNListResponse as ASNListResponse,
+    type ASNAsSetResponse as ASNAsSetResponse,
     type ASNGetResponse as ASNGetResponse,
     type ASNIPResponse as ASNIPResponse,
     type ASNRelResponse as ASNRelResponse,
     type ASNListParams as ASNListParams,
+    type ASNAsSetParams as ASNAsSetParams,
     type ASNGetParams as ASNGetParams,
     type ASNIPParams as ASNIPParams,
     type ASNRelParams as ASNRelParams,

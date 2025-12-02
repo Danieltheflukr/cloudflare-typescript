@@ -7,6 +7,14 @@ import { CloudflareError } from '../../error';
 export class Validate extends APIResource {
   /**
    * Validates destination.
+   *
+   * @example
+   * ```ts
+   * const response = await client.logpush.validate.destination({
+   *   destination_conf: 's3://mybucket/logs?region=us-west-2',
+   *   account_id: 'account_id',
+   * });
+   * ```
    */
   destination(
     params: ValidateDestinationParams,
@@ -39,6 +47,15 @@ export class Validate extends APIResource {
 
   /**
    * Checks if there is an existing job with a destination.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.logpush.validate.destinationExists({
+   *     destination_conf: 's3://mybucket/logs?region=us-west-2',
+   *     account_id: 'account_id',
+   *   });
+   * ```
    */
   destinationExists(
     params: ValidateDestinationExistsParams,
@@ -71,6 +88,15 @@ export class Validate extends APIResource {
 
   /**
    * Validates logpull origin with logpull_options.
+   *
+   * @example
+   * ```ts
+   * const response = await client.logpush.validate.origin({
+   *   logpull_options:
+   *     'fields=RayID,ClientIP,EdgeStartTimestamp&timestamps=rfc3339',
+   *   account_id: 'account_id',
+   * });
+   * ```
    */
   origin(
     params: ValidateOriginParams,
@@ -120,7 +146,7 @@ export interface ValidateOriginResponse {
 
 export interface ValidateDestinationParams {
   /**
-   * Body param: Uniquely identifies a resource (such as an s3 bucket) where data
+   * Body param: Uniquely identifies a resource (such as an s3 bucket) where data.
    * will be pushed. Additional configuration parameters supported by the destination
    * may be included.
    */
@@ -141,7 +167,7 @@ export interface ValidateDestinationParams {
 
 export interface ValidateDestinationExistsParams {
   /**
-   * Body param: Uniquely identifies a resource (such as an s3 bucket) where data
+   * Body param: Uniquely identifies a resource (such as an s3 bucket) where data.
    * will be pushed. Additional configuration parameters supported by the destination
    * may be included.
    */
@@ -162,7 +188,7 @@ export interface ValidateDestinationExistsParams {
 
 export interface ValidateOriginParams {
   /**
-   * Body param: This field is deprecated. Use `output_options` instead.
+   * @deprecated Body param: This field is deprecated. Use `output_options` instead.
    * Configuration string. It specifies things like requested fields and timestamp
    * formats. If migrating from the logpull api, copy the url (full url or just the
    * query string) of your call here, and logpush will keep on making this call for

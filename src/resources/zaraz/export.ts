@@ -8,6 +8,13 @@ export class Export extends APIResource {
   /**
    * Exports full current published Zaraz configuration for a zone, secret variables
    * included.
+   *
+   * @example
+   * ```ts
+   * const configuration = await client.zaraz.export.get({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   get(params: ExportGetParams, options?: Core.RequestOptions): Core.APIPromise<ConfigAPI.Configuration> {
     const { zone_id } = params;
@@ -17,7 +24,7 @@ export class Export extends APIResource {
 
 export interface ExportGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

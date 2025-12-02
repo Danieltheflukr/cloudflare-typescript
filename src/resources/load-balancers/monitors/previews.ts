@@ -7,6 +7,15 @@ export class Previews extends APIResource {
   /**
    * Preview pools using the specified monitor with provided monitor details. The
    * returned preview_id can be used in the preview endpoint to retrieve the results.
+   *
+   * @example
+   * ```ts
+   * const preview =
+   *   await client.loadBalancers.monitors.previews.create(
+   *     'f1aba936b94213e5b8dca0c0dbf1f9cc',
+   *     { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   *   );
+   * ```
    */
   create(
     monitorId: string,
@@ -27,14 +36,14 @@ export interface PreviewCreateResponse {
   /**
    * Monitored pool IDs mapped to their respective names.
    */
-  pools?: Record<string, string>;
+  pools?: { [key: string]: string };
 
   preview_id?: string;
 }
 
 export interface PreviewCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -85,7 +94,7 @@ export interface PreviewCreateParams {
    * recommended you set a Host header by default. The User-Agent header cannot be
    * overridden. This parameter is only valid for HTTP and HTTPS monitors.
    */
-  header?: Record<string, Array<string>>;
+  header?: { [key: string]: Array<string> };
 
   /**
    * Body param: The interval between each health check. Shorter intervals may

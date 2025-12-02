@@ -17,9 +17,9 @@ export class Filters extends APIResource {
     params: FilterCreateParams,
     options?: Core.RequestOptions,
   ): Core.PagePromise<FirewallFiltersSinglePage, FirewallFilter> {
-    const { zone_id, ...body } = params;
+    const { zone_id, body } = params;
     return this._client.getAPIList(`/zones/${zone_id}/filters`, FirewallFiltersSinglePage, {
-      body,
+      body: body,
       method: 'post',
       ...options,
     });
@@ -35,12 +35,11 @@ export class Filters extends APIResource {
     params: FilterUpdateParams,
     options?: Core.RequestOptions,
   ): Core.APIPromise<FirewallFilter> {
-    const { zone_id, body } = params;
+    const { zone_id, ...body } = params;
     return (
-      this._client.put(`/zones/${zone_id}/filters/${filterId}`, {
-        body: body,
-        ...options,
-      }) as Core.APIPromise<{ result: FirewallFilter }>
+      this._client.put(`/zones/${zone_id}/filters/${filterId}`, { body, ...options }) as Core.APIPromise<{
+        result: FirewallFilter;
+      }>
     )._thenUnwrap((obj) => obj.result);
   }
 
@@ -70,11 +69,11 @@ export class Filters extends APIResource {
     filterId: string,
     params: FilterDeleteParams,
     options?: Core.RequestOptions,
-  ): Core.APIPromise<FirewallFilter> {
+  ): Core.APIPromise<FilterDeleteResponse> {
     const { zone_id } = params;
     return (
       this._client.delete(`/zones/${zone_id}/filters/${filterId}`, options) as Core.APIPromise<{
-        result: FirewallFilter;
+        result: FilterDeleteResponse;
       }>
     )._thenUnwrap((obj) => obj.result);
   }
@@ -87,12 +86,13 @@ export class Filters extends APIResource {
   bulkDelete(
     params: FilterBulkDeleteParams,
     options?: Core.RequestOptions,
-  ): Core.PagePromise<FirewallFiltersSinglePage, FirewallFilter> {
-    const { zone_id } = params;
-    return this._client.getAPIList(`/zones/${zone_id}/filters`, FirewallFiltersSinglePage, {
-      method: 'delete',
-      ...options,
-    });
+  ): Core.APIPromise<FilterBulkDeleteResponse | null> {
+    const { zone_id, id } = params;
+    return (
+      this._client.delete(`/zones/${zone_id}/filters`, { query: { id }, ...options }) as Core.APIPromise<{
+        result: FilterBulkDeleteResponse | null;
+      }>
+    )._thenUnwrap((obj) => obj.result);
   }
 
   /**
@@ -104,9 +104,9 @@ export class Filters extends APIResource {
     params: FilterBulkUpdateParams,
     options?: Core.RequestOptions,
   ): Core.PagePromise<FirewallFiltersSinglePage, FirewallFilter> {
-    const { zone_id, ...body } = params;
+    const { zone_id, body } = params;
     return this._client.getAPIList(`/zones/${zone_id}/filters`, FirewallFiltersSinglePage, {
-      body,
+      body: body,
       method: 'put',
       ...options,
     });
@@ -186,34 +186,67 @@ export interface FirewallFilterParam {
   ref?: string;
 }
 
-export interface FilterCreateParams {
+export interface FilterDeleteResponse {
   /**
-   * Path param: Identifier
+   * The unique identifier of the filter.
    */
-  zone_id: string;
-
-  /**
-   * Body param: The filter expression. For more information, refer to
-   * [Expressions](https://developers.cloudflare.com/ruleset-engine/rules-language/expressions/).
-   */
-  expression: string;
+  id: string;
 }
 
-export interface FilterUpdateParams {
+export type FilterBulkDeleteResponse = Array<FilterBulkDeleteResponse.FilterBulkDeleteResponseItem>;
+
+export namespace FilterBulkDeleteResponse {
+  export interface FilterBulkDeleteResponseItem {
+    /**
+     * The unique identifier of the filter.
+     */
+    id?: string;
+  }
+}
+
+export interface FilterCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
 
   /**
    * Body param:
    */
-  body: unknown;
+  body: Array<FirewallFilterParam>;
+}
+
+export interface FilterUpdateParams {
+  /**
+   * Path param: Defines an identifier.
+   */
+  zone_id: string;
+
+  /**
+   * Body param: An informative summary of the filter.
+   */
+  description?: string;
+
+  /**
+   * Body param: The filter expression. For more information, refer to
+   * [Expressions](https://developers.cloudflare.com/ruleset-engine/rules-language/expressions/).
+   */
+  expression?: string;
+
+  /**
+   * Body param: When true, indicates that the filter is currently paused.
+   */
+  paused?: boolean;
+
+  /**
+   * Body param: A short reference tag. Allows you to select related filters.
+   */
+  ref?: string;
 }
 
 export interface FilterListParams extends V4PagePaginationArrayParams {
   /**
-   * Path param: Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
 
@@ -246,28 +279,83 @@ export interface FilterListParams extends V4PagePaginationArrayParams {
 
 export interface FilterDeleteParams {
   /**
-   * Identifier
+   * Defines an identifier.
    */
   zone_id: string;
 }
 
 export interface FilterBulkDeleteParams {
   /**
-   * Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
+
+  /**
+   * Query param:
+   */
+  id: Array<string>;
 }
 
 export interface FilterBulkUpdateParams {
   /**
-   * Identifier
+   * Path param: Defines an identifier.
    */
   zone_id: string;
+
+  /**
+   * Body param:
+   */
+  body: Array<FilterBulkUpdateParams.Body>;
+}
+
+export namespace FilterBulkUpdateParams {
+  export interface Body {
+    /**
+     * An informative summary of the filter.
+     */
+    description?: string;
+
+    /**
+     * The filter expression. For more information, refer to
+     * [Expressions](https://developers.cloudflare.com/ruleset-engine/rules-language/expressions/).
+     */
+    expression?: string;
+
+    /**
+     * When true, indicates that the filter is currently paused.
+     */
+    paused?: boolean;
+
+    /**
+     * A short reference tag. Allows you to select related filters.
+     */
+    ref?: string;
+  }
 }
 
 export interface FilterGetParams {
   /**
-   * Identifier
+   * Defines an identifier.
    */
   zone_id: string;
+}
+
+Filters.FirewallFiltersSinglePage = FirewallFiltersSinglePage;
+Filters.FirewallFiltersV4PagePaginationArray = FirewallFiltersV4PagePaginationArray;
+
+export declare namespace Filters {
+  export {
+    type FirewallFilter as FirewallFilter,
+    type FilterDeleteResponse as FilterDeleteResponse,
+    type FilterBulkDeleteResponse as FilterBulkDeleteResponse,
+    FirewallFiltersSinglePage as FirewallFiltersSinglePage,
+    FirewallFiltersV4PagePaginationArray as FirewallFiltersV4PagePaginationArray,
+    type FilterCreateParams as FilterCreateParams,
+    type FilterUpdateParams as FilterUpdateParams,
+    type FilterListParams as FilterListParams,
+    type FilterDeleteParams as FilterDeleteParams,
+    type FilterBulkDeleteParams as FilterBulkDeleteParams,
+    type FilterBulkUpdateParams as FilterBulkUpdateParams,
+    type FilterGetParams as FilterGetParams,
+  };
 }

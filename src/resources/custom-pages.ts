@@ -9,12 +9,31 @@ import { SinglePage } from '../pagination';
 export class CustomPages extends APIResource {
   /**
    * Updates the configuration of an existing custom page.
+   *
+   * @example
+   * ```ts
+   * const customPage = await client.customPages.update(
+   *   'ratelimit_block',
+   *   {
+   *     state: 'default',
+   *     url: 'http://www.example.com',
+   *     account_id: 'account_id',
+   *   },
+   * );
+   * ```
    */
   update(
-    identifier: string,
+    identifier:
+      | 'waf_block'
+      | 'ip_block'
+      | 'country_challenge'
+      | '500_errors'
+      | '1000_errors'
+      | 'managed_challenge'
+      | 'ratelimit_block',
     params: CustomPageUpdateParams,
     options?: Core.RequestOptions,
-  ): Core.APIPromise<CustomPageUpdateResponse | null> {
+  ): Core.APIPromise<CustomPageUpdateResponse> {
     const { account_id, zone_id, ...body } = params;
     if (!account_id && !zone_id) {
       throw new CloudflareError('You must provide either account_id or zone_id.');
@@ -36,12 +55,22 @@ export class CustomPages extends APIResource {
       this._client.put(`/${accountOrZone}/${accountOrZoneId}/custom_pages/${identifier}`, {
         body,
         ...options,
-      }) as Core.APIPromise<{ result: CustomPageUpdateResponse | null }>
+      }) as Core.APIPromise<{ result: CustomPageUpdateResponse }>
     )._thenUnwrap((obj) => obj.result);
   }
 
   /**
    * Fetches all the custom pages.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const customPageListResponse of client.customPages.list(
+   *   { account_id: 'account_id' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params?: CustomPageListParams,
@@ -83,18 +112,50 @@ export class CustomPages extends APIResource {
 
   /**
    * Fetches the details of a custom page.
+   *
+   * @example
+   * ```ts
+   * const customPage = await client.customPages.get(
+   *   'ratelimit_block',
+   *   { account_id: 'account_id' },
+   * );
+   * ```
    */
   get(
-    identifier: string,
+    identifier:
+      | 'waf_block'
+      | 'ip_block'
+      | 'country_challenge'
+      | '500_errors'
+      | '1000_errors'
+      | 'managed_challenge'
+      | 'ratelimit_block',
     params?: CustomPageGetParams,
     options?: Core.RequestOptions,
-  ): Core.APIPromise<CustomPageGetResponse | null>;
-  get(identifier: string, options?: Core.RequestOptions): Core.APIPromise<CustomPageGetResponse | null>;
+  ): Core.APIPromise<CustomPageGetResponse>;
   get(
-    identifier: string,
+    identifier:
+      | 'waf_block'
+      | 'ip_block'
+      | 'country_challenge'
+      | '500_errors'
+      | '1000_errors'
+      | 'managed_challenge'
+      | 'ratelimit_block',
+    options?: Core.RequestOptions,
+  ): Core.APIPromise<CustomPageGetResponse>;
+  get(
+    identifier:
+      | 'waf_block'
+      | 'ip_block'
+      | 'country_challenge'
+      | '500_errors'
+      | '1000_errors'
+      | 'managed_challenge'
+      | 'ratelimit_block',
     params: CustomPageGetParams | Core.RequestOptions = {},
     options?: Core.RequestOptions,
-  ): Core.APIPromise<CustomPageGetResponse | null> {
+  ): Core.APIPromise<CustomPageGetResponse> {
     if (isRequestOptions(params)) {
       return this.get(identifier, {}, params);
     }
@@ -119,18 +180,84 @@ export class CustomPages extends APIResource {
       this._client.get(
         `/${accountOrZone}/${accountOrZoneId}/custom_pages/${identifier}`,
         options,
-      ) as Core.APIPromise<{ result: CustomPageGetResponse | null }>
+      ) as Core.APIPromise<{ result: CustomPageGetResponse }>
     )._thenUnwrap((obj) => obj.result);
   }
 }
 
 export class CustomPageListResponsesSinglePage extends SinglePage<CustomPageListResponse> {}
 
-export type CustomPageUpdateResponse = unknown | string;
+export interface CustomPageUpdateResponse {
+  id?: string;
 
-export type CustomPageListResponse = unknown;
+  created_on?: string;
 
-export type CustomPageGetResponse = unknown | string;
+  description?: string;
+
+  modified_on?: string;
+
+  preview_target?: string;
+
+  required_tokens?: Array<string>;
+
+  /**
+   * The custom page state.
+   */
+  state?: 'default' | 'customized';
+
+  /**
+   * The URL associated with the custom page.
+   */
+  url?: string;
+}
+
+export interface CustomPageListResponse {
+  id?: string;
+
+  created_on?: string;
+
+  description?: string;
+
+  modified_on?: string;
+
+  preview_target?: string;
+
+  required_tokens?: Array<string>;
+
+  /**
+   * The custom page state.
+   */
+  state?: 'default' | 'customized';
+
+  /**
+   * The URL associated with the custom page.
+   */
+  url?: string;
+}
+
+export interface CustomPageGetResponse {
+  id?: string;
+
+  created_on?: string;
+
+  description?: string;
+
+  modified_on?: string;
+
+  preview_target?: string;
+
+  required_tokens?: Array<string>;
+
+  /**
+   * The custom page state.
+   */
+  state?: 'default' | 'customized';
+
+  /**
+   * The URL associated with the custom page.
+   */
+  url?: string;
+}
 
 export interface CustomPageUpdateParams {
   /**
@@ -178,4 +305,18 @@ export interface CustomPageGetParams {
    * The Zone ID to use for this endpoint. Mutually exclusive with the Account ID.
    */
   zone_id?: string;
+}
+
+CustomPages.CustomPageListResponsesSinglePage = CustomPageListResponsesSinglePage;
+
+export declare namespace CustomPages {
+  export {
+    type CustomPageUpdateResponse as CustomPageUpdateResponse,
+    type CustomPageListResponse as CustomPageListResponse,
+    type CustomPageGetResponse as CustomPageGetResponse,
+    CustomPageListResponsesSinglePage as CustomPageListResponsesSinglePage,
+    type CustomPageUpdateParams as CustomPageUpdateParams,
+    type CustomPageListParams as CustomPageListParams,
+    type CustomPageGetParams as CustomPageGetParams,
+  };
 }

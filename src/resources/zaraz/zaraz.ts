@@ -31,6 +31,14 @@ export class Zaraz extends APIResource {
 
   /**
    * Updates Zaraz workflow for a zone.
+   *
+   * @example
+   * ```ts
+   * const workflow = await client.zaraz.update({
+   *   zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   workflow: 'realtime',
+   * });
+   * ```
    */
   update(params: ZarazUpdateParams, options?: Core.RequestOptions): Core.APIPromise<WorkflowAPI.Workflow> {
     const { zone_id, workflow } = params;
@@ -47,34 +55,34 @@ export interface ButtonTextTranslation {
   /**
    * Object where keys are language codes
    */
-  accept_all: Record<string, string>;
+  accept_all: { [key: string]: string };
 
   /**
    * Object where keys are language codes
    */
-  confirm_my_choices: Record<string, string>;
+  confirm_my_choices: { [key: string]: string };
 
   /**
    * Object where keys are language codes
    */
-  reject_all: Record<string, string>;
+  reject_all: { [key: string]: string };
 }
 
 export interface ButtonTextTranslationParam {
   /**
    * Object where keys are language codes
    */
-  accept_all: Record<string, string>;
+  accept_all: { [key: string]: string };
 
   /**
    * Object where keys are language codes
    */
-  confirm_my_choices: Record<string, string>;
+  confirm_my_choices: { [key: string]: string };
 
   /**
    * Object where keys are language codes
    */
-  reject_all: Record<string, string>;
+  reject_all: { [key: string]: string };
 }
 
 export interface NeoEvent {
@@ -123,7 +131,7 @@ export interface NeoEventParam {
 
 export interface ZarazUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -142,6 +150,12 @@ Zaraz.Publish = Publish;
 Zaraz.WorkflowResource = WorkflowResource;
 
 export declare namespace Zaraz {
+  export {
+    type ButtonTextTranslation as ButtonTextTranslation,
+    type NeoEvent as NeoEvent,
+    type ZarazUpdateParams as ZarazUpdateParams,
+  };
+
   export {
     Config as Config,
     type Configuration as Configuration,

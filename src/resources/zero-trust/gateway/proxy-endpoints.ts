@@ -6,7 +6,17 @@ import { SinglePage } from '../../../pagination';
 
 export class ProxyEndpoints extends APIResource {
   /**
-   * Creates a new Zero Trust Gateway proxy endpoint.
+   * Create a new Zero Trust Gateway proxy endpoint.
+   *
+   * @example
+   * ```ts
+   * const proxyEndpoint =
+   *   await client.zeroTrust.gateway.proxyEndpoints.create({
+   *     account_id: '699d98642c564d2e855e9661899b7252',
+   *     ips: ['192.0.2.1/32'],
+   *     name: 'Devops team',
+   *   });
+   * ```
    */
   create(params: ProxyEndpointCreateParams, options?: Core.RequestOptions): Core.APIPromise<ProxyEndpoint> {
     const { account_id, ...body } = params;
@@ -19,7 +29,15 @@ export class ProxyEndpoints extends APIResource {
   }
 
   /**
-   * Fetches all Zero Trust Gateway proxy endpoints for an account.
+   * List all Zero Trust Gateway proxy endpoints for an account.
+   *
+   * @example
+   * ```ts
+   * const proxyEndpoint =
+   *   await client.zeroTrust.gateway.proxyEndpoints.list({
+   *     account_id: '699d98642c564d2e855e9661899b7252',
+   *   });
+   * ```
    */
   list(params: ProxyEndpointListParams, options?: Core.RequestOptions): Core.APIPromise<ProxyEndpoint> {
     const { account_id } = params;
@@ -31,7 +49,16 @@ export class ProxyEndpoints extends APIResource {
   }
 
   /**
-   * Deletes a configured Zero Trust Gateway proxy endpoint.
+   * Delete a configured Zero Trust Gateway proxy endpoint.
+   *
+   * @example
+   * ```ts
+   * const proxyEndpoint =
+   *   await client.zeroTrust.gateway.proxyEndpoints.delete(
+   *     'ed35569b41ce4d1facfe683550f54086',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   delete(
     proxyEndpointId: string,
@@ -48,7 +75,16 @@ export class ProxyEndpoints extends APIResource {
   }
 
   /**
-   * Updates a configured Zero Trust Gateway proxy endpoint.
+   * Update a configured Zero Trust Gateway proxy endpoint.
+   *
+   * @example
+   * ```ts
+   * const proxyEndpoint =
+   *   await client.zeroTrust.gateway.proxyEndpoints.edit(
+   *     'ed35569b41ce4d1facfe683550f54086',
+   *     { account_id: '699d98642c564d2e855e9661899b7252' },
+   *   );
+   * ```
    */
   edit(
     proxyEndpointId: string,
@@ -65,7 +101,18 @@ export class ProxyEndpoints extends APIResource {
   }
 
   /**
-   * Fetches a single Zero Trust Gateway proxy endpoint.
+   * Get a single Zero Trust Gateway proxy endpoint.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const proxyEndpoint of client.zeroTrust.gateway.proxyEndpoints.get(
+   *   'ed35569b41ce4d1facfe683550f54086',
+   *   { account_id: '699d98642c564d2e855e9661899b7252' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   get(
     proxyEndpointId: string,
@@ -84,14 +131,14 @@ export class ProxyEndpoints extends APIResource {
 export class ProxyEndpointsSinglePage extends SinglePage<ProxyEndpoint> {}
 
 /**
- * The IPv4 CIDR or IPv6 CIDR. IPv6 CIDRs are limited to a maximum of /109. IPv4
- * CIDRs are limited to a maximum of /25.
+ * Specify an IPv4 or IPv6 CIDR. Limit IPv6 to a maximum of /109 and IPv4 to a
+ * maximum of /25.
  */
 export type GatewayIPs = string;
 
 /**
- * The IPv4 CIDR or IPv6 CIDR. IPv6 CIDRs are limited to a maximum of /109. IPv4
- * CIDRs are limited to a maximum of /25.
+ * Specify an IPv4 or IPv6 CIDR. Limit IPv6 to a maximum of /109 and IPv4 to a
+ * maximum of /25.
  */
 export type GatewayIPsParam = string;
 
@@ -101,17 +148,17 @@ export interface ProxyEndpoint {
   created_at?: string;
 
   /**
-   * A list of CIDRs to restrict ingress connections.
+   * Specify the list of CIDRs to restrict ingress connections.
    */
   ips?: Array<GatewayIPs>;
 
   /**
-   * The name of the proxy endpoint.
+   * Specify the name of the proxy endpoint.
    */
   name?: string;
 
   /**
-   * The subdomain to be used as the destination in the proxy client.
+   * Specify the subdomain to use as the destination in the proxy client.
    */
   subdomain?: string;
 
@@ -127,12 +174,12 @@ export interface ProxyEndpointCreateParams {
   account_id: string;
 
   /**
-   * Body param: A list of CIDRs to restrict ingress connections.
+   * Body param: Specify the list of CIDRs to restrict ingress connections.
    */
   ips: Array<GatewayIPsParam>;
 
   /**
-   * Body param: The name of the proxy endpoint.
+   * Body param: Specify the name of the proxy endpoint.
    */
   name: string;
 }
@@ -152,12 +199,12 @@ export interface ProxyEndpointEditParams {
   account_id: string;
 
   /**
-   * Body param: A list of CIDRs to restrict ingress connections.
+   * Body param: Specify the list of CIDRs to restrict ingress connections.
    */
   ips?: Array<GatewayIPsParam>;
 
   /**
-   * Body param: The name of the proxy endpoint.
+   * Body param: Specify the name of the proxy endpoint.
    */
   name?: string;
 }

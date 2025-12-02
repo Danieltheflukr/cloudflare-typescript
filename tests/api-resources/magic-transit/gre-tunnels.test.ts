@@ -14,7 +14,10 @@ describe('resource greTunnels', () => {
   test.skip('create: only required params', async () => {
     const responsePromise = client.magicTransit.greTunnels.create({
       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
-      body: {},
+      cloudflare_gre_endpoint: '203.0.113.1',
+      customer_gre_endpoint: '203.0.113.1',
+      interface_address: '192.0.2.0/31',
+      name: 'GRE_1',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -29,7 +32,23 @@ describe('resource greTunnels', () => {
   test.skip('create: required and optional params', async () => {
     const response = await client.magicTransit.greTunnels.create({
       account_id: '023e105f4ecef8ad9ca31a8372d0c353',
-      body: {},
+      cloudflare_gre_endpoint: '203.0.113.1',
+      customer_gre_endpoint: '203.0.113.1',
+      interface_address: '192.0.2.0/31',
+      name: 'GRE_1',
+      automatic_return_routing: true,
+      bgp: { customer_asn: 0, extra_prefixes: ['string'], md5_key: 'md5_key' },
+      description: 'Tunnel for ISP X',
+      health_check: {
+        direction: 'bidirectional',
+        enabled: true,
+        rate: 'low',
+        target: { saved: '203.0.113.1' },
+        type: 'request',
+      },
+      interface_address6: '2606:54c1:7:0:a9fe:12d2:1:200/127',
+      mtu: 0,
+      ttl: 0,
       'x-magic-new-hc-target': true,
     });
   });
@@ -60,14 +79,16 @@ describe('resource greTunnels', () => {
       customer_gre_endpoint: '203.0.113.1',
       interface_address: '192.0.2.0/31',
       name: 'GRE_1',
+      automatic_return_routing: true,
       description: 'Tunnel for ISP X',
       health_check: {
-        direction: 'unidirectional',
+        direction: 'bidirectional',
         enabled: true,
         rate: 'low',
         target: { saved: '203.0.113.1' },
-        type: 'reply',
+        type: 'request',
       },
+      interface_address6: '2606:54c1:7:0:a9fe:12d2:1:200/127',
       mtu: 0,
       ttl: 0,
       'x-magic-new-hc-target': true,

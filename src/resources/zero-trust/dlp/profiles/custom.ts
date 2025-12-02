@@ -8,19 +8,37 @@ import * as ProfilesAPI from './profiles';
 export class Custom extends APIResource {
   /**
    * Creates a DLP custom profile.
+   *
+   * @example
+   * ```ts
+   * const profile =
+   *   await client.zeroTrust.dlp.profiles.custom.create({
+   *     account_id: 'account_id',
+   *     name: 'name',
+   *   });
+   * ```
    */
-  create(params: CustomCreateParams, options?: Core.RequestOptions): Core.APIPromise<CustomCreateResponse> {
+  create(params: CustomCreateParams, options?: Core.RequestOptions): Core.APIPromise<ProfilesAPI.Profile> {
     const { account_id, ...body } = params;
     return (
       this._client.post(`/accounts/${account_id}/dlp/profiles/custom`, {
         body,
         ...options,
-      }) as Core.APIPromise<{ result: CustomCreateResponse }>
+      }) as Core.APIPromise<{ result: ProfilesAPI.Profile }>
     )._thenUnwrap((obj) => obj.result);
   }
 
   /**
    * Updates a DLP custom profile.
+   *
+   * @example
+   * ```ts
+   * const profile =
+   *   await client.zeroTrust.dlp.profiles.custom.update(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id', name: 'name' },
+   *   );
+   * ```
    */
   update(
     profileId: string,
@@ -38,6 +56,15 @@ export class Custom extends APIResource {
 
   /**
    * Deletes a DLP custom profile.
+   *
+   * @example
+   * ```ts
+   * const custom =
+   *   await client.zeroTrust.dlp.profiles.custom.delete(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   delete(
     profileId: string,
@@ -55,6 +82,15 @@ export class Custom extends APIResource {
 
   /**
    * Fetches a custom DLP profile by id.
+   *
+   * @example
+   * ```ts
+   * const profile =
+   *   await client.zeroTrust.dlp.profiles.custom.get(
+   *     '182bd5e5-6e1a-4fe4-a799-aa6d9a6ab26e',
+   *     { account_id: 'account_id' },
+   *   );
+   * ```
    */
   get(
     profileId: string,
@@ -73,7 +109,7 @@ export class Custom extends APIResource {
 
 export interface CustomProfile {
   /**
-   * The id of the profile (uuid)
+   * The id of the profile (uuid).
    */
   id: string;
 
@@ -83,33 +119,19 @@ export interface CustomProfile {
   allowed_match_count: number;
 
   /**
-   * Scan the context of predefined entries to only return matches surrounded by
-   * keywords.
-   */
-  context_awareness: ProfilesAPI.ContextAwareness;
-
-  /**
-   * When the profile was created
+   * When the profile was created.
    */
   created_at: string;
 
-  entries: Array<
-    | CustomProfile.CustomEntry
-    | CustomProfile.PredefinedEntry
-    | CustomProfile.IntegrationEntry
-    | CustomProfile.ExactDataEntry
-    | CustomProfile.WordListEntry
-  >;
-
   /**
-   * The name of the profile
+   * The name of the profile.
    */
   name: string;
 
   ocr_enabled: boolean;
 
   /**
-   * When the profile was lasted updated
+   * When the profile was lasted updated.
    */
   updated_at: string;
 
@@ -118,9 +140,24 @@ export interface CustomProfile {
   confidence_threshold?: 'low' | 'medium' | 'high' | 'very_high';
 
   /**
-   * The description of the profile
+   * @deprecated Scan the context of predefined entries to only return matches
+   * surrounded by keywords.
+   */
+  context_awareness?: ProfilesAPI.ContextAwareness;
+
+  /**
+   * The description of the profile.
    */
   description?: string | null;
+
+  entries?: Array<
+    | CustomProfile.CustomEntry
+    | CustomProfile.PredefinedEntry
+    | CustomProfile.IntegrationEntry
+    | CustomProfile.ExactDataEntry
+    | CustomProfile.DocumentFingerprintEntry
+    | CustomProfile.WordListEntry
+  >;
 }
 
 export namespace CustomProfile {
@@ -154,20 +191,30 @@ export namespace CustomProfile {
     type: 'predefined';
 
     profile_id?: string | null;
+
+    variant?: PredefinedEntry.Variant;
   }
 
   export namespace PredefinedEntry {
     export interface Confidence {
       /**
-       * Indicates whether this entry has AI remote service validation
+       * Indicates whether this entry has AI remote service validation.
        */
       ai_context_available: boolean;
 
       /**
        * Indicates whether this entry has any form of validation that is not an AI remote
-       * service
+       * service.
        */
       available: boolean;
+    }
+
+    export interface Variant {
+      topic_type: 'Intent' | 'Content';
+
+      type: 'PromptTopic';
+
+      description?: string | null;
     }
   }
 
@@ -190,6 +237,12 @@ export namespace CustomProfile {
   export interface ExactDataEntry {
     id: string;
 
+    /**
+     * Only applies to custom word lists. Determines if the words should be matched in
+     * a case-sensitive manner Cannot be set to false if secret is true
+     */
+    case_sensitive: boolean;
+
     created_at: string;
 
     enabled: boolean;
@@ -199,6 +252,20 @@ export namespace CustomProfile {
     secret: boolean;
 
     type: 'exact_data';
+
+    updated_at: string;
+  }
+
+  export interface DocumentFingerprintEntry {
+    id: string;
+
+    created_at: string;
+
+    enabled: boolean;
+
+    name: string;
+
+    type: 'document_fingerprint';
 
     updated_at: string;
   }
@@ -240,644 +307,124 @@ export interface PatternParam {
   validation?: 'luhn';
 }
 
-export type CustomCreateResponse =
-  | CustomCreateResponse.CustomProfile
-  | CustomCreateResponse.PredefinedProfile
-  | CustomCreateResponse.IntegrationProfile
-  | Array<ProfilesAPI.Profile>;
-
-export namespace CustomCreateResponse {
-  export interface CustomProfile {
-    /**
-     * The id of the profile (uuid)
-     */
-    id: string;
-
-    /**
-     * Related DLP policies will trigger when the match count exceeds the number set.
-     */
-    allowed_match_count: number;
-
-    /**
-     * Scan the context of predefined entries to only return matches surrounded by
-     * keywords.
-     */
-    context_awareness: ProfilesAPI.ContextAwareness;
-
-    /**
-     * When the profile was created
-     */
-    created_at: string;
-
-    entries: Array<
-      | CustomProfile.CustomEntry
-      | CustomProfile.PredefinedEntry
-      | CustomProfile.IntegrationEntry
-      | CustomProfile.ExactDataEntry
-      | CustomProfile.WordListEntry
-    >;
-
-    /**
-     * The name of the profile
-     */
-    name: string;
-
-    ocr_enabled: boolean;
-
-    type: 'custom';
-
-    /**
-     * When the profile was lasted updated
-     */
-    updated_at: string;
-
-    ai_context_enabled?: boolean;
-
-    confidence_threshold?: 'low' | 'medium' | 'high' | 'very_high';
-
-    /**
-     * The description of the profile
-     */
-    description?: string | null;
-  }
-
-  export namespace CustomProfile {
-    export interface CustomEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      pattern: CustomAPI.Pattern;
-
-      type: 'custom';
-
-      updated_at: string;
-
-      profile_id?: string | null;
-    }
-
-    export interface PredefinedEntry {
-      id: string;
-
-      confidence: PredefinedEntry.Confidence;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'predefined';
-
-      profile_id?: string | null;
-    }
-
-    export namespace PredefinedEntry {
-      export interface Confidence {
-        /**
-         * Indicates whether this entry has AI remote service validation
-         */
-        ai_context_available: boolean;
-
-        /**
-         * Indicates whether this entry has any form of validation that is not an AI remote
-         * service
-         */
-        available: boolean;
-      }
-    }
-
-    export interface IntegrationEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'integration';
-
-      updated_at: string;
-
-      profile_id?: string | null;
-    }
-
-    export interface ExactDataEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      secret: boolean;
-
-      type: 'exact_data';
-
-      updated_at: string;
-    }
-
-    export interface WordListEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'word_list';
-
-      updated_at: string;
-
-      word_list: unknown;
-
-      profile_id?: string | null;
-    }
-  }
-
-  export interface PredefinedProfile {
-    /**
-     * The id of the predefined profile (uuid)
-     */
-    id: string;
-
-    allowed_match_count: number;
-
-    entries: Array<
-      | PredefinedProfile.CustomEntry
-      | PredefinedProfile.PredefinedEntry
-      | PredefinedProfile.IntegrationEntry
-      | PredefinedProfile.ExactDataEntry
-      | PredefinedProfile.WordListEntry
-    >;
-
-    /**
-     * The name of the predefined profile
-     */
-    name: string;
-
-    type: 'predefined';
-
-    ai_context_enabled?: boolean;
-
-    confidence_threshold?: 'low' | 'medium' | 'high' | 'very_high';
-
-    /**
-     * Scan the context of predefined entries to only return matches surrounded by
-     * keywords.
-     */
-    context_awareness?: ProfilesAPI.ContextAwareness;
-
-    ocr_enabled?: boolean;
-
-    /**
-     * Whether this profile can be accessed by anyone
-     */
-    open_access?: boolean;
-  }
-
-  export namespace PredefinedProfile {
-    export interface CustomEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      pattern: CustomAPI.Pattern;
-
-      type: 'custom';
-
-      updated_at: string;
-
-      profile_id?: string | null;
-    }
-
-    export interface PredefinedEntry {
-      id: string;
-
-      confidence: PredefinedEntry.Confidence;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'predefined';
-
-      profile_id?: string | null;
-    }
-
-    export namespace PredefinedEntry {
-      export interface Confidence {
-        /**
-         * Indicates whether this entry has AI remote service validation
-         */
-        ai_context_available: boolean;
-
-        /**
-         * Indicates whether this entry has any form of validation that is not an AI remote
-         * service
-         */
-        available: boolean;
-      }
-    }
-
-    export interface IntegrationEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'integration';
-
-      updated_at: string;
-
-      profile_id?: string | null;
-    }
-
-    export interface ExactDataEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      secret: boolean;
-
-      type: 'exact_data';
-
-      updated_at: string;
-    }
-
-    export interface WordListEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'word_list';
-
-      updated_at: string;
-
-      word_list: unknown;
-
-      profile_id?: string | null;
-    }
-  }
-
-  export interface IntegrationProfile {
-    id: string;
-
-    created_at: string;
-
-    entries: Array<
-      | IntegrationProfile.CustomEntry
-      | IntegrationProfile.PredefinedEntry
-      | IntegrationProfile.IntegrationEntry
-      | IntegrationProfile.ExactDataEntry
-      | IntegrationProfile.WordListEntry
-    >;
-
-    name: string;
-
-    type: 'integration';
-
-    updated_at: string;
-
-    /**
-     * The description of the profile
-     */
-    description?: string | null;
-  }
-
-  export namespace IntegrationProfile {
-    export interface CustomEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      pattern: CustomAPI.Pattern;
-
-      type: 'custom';
-
-      updated_at: string;
-
-      profile_id?: string | null;
-    }
-
-    export interface PredefinedEntry {
-      id: string;
-
-      confidence: PredefinedEntry.Confidence;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'predefined';
-
-      profile_id?: string | null;
-    }
-
-    export namespace PredefinedEntry {
-      export interface Confidence {
-        /**
-         * Indicates whether this entry has AI remote service validation
-         */
-        ai_context_available: boolean;
-
-        /**
-         * Indicates whether this entry has any form of validation that is not an AI remote
-         * service
-         */
-        available: boolean;
-      }
-    }
-
-    export interface IntegrationEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'integration';
-
-      updated_at: string;
-
-      profile_id?: string | null;
-    }
-
-    export interface ExactDataEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      secret: boolean;
-
-      type: 'exact_data';
-
-      updated_at: string;
-    }
-
-    export interface WordListEntry {
-      id: string;
-
-      created_at: string;
-
-      enabled: boolean;
-
-      name: string;
-
-      type: 'word_list';
-
-      updated_at: string;
-
-      word_list: unknown;
-
-      profile_id?: string | null;
-    }
-  }
-}
-
 export type CustomDeleteResponse = unknown;
 
-export type CustomCreateParams = CustomCreateParams.Variant0 | CustomCreateParams.DLPNewCustomProfile;
+export interface CustomCreateParams {
+  /**
+   * Path param:
+   */
+  account_id: string;
 
-export declare namespace CustomCreateParams {
-  export interface Variant0 {
-    /**
-     * Path param:
-     */
-    account_id: string;
+  /**
+   * Body param:
+   */
+  name: string;
 
-    /**
-     * Body param:
-     */
-    profiles: Array<Variant0.Profile>;
-  }
+  /**
+   * Body param:
+   */
+  ai_context_enabled?: boolean;
 
-  export namespace Variant0 {
-    export interface Profile {
-      entries: Array<Profile.DLPNewCustomEntry | Profile.DLPNewWordListEntry>;
+  /**
+   * Body param: Related DLP policies will trigger when the match count exceeds the
+   * number set.
+   */
+  allowed_match_count?: number;
 
-      name: string;
+  /**
+   * Body param:
+   */
+  confidence_threshold?: string | null;
 
-      ai_context_enabled?: boolean;
+  /**
+   * @deprecated Body param: Scan the context of predefined entries to only return
+   * matches surrounded by keywords.
+   */
+  context_awareness?: ProfilesAPI.ContextAwarenessParam;
 
-      /**
-       * Related DLP policies will trigger when the match count exceeds the number set.
-       */
-      allowed_match_count?: number;
+  /**
+   * Body param: The description of the profile.
+   */
+  description?: string | null;
 
-      confidence_threshold?: string | null;
+  /**
+   * Body param:
+   */
+  entries?: Array<CustomCreateParams.DLPNewCustomEntry | CustomCreateParams.DLPNewWordListEntry>;
 
-      /**
-       * Scan the context of predefined entries to only return matches surrounded by
-       * keywords.
-       */
-      context_awareness?: ProfilesAPI.ContextAwarenessParam;
+  /**
+   * Body param:
+   */
+  ocr_enabled?: boolean;
 
-      /**
-       * The description of the profile
-       */
-      description?: string | null;
+  /**
+   * Body param: Entries from other profiles (e.g. pre-defined Cloudflare profiles,
+   * or your Microsoft Information Protection profiles).
+   */
+  shared_entries?: Array<
+    | CustomCreateParams.Custom
+    | CustomCreateParams.Predefined
+    | CustomCreateParams.Integration
+    | CustomCreateParams.ExactData
+    | CustomCreateParams.UnionMember4
+  >;
+}
 
-      ocr_enabled?: boolean;
+export namespace CustomCreateParams {
+  export interface DLPNewCustomEntry {
+    enabled: boolean;
 
-      /**
-       * Entries from other profiles (e.g. pre-defined Cloudflare profiles, or your
-       * Microsoft Information Protection profiles).
-       */
-      shared_entries?: Array<
-        Profile.UnionMember0 | Profile.UnionMember1 | Profile.UnionMember2 | Profile.UnionMember3
-      >;
-    }
-
-    export namespace Profile {
-      export interface DLPNewCustomEntry {
-        enabled: boolean;
-
-        name: string;
-
-        pattern: CustomAPI.PatternParam;
-      }
-
-      export interface DLPNewWordListEntry {
-        enabled: boolean;
-
-        name: string;
-
-        words: Array<string>;
-      }
-
-      export interface UnionMember0 {
-        enabled: boolean;
-
-        entry_id: string;
-
-        entry_type: 'custom';
-      }
-
-      export interface UnionMember1 {
-        enabled: boolean;
-
-        entry_id: string;
-
-        entry_type: 'predefined';
-      }
-
-      export interface UnionMember2 {
-        enabled: boolean;
-
-        entry_id: string;
-
-        entry_type: 'integration';
-      }
-
-      export interface UnionMember3 {
-        enabled: boolean;
-
-        entry_id: string;
-
-        entry_type: 'exact_data';
-      }
-    }
-  }
-
-  export interface DLPNewCustomProfile {
-    /**
-     * Path param:
-     */
-    account_id: string;
-
-    /**
-     * Body param:
-     */
-    entries: Array<DLPNewCustomProfile.DLPNewCustomEntry | DLPNewCustomProfile.DLPNewWordListEntry>;
-
-    /**
-     * Body param:
-     */
     name: string;
 
-    /**
-     * Body param:
-     */
-    ai_context_enabled?: boolean;
-
-    /**
-     * Body param: Related DLP policies will trigger when the match count exceeds the
-     * number set.
-     */
-    allowed_match_count?: number;
-
-    /**
-     * Body param:
-     */
-    confidence_threshold?: string | null;
-
-    /**
-     * Body param: Scan the context of predefined entries to only return matches
-     * surrounded by keywords.
-     */
-    context_awareness?: ProfilesAPI.ContextAwarenessParam;
-
-    /**
-     * Body param: The description of the profile
-     */
-    description?: string | null;
-
-    /**
-     * Body param:
-     */
-    ocr_enabled?: boolean;
-
-    /**
-     * Body param: Entries from other profiles (e.g. pre-defined Cloudflare profiles,
-     * or your Microsoft Information Protection profiles).
-     */
-    shared_entries?: Array<
-      | DLPNewCustomProfile.UnionMember0
-      | DLPNewCustomProfile.UnionMember1
-      | DLPNewCustomProfile.UnionMember2
-      | DLPNewCustomProfile.UnionMember3
-    >;
+    pattern: CustomAPI.PatternParam;
   }
 
-  export namespace DLPNewCustomProfile {
-    export interface DLPNewCustomEntry {
-      enabled: boolean;
+  export interface DLPNewWordListEntry {
+    enabled: boolean;
 
-      name: string;
+    name: string;
 
-      pattern: CustomAPI.PatternParam;
-    }
+    words: Array<string>;
+  }
 
-    export interface DLPNewWordListEntry {
-      enabled: boolean;
+  export interface Custom {
+    enabled: boolean;
 
-      name: string;
+    entry_id: string;
 
-      words: Array<string>;
-    }
+    entry_type: 'custom';
+  }
 
-    export interface UnionMember0 {
-      enabled: boolean;
+  export interface Predefined {
+    enabled: boolean;
 
-      entry_id: string;
+    entry_id: string;
 
-      entry_type: 'custom';
-    }
+    entry_type: 'predefined';
+  }
 
-    export interface UnionMember1 {
-      enabled: boolean;
+  export interface Integration {
+    enabled: boolean;
 
-      entry_id: string;
+    entry_id: string;
 
-      entry_type: 'predefined';
-    }
+    entry_type: 'integration';
+  }
 
-    export interface UnionMember2 {
-      enabled: boolean;
+  export interface ExactData {
+    enabled: boolean;
 
-      entry_id: string;
+    entry_id: string;
 
-      entry_type: 'integration';
-    }
+    entry_type: 'exact_data';
+  }
 
-    export interface UnionMember3 {
-      enabled: boolean;
+  export interface UnionMember4 {
+    enabled: boolean;
 
-      entry_id: string;
+    entry_id: string;
 
-      entry_type: 'exact_data';
-    }
+    entry_type: 'document_fingerprint';
   }
 }
 
@@ -908,19 +455,19 @@ export interface CustomUpdateParams {
   confidence_threshold?: string | null;
 
   /**
-   * Body param: Scan the context of predefined entries to only return matches
-   * surrounded by keywords.
+   * @deprecated Body param: Scan the context of predefined entries to only return
+   * matches surrounded by keywords.
    */
   context_awareness?: ProfilesAPI.ContextAwarenessParam;
 
   /**
-   * Body param: The description of the profile
+   * Body param: The description of the profile.
    */
   description?: string | null;
 
   /**
-   * Body param: Custom entries from this profile. If this field is omitted, entries
-   * owned by this profile will not be changed.
+   * @deprecated Body param: Custom entries from this profile. If this field is
+   * omitted, entries owned by this profile will not be changed.
    */
   entries?: Array<CustomUpdateParams.DLPNewCustomEntryWithID | CustomUpdateParams.DLPNewCustomEntry> | null;
 
@@ -933,7 +480,10 @@ export interface CustomUpdateParams {
    * Body param: Other entries, e.g. predefined or integration.
    */
   shared_entries?: Array<
-    CustomUpdateParams.UnionMember0 | CustomUpdateParams.UnionMember1 | CustomUpdateParams.UnionMember2
+    | CustomUpdateParams.Predefined
+    | CustomUpdateParams.Integration
+    | CustomUpdateParams.ExactData
+    | CustomUpdateParams.UnionMember3
   >;
 }
 
@@ -956,7 +506,7 @@ export namespace CustomUpdateParams {
     pattern: CustomAPI.PatternParam;
   }
 
-  export interface UnionMember0 {
+  export interface Predefined {
     enabled: boolean;
 
     entry_id: string;
@@ -964,7 +514,7 @@ export namespace CustomUpdateParams {
     entry_type: 'predefined';
   }
 
-  export interface UnionMember1 {
+  export interface Integration {
     enabled: boolean;
 
     entry_id: string;
@@ -972,12 +522,20 @@ export namespace CustomUpdateParams {
     entry_type: 'integration';
   }
 
-  export interface UnionMember2 {
+  export interface ExactData {
     enabled: boolean;
 
     entry_id: string;
 
     entry_type: 'exact_data';
+  }
+
+  export interface UnionMember3 {
+    enabled: boolean;
+
+    entry_id: string;
+
+    entry_type: 'document_fingerprint';
   }
 }
 
@@ -993,7 +551,6 @@ export declare namespace Custom {
   export {
     type CustomProfile as CustomProfile,
     type Pattern as Pattern,
-    type CustomCreateResponse as CustomCreateResponse,
     type CustomDeleteResponse as CustomDeleteResponse,
     type CustomCreateParams as CustomCreateParams,
     type CustomUpdateParams as CustomUpdateParams,

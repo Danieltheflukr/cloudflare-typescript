@@ -12,7 +12,10 @@ const client = new Cloudflare({
 describe('resource tags', () => {
   // TODO: HTTP 401 from prism
   test.skip('create: only required params', async () => {
-    const responsePromise = client.cloudforceOne.threatEvents.tags.create({ account_id: 0, name: 'name' });
+    const responsePromise = client.cloudforceOne.threatEvents.tags.create({
+      account_id: 'account_id',
+      value: 'APT28',
+    });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
     const response = await responsePromise;
@@ -24,6 +27,24 @@ describe('resource tags', () => {
 
   // TODO: HTTP 401 from prism
   test.skip('create: required and optional params', async () => {
-    const response = await client.cloudforceOne.threatEvents.tags.create({ account_id: 0, name: 'name' });
+    const response = await client.cloudforceOne.threatEvents.tags.create({
+      account_id: 'account_id',
+      value: 'APT28',
+      activeDuration: 'activeDuration',
+      actorCategory: 'actorCategory',
+      aliasGroupNames: ['string'],
+      aliasGroupNamesInternal: ['string'],
+      analyticPriority: 0,
+      attributionConfidence: 'attributionConfidence',
+      attributionOrganization: 'attributionOrganization',
+      categoryUuid: '12345678-1234-1234-1234-1234567890ab',
+      externalReferenceLinks: ['string'],
+      internalDescription: 'internalDescription',
+      motive: 'motive',
+      opsecLevel: 'opsecLevel',
+      originCountryISO: 'originCountryISO',
+      priority: 0,
+      sophisticationLevel: 'sophisticationLevel',
+    });
   });
 });

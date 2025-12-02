@@ -20,6 +20,19 @@ export class DNSFirewall extends APIResource {
 
   /**
    * Create a DNS Firewall cluster
+   *
+   * @example
+   * ```ts
+   * const dnsFirewall = await client.dnsFirewall.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   name: 'My Awesome DNS Firewall cluster',
+   *   upstream_ips: [
+   *     '192.0.2.1',
+   *     '198.51.100.1',
+   *     '2001:DB8:100::CF',
+   *   ],
+   * });
+   * ```
    */
   create(
     params: DNSFirewallCreateParams,
@@ -35,6 +48,16 @@ export class DNSFirewall extends APIResource {
 
   /**
    * List DNS Firewall clusters for an account
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const dnsFirewallListResponse of client.dnsFirewall.list(
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * )) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: DNSFirewallListParams,
@@ -50,6 +73,14 @@ export class DNSFirewall extends APIResource {
 
   /**
    * Delete a DNS Firewall cluster
+   *
+   * @example
+   * ```ts
+   * const dnsFirewall = await client.dnsFirewall.delete(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     dnsFirewallId: string,
@@ -67,6 +98,14 @@ export class DNSFirewall extends APIResource {
 
   /**
    * Modify the configuration of a DNS Firewall cluster
+   *
+   * @example
+   * ```ts
+   * const response = await client.dnsFirewall.edit(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   edit(
     dnsFirewallId: string,
@@ -84,6 +123,14 @@ export class DNSFirewall extends APIResource {
 
   /**
    * Show a single DNS Firewall cluster for an account
+   *
+   * @example
+   * ```ts
+   * const dnsFirewall = await client.dnsFirewall.get(
+   *   '023e105f4ecef8ad9ca31a8372d0c353',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(
     dnsFirewallId: string,
@@ -150,7 +197,7 @@ export type UpstreamIPsParam = string;
 
 export interface DNSFirewallCreateResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id: string;
 
@@ -167,16 +214,30 @@ export interface DNSFirewallCreateResponse {
   ecs_fallback: boolean;
 
   /**
-   * Maximum DNS cache TTL This setting sets an upper bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Higher TTLs will be
-   * decreased to the maximum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets an upper bound on
+   * this duration. For caching purposes, higher TTLs will be decreased to the
+   * maximum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   maximum_cache_ttl: number;
 
   /**
-   * Minimum DNS cache TTL This setting sets a lower bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Lower TTLs will be
-   * increased to the minimum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets a lower bound on
+   * this duration. For caching purposes, lower TTLs will be increased to the minimum
+   * value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
+   *
+   * Note that, even with this setting, there is no guarantee that a response will be
+   * cached for at least the specified duration. Cached responses may be removed
+   * earlier for capacity or other operational reasons.
    */
   minimum_cache_ttl: number;
 
@@ -191,8 +252,12 @@ export interface DNSFirewallCreateResponse {
   name: string;
 
   /**
-   * Negative DNS cache TTL This setting controls how long DNS Firewall should cache
-   * negative responses (e.g., NXDOMAIN) from the upstream servers.
+   * This setting controls how long DNS Firewall should cache negative responses
+   * (e.g., NXDOMAIN) from the upstream servers.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   negative_cache_ttl: number | null;
 
@@ -218,7 +283,7 @@ export interface DNSFirewallCreateResponse {
 
 export interface DNSFirewallListResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id: string;
 
@@ -235,16 +300,30 @@ export interface DNSFirewallListResponse {
   ecs_fallback: boolean;
 
   /**
-   * Maximum DNS cache TTL This setting sets an upper bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Higher TTLs will be
-   * decreased to the maximum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets an upper bound on
+   * this duration. For caching purposes, higher TTLs will be decreased to the
+   * maximum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   maximum_cache_ttl: number;
 
   /**
-   * Minimum DNS cache TTL This setting sets a lower bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Lower TTLs will be
-   * increased to the minimum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets a lower bound on
+   * this duration. For caching purposes, lower TTLs will be increased to the minimum
+   * value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
+   *
+   * Note that, even with this setting, there is no guarantee that a response will be
+   * cached for at least the specified duration. Cached responses may be removed
+   * earlier for capacity or other operational reasons.
    */
   minimum_cache_ttl: number;
 
@@ -259,8 +338,12 @@ export interface DNSFirewallListResponse {
   name: string;
 
   /**
-   * Negative DNS cache TTL This setting controls how long DNS Firewall should cache
-   * negative responses (e.g., NXDOMAIN) from the upstream servers.
+   * This setting controls how long DNS Firewall should cache negative responses
+   * (e.g., NXDOMAIN) from the upstream servers.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   negative_cache_ttl: number | null;
 
@@ -286,14 +369,14 @@ export interface DNSFirewallListResponse {
 
 export interface DNSFirewallDeleteResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id?: string;
 }
 
 export interface DNSFirewallEditResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id: string;
 
@@ -310,16 +393,30 @@ export interface DNSFirewallEditResponse {
   ecs_fallback: boolean;
 
   /**
-   * Maximum DNS cache TTL This setting sets an upper bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Higher TTLs will be
-   * decreased to the maximum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets an upper bound on
+   * this duration. For caching purposes, higher TTLs will be decreased to the
+   * maximum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   maximum_cache_ttl: number;
 
   /**
-   * Minimum DNS cache TTL This setting sets a lower bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Lower TTLs will be
-   * increased to the minimum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets a lower bound on
+   * this duration. For caching purposes, lower TTLs will be increased to the minimum
+   * value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
+   *
+   * Note that, even with this setting, there is no guarantee that a response will be
+   * cached for at least the specified duration. Cached responses may be removed
+   * earlier for capacity or other operational reasons.
    */
   minimum_cache_ttl: number;
 
@@ -334,8 +431,12 @@ export interface DNSFirewallEditResponse {
   name: string;
 
   /**
-   * Negative DNS cache TTL This setting controls how long DNS Firewall should cache
-   * negative responses (e.g., NXDOMAIN) from the upstream servers.
+   * This setting controls how long DNS Firewall should cache negative responses
+   * (e.g., NXDOMAIN) from the upstream servers.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   negative_cache_ttl: number | null;
 
@@ -361,7 +462,7 @@ export interface DNSFirewallEditResponse {
 
 export interface DNSFirewallGetResponse {
   /**
-   * Identifier
+   * Identifier.
    */
   id: string;
 
@@ -378,16 +479,30 @@ export interface DNSFirewallGetResponse {
   ecs_fallback: boolean;
 
   /**
-   * Maximum DNS cache TTL This setting sets an upper bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Higher TTLs will be
-   * decreased to the maximum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets an upper bound on
+   * this duration. For caching purposes, higher TTLs will be decreased to the
+   * maximum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   maximum_cache_ttl: number;
 
   /**
-   * Minimum DNS cache TTL This setting sets a lower bound on DNS TTLs for purposes
-   * of caching between DNS Firewall and the upstream servers. Lower TTLs will be
-   * increased to the minimum defined here for caching purposes.
+   * By default, Cloudflare attempts to cache responses for as long as indicated by
+   * the TTL received from upstream nameservers. This setting sets a lower bound on
+   * this duration. For caching purposes, lower TTLs will be increased to the minimum
+   * value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
+   *
+   * Note that, even with this setting, there is no guarantee that a response will be
+   * cached for at least the specified duration. Cached responses may be removed
+   * earlier for capacity or other operational reasons.
    */
   minimum_cache_ttl: number;
 
@@ -402,8 +517,12 @@ export interface DNSFirewallGetResponse {
   name: string;
 
   /**
-   * Negative DNS cache TTL This setting controls how long DNS Firewall should cache
-   * negative responses (e.g., NXDOMAIN) from the upstream servers.
+   * This setting controls how long DNS Firewall should cache negative responses
+   * (e.g., NXDOMAIN) from the upstream servers.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   negative_cache_ttl: number | null;
 
@@ -429,7 +548,7 @@ export interface DNSFirewallGetResponse {
 
 export interface DNSFirewallCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -460,22 +579,40 @@ export interface DNSFirewallCreateParams {
   ecs_fallback?: boolean;
 
   /**
-   * Body param: Maximum DNS cache TTL This setting sets an upper bound on DNS TTLs
-   * for purposes of caching between DNS Firewall and the upstream servers. Higher
-   * TTLs will be decreased to the maximum defined here for caching purposes.
+   * Body param: By default, Cloudflare attempts to cache responses for as long as
+   * indicated by the TTL received from upstream nameservers. This setting sets an
+   * upper bound on this duration. For caching purposes, higher TTLs will be
+   * decreased to the maximum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   maximum_cache_ttl?: number;
 
   /**
-   * Body param: Minimum DNS cache TTL This setting sets a lower bound on DNS TTLs
-   * for purposes of caching between DNS Firewall and the upstream servers. Lower
-   * TTLs will be increased to the minimum defined here for caching purposes.
+   * Body param: By default, Cloudflare attempts to cache responses for as long as
+   * indicated by the TTL received from upstream nameservers. This setting sets a
+   * lower bound on this duration. For caching purposes, lower TTLs will be increased
+   * to the minimum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
+   *
+   * Note that, even with this setting, there is no guarantee that a response will be
+   * cached for at least the specified duration. Cached responses may be removed
+   * earlier for capacity or other operational reasons.
    */
   minimum_cache_ttl?: number;
 
   /**
-   * Body param: Negative DNS cache TTL This setting controls how long DNS Firewall
-   * should cache negative responses (e.g., NXDOMAIN) from the upstream servers.
+   * Body param: This setting controls how long DNS Firewall should cache negative
+   * responses (e.g., NXDOMAIN) from the upstream servers.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   negative_cache_ttl?: number | null;
 
@@ -494,21 +631,21 @@ export interface DNSFirewallCreateParams {
 
 export interface DNSFirewallListParams extends V4PagePaginationArrayParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 }
 
 export interface DNSFirewallDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
 export interface DNSFirewallEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -529,16 +666,30 @@ export interface DNSFirewallEditParams {
   ecs_fallback?: boolean;
 
   /**
-   * Body param: Maximum DNS cache TTL This setting sets an upper bound on DNS TTLs
-   * for purposes of caching between DNS Firewall and the upstream servers. Higher
-   * TTLs will be decreased to the maximum defined here for caching purposes.
+   * Body param: By default, Cloudflare attempts to cache responses for as long as
+   * indicated by the TTL received from upstream nameservers. This setting sets an
+   * upper bound on this duration. For caching purposes, higher TTLs will be
+   * decreased to the maximum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   maximum_cache_ttl?: number;
 
   /**
-   * Body param: Minimum DNS cache TTL This setting sets a lower bound on DNS TTLs
-   * for purposes of caching between DNS Firewall and the upstream servers. Lower
-   * TTLs will be increased to the minimum defined here for caching purposes.
+   * Body param: By default, Cloudflare attempts to cache responses for as long as
+   * indicated by the TTL received from upstream nameservers. This setting sets a
+   * lower bound on this duration. For caching purposes, lower TTLs will be increased
+   * to the minimum value defined by this setting.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
+   *
+   * Note that, even with this setting, there is no guarantee that a response will be
+   * cached for at least the specified duration. Cached responses may be removed
+   * earlier for capacity or other operational reasons.
    */
   minimum_cache_ttl?: number;
 
@@ -548,8 +699,12 @@ export interface DNSFirewallEditParams {
   name?: string;
 
   /**
-   * Body param: Negative DNS cache TTL This setting controls how long DNS Firewall
-   * should cache negative responses (e.g., NXDOMAIN) from the upstream servers.
+   * Body param: This setting controls how long DNS Firewall should cache negative
+   * responses (e.g., NXDOMAIN) from the upstream servers.
+   *
+   * This setting does not affect the TTL value in the DNS response Cloudflare
+   * returns to clients. Cloudflare will always forward the TTL value received from
+   * upstream nameservers.
    */
   negative_cache_ttl?: number | null;
 
@@ -573,15 +728,33 @@ export interface DNSFirewallEditParams {
 
 export interface DNSFirewallGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
+DNSFirewall.DNSFirewallListResponsesV4PagePaginationArray = DNSFirewallListResponsesV4PagePaginationArray;
 DNSFirewall.Analytics = Analytics;
 DNSFirewall.ReverseDNS = ReverseDNS;
 
 export declare namespace DNSFirewall {
+  export {
+    type AttackMitigation as AttackMitigation,
+    type FirewallIPs as FirewallIPs,
+    type UpstreamIPs as UpstreamIPs,
+    type DNSFirewallCreateResponse as DNSFirewallCreateResponse,
+    type DNSFirewallListResponse as DNSFirewallListResponse,
+    type DNSFirewallDeleteResponse as DNSFirewallDeleteResponse,
+    type DNSFirewallEditResponse as DNSFirewallEditResponse,
+    type DNSFirewallGetResponse as DNSFirewallGetResponse,
+    DNSFirewallListResponsesV4PagePaginationArray as DNSFirewallListResponsesV4PagePaginationArray,
+    type DNSFirewallCreateParams as DNSFirewallCreateParams,
+    type DNSFirewallListParams as DNSFirewallListParams,
+    type DNSFirewallDeleteParams as DNSFirewallDeleteParams,
+    type DNSFirewallEditParams as DNSFirewallEditParams,
+    type DNSFirewallGetParams as DNSFirewallGetParams,
+  };
+
   export { Analytics as Analytics };
 
   export {

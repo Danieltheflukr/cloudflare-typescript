@@ -43,6 +43,13 @@ export class V1 extends APIResource {
    * Upload an image with up to 10 Megabytes using a single HTTP POST
    * (multipart/form-data) request. An image can be uploaded by sending an image file
    * or passing an accessible to an API url.
+   *
+   * @example
+   * ```ts
+   * const image = await client.images.v1.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   create(params: V1CreateParams, options?: Core.RequestOptions): Core.APIPromise<Image> {
     const { account_id, ...body } = params;
@@ -57,6 +64,8 @@ export class V1 extends APIResource {
   /**
    * List up to 100 images with one request. Use the optional parameters below to get
    * a specific range of images.
+   *
+   * @deprecated
    */
   list(
     params: V1ListParams,
@@ -72,6 +81,13 @@ export class V1 extends APIResource {
   /**
    * Delete an image on Cloudflare Images. On success, all copies of the image are
    * deleted and purged from cache.
+   *
+   * @example
+   * ```ts
+   * const v1 = await client.images.v1.delete('image_id', {
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   delete(
     imageId: string,
@@ -89,6 +105,13 @@ export class V1 extends APIResource {
   /**
    * Update image access control. On access control change, all copies of the image
    * are purged from cache.
+   *
+   * @example
+   * ```ts
+   * const image = await client.images.v1.edit('image_id', {
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   edit(imageId: string, params: V1EditParams, options?: Core.RequestOptions): Core.APIPromise<Image> {
     const { account_id, ...body } = params;
@@ -102,6 +125,13 @@ export class V1 extends APIResource {
 
   /**
    * Fetch details for a single image.
+   *
+   * @example
+   * ```ts
+   * const image = await client.images.v1.get('image_id', {
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   get(imageId: string, params: V1GetParams, options?: Core.RequestOptions): Core.APIPromise<Image> {
     const { account_id } = params;
@@ -120,6 +150,11 @@ export interface Image {
    * Image unique identifier.
    */
   id?: string;
+
+  /**
+   * Can set the creator field with an internal user ID.
+   */
+  creator?: string | null;
 
   /**
    * Image file name.
@@ -162,9 +197,19 @@ export interface V1CreateParams {
   account_id: string;
 
   /**
+   * Body param: An optional custom unique identifier for your image.
+   */
+  id?: string;
+
+  /**
+   * Body param: Can set the creator field with an internal user ID.
+   */
+  creator?: string;
+
+  /**
    * Body param: An image binary data. Only needed when type is uploading a file.
    */
-  file?: unknown;
+  file?: Core.Uploadable;
 
   /**
    * Body param: User modifiable key-value store. Can use used for keeping references
@@ -190,6 +235,12 @@ export interface V1ListParams extends V4PagePaginationParams {
    * Path param: Account identifier tag.
    */
   account_id: string;
+
+  /**
+   * Query param: Internal user ID set within the creator field. Setting to empty
+   * string "" will return images where creator field is not set
+   */
+  creator?: string | null;
 }
 
 export interface V1DeleteParams {
@@ -204,6 +255,11 @@ export interface V1EditParams {
    * Path param: Account identifier tag.
    */
   account_id: string;
+
+  /**
+   * Body param: Can set the creator field with an internal user ID.
+   */
+  creator?: string;
 
   /**
    * Body param: User modifiable key-value store. Can be used for keeping references

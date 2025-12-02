@@ -5,7 +5,15 @@ import * as Core from '../../core';
 
 export class Search extends APIResource {
   /**
-   * Searches for locations, autonomous systems, and reports.
+   * Searches for locations, autonomous systems, reports, bots, certificate logs,
+   * certificate authorities, industries and verticals
+   *
+   * @example
+   * ```ts
+   * const response = await client.radar.search.global({
+   *   query: 'United',
+   * });
+   * ```
    */
   global(query: SearchGlobalParams, options?: Core.RequestOptions): Core.APIPromise<SearchGlobalResponse> {
     return (
@@ -32,14 +40,25 @@ export namespace SearchGlobalResponse {
 
 export interface SearchGlobalParams {
   /**
-   * Search for locations, autonomous systems and reports.
+   * String used to perform the search operation.
    */
   query: string;
 
   /**
-   * Search types to be excluded from results.
+   * Search types excluded from results.
    */
-  exclude?: Array<'SPECIAL_EVENTS' | 'NOTEBOOKS' | 'LOCATIONS' | 'ASNS'>;
+  exclude?: Array<
+    | 'ADM1S'
+    | 'ASNS'
+    | 'BOTS'
+    | 'CERTIFICATE_AUTHORITIES'
+    | 'CERTIFICATE_LOGS'
+    | 'INDUSTRIES'
+    | 'LOCATIONS'
+    | 'NOTEBOOKS'
+    | 'TLDS'
+    | 'VERTICALS'
+  >;
 
   /**
    * Format in which results will be returned.
@@ -47,9 +66,20 @@ export interface SearchGlobalParams {
   format?: 'JSON' | 'CSV';
 
   /**
-   * Search types to be included in results.
+   * Search types included in results.
    */
-  include?: Array<'SPECIAL_EVENTS' | 'NOTEBOOKS' | 'LOCATIONS' | 'ASNS'>;
+  include?: Array<
+    | 'ADM1S'
+    | 'ASNS'
+    | 'BOTS'
+    | 'CERTIFICATE_AUTHORITIES'
+    | 'CERTIFICATE_LOGS'
+    | 'INDUSTRIES'
+    | 'LOCATIONS'
+    | 'NOTEBOOKS'
+    | 'TLDS'
+    | 'VERTICALS'
+  >;
 
   /**
    * Limits the number of objects returned in the response.
@@ -57,7 +87,7 @@ export interface SearchGlobalParams {
   limit?: number;
 
   /**
-   * Limit the number of objects per search category.
+   * Limits the number of objects per search category.
    */
   limitPerGroup?: number;
 }

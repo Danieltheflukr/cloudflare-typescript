@@ -3,6 +3,18 @@
 import { APIResource } from '../../resource';
 import * as Core from '../../core';
 import * as LoadBalancersAPI from './load-balancers';
+import * as MonitorGroupsAPI from './monitor-groups';
+import {
+  MonitorGroup,
+  MonitorGroupCreateParams,
+  MonitorGroupDeleteParams,
+  MonitorGroupEditParams,
+  MonitorGroupGetParams,
+  MonitorGroupListParams,
+  MonitorGroupUpdateParams,
+  MonitorGroups,
+  MonitorGroupsSinglePage,
+} from './monitor-groups';
 import * as PreviewsAPI from './previews';
 import { PreviewGetParams, PreviewGetResponse, Previews } from './previews';
 import * as RegionsAPI from './regions';
@@ -45,6 +57,7 @@ import { SinglePage } from '../../pagination';
 
 export class LoadBalancers extends APIResource {
   monitors: MonitorsAPI.Monitors = new MonitorsAPI.Monitors(this._client);
+  monitorGroups: MonitorGroupsAPI.MonitorGroups = new MonitorGroupsAPI.MonitorGroups(this._client);
   pools: PoolsAPI.Pools = new PoolsAPI.Pools(this._client);
   previews: PreviewsAPI.Previews = new PreviewsAPI.Previews(this._client);
   regions: RegionsAPI.Regions = new RegionsAPI.Regions(this._client);
@@ -52,6 +65,20 @@ export class LoadBalancers extends APIResource {
 
   /**
    * Create a new load balancer.
+   *
+   * @example
+   * ```ts
+   * const loadBalancer = await client.loadBalancers.create({
+   *   zone_id: '699d98642c564d2e855e9661899b7252',
+   *   default_pools: [
+   *     '17b5962d775c646f3f9725cbc7a53df4',
+   *     '9290f38c5d07c2e2f4df57b1f61d4196',
+   *     '00920f38ce07c2e2f4df50b1f61d4194',
+   *   ],
+   *   fallback_pool: 'fallback_pool',
+   *   name: 'www.example.com',
+   * });
+   * ```
    */
   create(params: LoadBalancerCreateParams, options?: Core.RequestOptions): Core.APIPromise<LoadBalancer> {
     const { zone_id, ...body } = params;
@@ -64,6 +91,23 @@ export class LoadBalancers extends APIResource {
 
   /**
    * Update a configured load balancer.
+   *
+   * @example
+   * ```ts
+   * const loadBalancer = await client.loadBalancers.update(
+   *   '699d98642c564d2e855e9661899b7252',
+   *   {
+   *     zone_id: '699d98642c564d2e855e9661899b7252',
+   *     default_pools: [
+   *       '17b5962d775c646f3f9725cbc7a53df4',
+   *       '9290f38c5d07c2e2f4df57b1f61d4196',
+   *       '00920f38ce07c2e2f4df50b1f61d4194',
+   *     ],
+   *     fallback_pool: 'fallback_pool',
+   *     name: 'www.example.com',
+   *   },
+   * );
+   * ```
    */
   update(
     loadBalancerId: string,
@@ -81,6 +125,16 @@ export class LoadBalancers extends APIResource {
 
   /**
    * List configured load balancers.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const loadBalancer of client.loadBalancers.list({
+   *   zone_id: '699d98642c564d2e855e9661899b7252',
+   * })) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     params: LoadBalancerListParams,
@@ -92,6 +146,14 @@ export class LoadBalancers extends APIResource {
 
   /**
    * Delete a configured load balancer.
+   *
+   * @example
+   * ```ts
+   * const loadBalancer = await client.loadBalancers.delete(
+   *   '699d98642c564d2e855e9661899b7252',
+   *   { zone_id: '699d98642c564d2e855e9661899b7252' },
+   * );
+   * ```
    */
   delete(
     loadBalancerId: string,
@@ -108,6 +170,14 @@ export class LoadBalancers extends APIResource {
 
   /**
    * Apply changes to an existing load balancer, overwriting the supplied properties.
+   *
+   * @example
+   * ```ts
+   * const loadBalancer = await client.loadBalancers.edit(
+   *   '699d98642c564d2e855e9661899b7252',
+   *   { zone_id: '699d98642c564d2e855e9661899b7252' },
+   * );
+   * ```
    */
   edit(
     loadBalancerId: string,
@@ -125,6 +195,14 @@ export class LoadBalancers extends APIResource {
 
   /**
    * Fetch a single configured load balancer.
+   *
+   * @example
+   * ```ts
+   * const loadBalancer = await client.loadBalancers.get(
+   *   '699d98642c564d2e855e9661899b7252',
+   *   { zone_id: '699d98642c564d2e855e9661899b7252' },
+   * );
+   * ```
    */
   get(
     loadBalancerId: string,
@@ -319,7 +397,7 @@ export interface LoadBalancer {
    * back to using the corresponding region_pool mapping if it exists else to
    * default_pools.
    */
-  country_pools?: Record<string, Array<string>>;
+  country_pools?: { [key: string]: Array<string> };
 
   created_on?: string;
 
@@ -365,12 +443,12 @@ export interface LoadBalancer {
   networks?: Array<string>;
 
   /**
-   * (Enterprise only): A mapping of Cloudflare PoP identifiers to a list of pool IDs
+   * Enterprise only: A mapping of Cloudflare PoP identifiers to a list of pool IDs
    * (ordered by their failover priority) for the PoP (datacenter). Any PoPs not
    * explicitly defined will fall back to using the corresponding country_pool, then
    * region_pool mapping if it exists else to default_pools.
    */
-  pop_pools?: Record<string, Array<string>>;
+  pop_pools?: { [key: string]: Array<string> };
 
   /**
    * Whether the hostname should be gray clouded (false) or orange clouded (true).
@@ -394,7 +472,7 @@ export interface LoadBalancer {
    * priority) for the given region. Any regions not explicitly defined will fall
    * back to using default_pools.
    */
-  region_pools?: Record<string, Array<string>>;
+  region_pools?: { [key: string]: Array<string> };
 
   /**
    * BETA Field Not General Access: A list of rules for this load balancer to
@@ -404,28 +482,25 @@ export interface LoadBalancer {
 
   /**
    * Specifies the type of session affinity the load balancer should use unless
-   * specified as `"none"`. The supported types are:
-   *
-   * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
-   *   generated, encoding information of which origin the request will be forwarded
-   *   to. Subsequent requests, by the same client to the same load balancer, will be
-   *   sent to the origin server the cookie encodes, for the duration of the cookie
-   *   and as long as the origin server remains healthy. If the cookie has expired or
-   *   the origin server is unhealthy, then a new origin server is calculated and
-   *   used.
-   * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
-   *   selection is stable and based on the client's ip address.
-   * - `"header"`: On the first request to a proxied load balancer, a session key
-   *   based on the configured HTTP headers (see
-   *   `session_affinity_attributes.headers`) is generated, encoding the request
-   *   headers used for storing in the load balancer session state which origin the
-   *   request will be forwarded to. Subsequent requests to the load balancer with
-   *   the same headers will be sent to the same origin server, for the duration of
-   *   the session and as long as the origin server remains healthy. If the session
-   *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
-   *   server is unhealthy, then a new origin server is calculated and used. See
-   *   `headers` in `session_affinity_attributes` for additional required
-   *   configuration.
+   * specified as `"none"`. The supported types are: - `"cookie"`: On the first
+   * request to a proxied load balancer, a cookie is generated, encoding information
+   * of which origin the request will be forwarded to. Subsequent requests, by the
+   * same client to the same load balancer, will be sent to the origin server the
+   * cookie encodes, for the duration of the cookie and as long as the origin server
+   * remains healthy. If the cookie has expired or the origin server is unhealthy,
+   * then a new origin server is calculated and used. - `"ip_cookie"`: Behaves the
+   * same as `"cookie"` except the initial origin selection is stable and based on
+   * the client's ip address. - `"header"`: On the first request to a proxied load
+   * balancer, a session key based on the configured HTTP headers (see
+   * `session_affinity_attributes.headers`) is generated, encoding the request
+   * headers used for storing in the load balancer session state which origin the
+   * request will be forwarded to. Subsequent requests to the load balancer with the
+   * same headers will be sent to the same origin server, for the duration of the
+   * session and as long as the origin server remains healthy. If the session has
+   * been idle for the duration of `session_affinity_ttl` seconds or the origin
+   * server is unhealthy, then a new origin server is calculated and used. See
+   * `headers` in `session_affinity_attributes` for additional required
+   * configuration.
    */
   session_affinity?: SessionAffinity;
 
@@ -437,14 +512,13 @@ export interface LoadBalancer {
   /**
    * Time, in seconds, until a client's session expires after being created. Once the
    * expiry time has been reached, subsequent requests may get sent to a different
-   * origin server. The accepted ranges per `session_affinity` policy are:
-   *
-   * - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
-   *   unless explicitly set. The accepted range of values is between [1800, 604800].
-   * - `"header"`: The current default of 1800 seconds will be used unless explicitly
-   *   set. The accepted range of values is between [30, 3600]. Note: With session
-   *   affinity by header, sessions only expire after they haven't been used for the
-   *   number of seconds specified.
+   * origin server. The accepted ranges per `session_affinity` policy are: -
+   * `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used unless
+   * explicitly set. The accepted range of values is between [1800, 604800]. -
+   * `"header"`: The current default of 1800 seconds will be used unless explicitly
+   * set. The accepted range of values is between [30, 3600]. Note: With session
+   * affinity by header, sessions only expire after they haven't been used for the
+   * number of seconds specified.
    */
   session_affinity_ttl?: number;
 
@@ -669,6 +743,12 @@ export interface Origin {
   name?: string;
 
   /**
+   * The port for upstream connections. A value of 0 means the default port for the
+   * protocol will be used.
+   */
+  port?: number;
+
+  /**
    * The virtual network subnet ID the origin belongs in. Virtual network must also
    * belong to the account.
    */
@@ -713,6 +793,12 @@ export interface OriginParam {
    * A human-identifiable name for the origin.
    */
   name?: string;
+
+  /**
+   * The port for upstream connections. A value of 0 means the default port for the
+   * protocol will be used.
+   */
+  port?: number;
 
   /**
    * The virtual network subnet ID the origin belongs in. Virtual network must also
@@ -800,7 +886,7 @@ export interface RandomSteering {
    * A mapping of pool IDs to custom weights. The weight is relative to other pools
    * in the load balancer.
    */
-  pool_weights?: Record<string, number>;
+  pool_weights?: { [key: string]: number };
 }
 
 /**
@@ -824,7 +910,7 @@ export interface RandomSteeringParam {
    * A mapping of pool IDs to custom weights. The weight is relative to other pools
    * in the load balancer.
    */
-  pool_weights?: Record<string, number>;
+  pool_weights?: { [key: string]: number };
 }
 
 /**
@@ -928,7 +1014,7 @@ export namespace Rules {
      * back to using the corresponding region_pool mapping if it exists else to
      * default_pools.
      */
-    country_pools?: Record<string, Array<string>>;
+    country_pools?: { [key: string]: Array<string> };
 
     /**
      * A list of pool IDs ordered by their failover priority. Pools defined here are
@@ -948,12 +1034,12 @@ export namespace Rules {
     location_strategy?: LoadBalancersAPI.LocationStrategy;
 
     /**
-     * (Enterprise only): A mapping of Cloudflare PoP identifiers to a list of pool IDs
+     * Enterprise only: A mapping of Cloudflare PoP identifiers to a list of pool IDs
      * (ordered by their failover priority) for the PoP (datacenter). Any PoPs not
      * explicitly defined will fall back to using the corresponding country_pool, then
      * region_pool mapping if it exists else to default_pools.
      */
-    pop_pools?: Record<string, Array<string>>;
+    pop_pools?: { [key: string]: Array<string> };
 
     /**
      * Configures pool weights.
@@ -972,32 +1058,29 @@ export namespace Rules {
      * priority) for the given region. Any regions not explicitly defined will fall
      * back to using default_pools.
      */
-    region_pools?: Record<string, Array<string>>;
+    region_pools?: { [key: string]: Array<string> };
 
     /**
      * Specifies the type of session affinity the load balancer should use unless
-     * specified as `"none"`. The supported types are:
-     *
-     * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
-     *   generated, encoding information of which origin the request will be forwarded
-     *   to. Subsequent requests, by the same client to the same load balancer, will be
-     *   sent to the origin server the cookie encodes, for the duration of the cookie
-     *   and as long as the origin server remains healthy. If the cookie has expired or
-     *   the origin server is unhealthy, then a new origin server is calculated and
-     *   used.
-     * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
-     *   selection is stable and based on the client's ip address.
-     * - `"header"`: On the first request to a proxied load balancer, a session key
-     *   based on the configured HTTP headers (see
-     *   `session_affinity_attributes.headers`) is generated, encoding the request
-     *   headers used for storing in the load balancer session state which origin the
-     *   request will be forwarded to. Subsequent requests to the load balancer with
-     *   the same headers will be sent to the same origin server, for the duration of
-     *   the session and as long as the origin server remains healthy. If the session
-     *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
-     *   server is unhealthy, then a new origin server is calculated and used. See
-     *   `headers` in `session_affinity_attributes` for additional required
-     *   configuration.
+     * specified as `"none"`. The supported types are: - `"cookie"`: On the first
+     * request to a proxied load balancer, a cookie is generated, encoding information
+     * of which origin the request will be forwarded to. Subsequent requests, by the
+     * same client to the same load balancer, will be sent to the origin server the
+     * cookie encodes, for the duration of the cookie and as long as the origin server
+     * remains healthy. If the cookie has expired or the origin server is unhealthy,
+     * then a new origin server is calculated and used. - `"ip_cookie"`: Behaves the
+     * same as `"cookie"` except the initial origin selection is stable and based on
+     * the client's ip address. - `"header"`: On the first request to a proxied load
+     * balancer, a session key based on the configured HTTP headers (see
+     * `session_affinity_attributes.headers`) is generated, encoding the request
+     * headers used for storing in the load balancer session state which origin the
+     * request will be forwarded to. Subsequent requests to the load balancer with the
+     * same headers will be sent to the same origin server, for the duration of the
+     * session and as long as the origin server remains healthy. If the session has
+     * been idle for the duration of `session_affinity_ttl` seconds or the origin
+     * server is unhealthy, then a new origin server is calculated and used. See
+     * `headers` in `session_affinity_attributes` for additional required
+     * configuration.
      */
     session_affinity?: LoadBalancersAPI.SessionAffinity;
 
@@ -1009,14 +1092,13 @@ export namespace Rules {
     /**
      * Time, in seconds, until a client's session expires after being created. Once the
      * expiry time has been reached, subsequent requests may get sent to a different
-     * origin server. The accepted ranges per `session_affinity` policy are:
-     *
-     * - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
-     *   unless explicitly set. The accepted range of values is between [1800, 604800].
-     * - `"header"`: The current default of 1800 seconds will be used unless explicitly
-     *   set. The accepted range of values is between [30, 3600]. Note: With session
-     *   affinity by header, sessions only expire after they haven't been used for the
-     *   number of seconds specified.
+     * origin server. The accepted ranges per `session_affinity` policy are: -
+     * `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used unless
+     * explicitly set. The accepted range of values is between [1800, 604800]. -
+     * `"header"`: The current default of 1800 seconds will be used unless explicitly
+     * set. The accepted range of values is between [30, 3600]. Note: With session
+     * affinity by header, sessions only expire after they haven't been used for the
+     * number of seconds specified.
      */
     session_affinity_ttl?: number;
 
@@ -1155,7 +1237,7 @@ export namespace RulesParam {
      * back to using the corresponding region_pool mapping if it exists else to
      * default_pools.
      */
-    country_pools?: Record<string, Array<string>>;
+    country_pools?: { [key: string]: Array<string> };
 
     /**
      * A list of pool IDs ordered by their failover priority. Pools defined here are
@@ -1175,12 +1257,12 @@ export namespace RulesParam {
     location_strategy?: LoadBalancersAPI.LocationStrategyParam;
 
     /**
-     * (Enterprise only): A mapping of Cloudflare PoP identifiers to a list of pool IDs
+     * Enterprise only: A mapping of Cloudflare PoP identifiers to a list of pool IDs
      * (ordered by their failover priority) for the PoP (datacenter). Any PoPs not
      * explicitly defined will fall back to using the corresponding country_pool, then
      * region_pool mapping if it exists else to default_pools.
      */
-    pop_pools?: Record<string, Array<string>>;
+    pop_pools?: { [key: string]: Array<string> };
 
     /**
      * Configures pool weights.
@@ -1199,32 +1281,29 @@ export namespace RulesParam {
      * priority) for the given region. Any regions not explicitly defined will fall
      * back to using default_pools.
      */
-    region_pools?: Record<string, Array<string>>;
+    region_pools?: { [key: string]: Array<string> };
 
     /**
      * Specifies the type of session affinity the load balancer should use unless
-     * specified as `"none"`. The supported types are:
-     *
-     * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
-     *   generated, encoding information of which origin the request will be forwarded
-     *   to. Subsequent requests, by the same client to the same load balancer, will be
-     *   sent to the origin server the cookie encodes, for the duration of the cookie
-     *   and as long as the origin server remains healthy. If the cookie has expired or
-     *   the origin server is unhealthy, then a new origin server is calculated and
-     *   used.
-     * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
-     *   selection is stable and based on the client's ip address.
-     * - `"header"`: On the first request to a proxied load balancer, a session key
-     *   based on the configured HTTP headers (see
-     *   `session_affinity_attributes.headers`) is generated, encoding the request
-     *   headers used for storing in the load balancer session state which origin the
-     *   request will be forwarded to. Subsequent requests to the load balancer with
-     *   the same headers will be sent to the same origin server, for the duration of
-     *   the session and as long as the origin server remains healthy. If the session
-     *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
-     *   server is unhealthy, then a new origin server is calculated and used. See
-     *   `headers` in `session_affinity_attributes` for additional required
-     *   configuration.
+     * specified as `"none"`. The supported types are: - `"cookie"`: On the first
+     * request to a proxied load balancer, a cookie is generated, encoding information
+     * of which origin the request will be forwarded to. Subsequent requests, by the
+     * same client to the same load balancer, will be sent to the origin server the
+     * cookie encodes, for the duration of the cookie and as long as the origin server
+     * remains healthy. If the cookie has expired or the origin server is unhealthy,
+     * then a new origin server is calculated and used. - `"ip_cookie"`: Behaves the
+     * same as `"cookie"` except the initial origin selection is stable and based on
+     * the client's ip address. - `"header"`: On the first request to a proxied load
+     * balancer, a session key based on the configured HTTP headers (see
+     * `session_affinity_attributes.headers`) is generated, encoding the request
+     * headers used for storing in the load balancer session state which origin the
+     * request will be forwarded to. Subsequent requests to the load balancer with the
+     * same headers will be sent to the same origin server, for the duration of the
+     * session and as long as the origin server remains healthy. If the session has
+     * been idle for the duration of `session_affinity_ttl` seconds or the origin
+     * server is unhealthy, then a new origin server is calculated and used. See
+     * `headers` in `session_affinity_attributes` for additional required
+     * configuration.
      */
     session_affinity?: LoadBalancersAPI.SessionAffinityParam;
 
@@ -1236,14 +1315,13 @@ export namespace RulesParam {
     /**
      * Time, in seconds, until a client's session expires after being created. Once the
      * expiry time has been reached, subsequent requests may get sent to a different
-     * origin server. The accepted ranges per `session_affinity` policy are:
-     *
-     * - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
-     *   unless explicitly set. The accepted range of values is between [1800, 604800].
-     * - `"header"`: The current default of 1800 seconds will be used unless explicitly
-     *   set. The accepted range of values is between [30, 3600]. Note: With session
-     *   affinity by header, sessions only expire after they haven't been used for the
-     *   number of seconds specified.
+     * origin server. The accepted ranges per `session_affinity` policy are: -
+     * `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used unless
+     * explicitly set. The accepted range of values is between [1800, 604800]. -
+     * `"header"`: The current default of 1800 seconds will be used unless explicitly
+     * set. The accepted range of values is between [30, 3600]. Note: With session
+     * affinity by header, sessions only expire after they haven't been used for the
+     * number of seconds specified.
      */
     session_affinity_ttl?: number;
 
@@ -1283,55 +1361,49 @@ export namespace RulesParam {
 
 /**
  * Specifies the type of session affinity the load balancer should use unless
- * specified as `"none"`. The supported types are:
- *
- * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
- *   generated, encoding information of which origin the request will be forwarded
- *   to. Subsequent requests, by the same client to the same load balancer, will be
- *   sent to the origin server the cookie encodes, for the duration of the cookie
- *   and as long as the origin server remains healthy. If the cookie has expired or
- *   the origin server is unhealthy, then a new origin server is calculated and
- *   used.
- * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
- *   selection is stable and based on the client's ip address.
- * - `"header"`: On the first request to a proxied load balancer, a session key
- *   based on the configured HTTP headers (see
- *   `session_affinity_attributes.headers`) is generated, encoding the request
- *   headers used for storing in the load balancer session state which origin the
- *   request will be forwarded to. Subsequent requests to the load balancer with
- *   the same headers will be sent to the same origin server, for the duration of
- *   the session and as long as the origin server remains healthy. If the session
- *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
- *   server is unhealthy, then a new origin server is calculated and used. See
- *   `headers` in `session_affinity_attributes` for additional required
- *   configuration.
+ * specified as `"none"`. The supported types are: - `"cookie"`: On the first
+ * request to a proxied load balancer, a cookie is generated, encoding information
+ * of which origin the request will be forwarded to. Subsequent requests, by the
+ * same client to the same load balancer, will be sent to the origin server the
+ * cookie encodes, for the duration of the cookie and as long as the origin server
+ * remains healthy. If the cookie has expired or the origin server is unhealthy,
+ * then a new origin server is calculated and used. - `"ip_cookie"`: Behaves the
+ * same as `"cookie"` except the initial origin selection is stable and based on
+ * the client's ip address. - `"header"`: On the first request to a proxied load
+ * balancer, a session key based on the configured HTTP headers (see
+ * `session_affinity_attributes.headers`) is generated, encoding the request
+ * headers used for storing in the load balancer session state which origin the
+ * request will be forwarded to. Subsequent requests to the load balancer with the
+ * same headers will be sent to the same origin server, for the duration of the
+ * session and as long as the origin server remains healthy. If the session has
+ * been idle for the duration of `session_affinity_ttl` seconds or the origin
+ * server is unhealthy, then a new origin server is calculated and used. See
+ * `headers` in `session_affinity_attributes` for additional required
+ * configuration.
  */
 export type SessionAffinity = 'none' | 'cookie' | 'ip_cookie' | 'header';
 
 /**
  * Specifies the type of session affinity the load balancer should use unless
- * specified as `"none"`. The supported types are:
- *
- * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
- *   generated, encoding information of which origin the request will be forwarded
- *   to. Subsequent requests, by the same client to the same load balancer, will be
- *   sent to the origin server the cookie encodes, for the duration of the cookie
- *   and as long as the origin server remains healthy. If the cookie has expired or
- *   the origin server is unhealthy, then a new origin server is calculated and
- *   used.
- * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
- *   selection is stable and based on the client's ip address.
- * - `"header"`: On the first request to a proxied load balancer, a session key
- *   based on the configured HTTP headers (see
- *   `session_affinity_attributes.headers`) is generated, encoding the request
- *   headers used for storing in the load balancer session state which origin the
- *   request will be forwarded to. Subsequent requests to the load balancer with
- *   the same headers will be sent to the same origin server, for the duration of
- *   the session and as long as the origin server remains healthy. If the session
- *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
- *   server is unhealthy, then a new origin server is calculated and used. See
- *   `headers` in `session_affinity_attributes` for additional required
- *   configuration.
+ * specified as `"none"`. The supported types are: - `"cookie"`: On the first
+ * request to a proxied load balancer, a cookie is generated, encoding information
+ * of which origin the request will be forwarded to. Subsequent requests, by the
+ * same client to the same load balancer, will be sent to the origin server the
+ * cookie encodes, for the duration of the cookie and as long as the origin server
+ * remains healthy. If the cookie has expired or the origin server is unhealthy,
+ * then a new origin server is calculated and used. - `"ip_cookie"`: Behaves the
+ * same as `"cookie"` except the initial origin selection is stable and based on
+ * the client's ip address. - `"header"`: On the first request to a proxied load
+ * balancer, a session key based on the configured HTTP headers (see
+ * `session_affinity_attributes.headers`) is generated, encoding the request
+ * headers used for storing in the load balancer session state which origin the
+ * request will be forwarded to. Subsequent requests to the load balancer with the
+ * same headers will be sent to the same origin server, for the duration of the
+ * session and as long as the origin server remains healthy. If the session has
+ * been idle for the duration of `session_affinity_ttl` seconds or the origin
+ * server is unhealthy, then a new origin server is calculated and used. See
+ * `headers` in `session_affinity_attributes` for additional required
+ * configuration.
  */
 export type SessionAffinityParam = 'none' | 'cookie' | 'ip_cookie' | 'header';
 
@@ -1360,14 +1432,11 @@ export interface SessionAffinityAttributes {
   /**
    * When header `session_affinity` is enabled, this option can be used to specify
    * how HTTP headers on load balancing requests will be used. The supported values
-   * are:
-   *
-   * - `"true"`: Load balancing requests must contain _all_ of the HTTP headers
-   *   specified by the `headers` session affinity attribute, otherwise sessions
-   *   aren't created.
-   * - `"false"`: Load balancing requests must contain _at least one_ of the HTTP
-   *   headers specified by the `headers` session affinity attribute, otherwise
-   *   sessions aren't created.
+   * are: - `"true"`: Load balancing requests must contain _all_ of the HTTP headers
+   * specified by the `headers` session affinity attribute, otherwise sessions aren't
+   * created. - `"false"`: Load balancing requests must contain _at least one_ of the
+   * HTTP headers specified by the `headers` session affinity attribute, otherwise
+   * sessions aren't created.
    */
   require_all_headers?: boolean;
 
@@ -1389,15 +1458,13 @@ export interface SessionAffinityAttributes {
   /**
    * Configures the zero-downtime failover between origins within a pool when session
    * affinity is enabled. This feature is currently incompatible with Argo, Tiered
-   * Cache, and Bandwidth Alliance. The supported values are:
-   *
-   * - `"none"`: No failover takes place for sessions pinned to the origin (default).
-   * - `"temporary"`: Traffic will be sent to another other healthy origin until the
-   *   originally pinned origin is available; note that this can potentially result
-   *   in heavy origin flapping.
-   * - `"sticky"`: The session affinity cookie is updated and subsequent requests are
-   *   sent to the new origin. Note: Zero-downtime failover with sticky sessions is
-   *   currently not supported for session affinity by header.
+   * Cache, and Bandwidth Alliance. The supported values are: - `"none"`: No failover
+   * takes place for sessions pinned to the origin (default). - `"temporary"`:
+   * Traffic will be sent to another other healthy origin until the originally pinned
+   * origin is available; note that this can potentially result in heavy origin
+   * flapping. - `"sticky"`: The session affinity cookie is updated and subsequent
+   * requests are sent to the new origin. Note: Zero-downtime failover with sticky
+   * sessions is currently not supported for session affinity by header.
    */
   zero_downtime_failover?: 'none' | 'temporary' | 'sticky';
 }
@@ -1427,14 +1494,11 @@ export interface SessionAffinityAttributesParam {
   /**
    * When header `session_affinity` is enabled, this option can be used to specify
    * how HTTP headers on load balancing requests will be used. The supported values
-   * are:
-   *
-   * - `"true"`: Load balancing requests must contain _all_ of the HTTP headers
-   *   specified by the `headers` session affinity attribute, otherwise sessions
-   *   aren't created.
-   * - `"false"`: Load balancing requests must contain _at least one_ of the HTTP
-   *   headers specified by the `headers` session affinity attribute, otherwise
-   *   sessions aren't created.
+   * are: - `"true"`: Load balancing requests must contain _all_ of the HTTP headers
+   * specified by the `headers` session affinity attribute, otherwise sessions aren't
+   * created. - `"false"`: Load balancing requests must contain _at least one_ of the
+   * HTTP headers specified by the `headers` session affinity attribute, otherwise
+   * sessions aren't created.
    */
   require_all_headers?: boolean;
 
@@ -1456,15 +1520,13 @@ export interface SessionAffinityAttributesParam {
   /**
    * Configures the zero-downtime failover between origins within a pool when session
    * affinity is enabled. This feature is currently incompatible with Argo, Tiered
-   * Cache, and Bandwidth Alliance. The supported values are:
-   *
-   * - `"none"`: No failover takes place for sessions pinned to the origin (default).
-   * - `"temporary"`: Traffic will be sent to another other healthy origin until the
-   *   originally pinned origin is available; note that this can potentially result
-   *   in heavy origin flapping.
-   * - `"sticky"`: The session affinity cookie is updated and subsequent requests are
-   *   sent to the new origin. Note: Zero-downtime failover with sticky sessions is
-   *   currently not supported for session affinity by header.
+   * Cache, and Bandwidth Alliance. The supported values are: - `"none"`: No failover
+   * takes place for sessions pinned to the origin (default). - `"temporary"`:
+   * Traffic will be sent to another other healthy origin until the originally pinned
+   * origin is available; note that this can potentially result in heavy origin
+   * flapping. - `"sticky"`: The session affinity cookie is updated and subsequent
+   * requests are sent to the new origin. Note: Zero-downtime failover with sticky
+   * sessions is currently not supported for session affinity by header.
    */
   zero_downtime_failover?: 'none' | 'temporary' | 'sticky';
 }
@@ -1582,7 +1644,7 @@ export interface LoadBalancerCreateParams {
    * will fall back to using the corresponding region_pool mapping if it exists else
    * to default_pools.
    */
-  country_pools?: Record<string, Array<string>>;
+  country_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: Object description.
@@ -1601,12 +1663,12 @@ export interface LoadBalancerCreateParams {
   networks?: Array<string>;
 
   /**
-   * Body param: (Enterprise only): A mapping of Cloudflare PoP identifiers to a list
+   * Body param: Enterprise only: A mapping of Cloudflare PoP identifiers to a list
    * of pool IDs (ordered by their failover priority) for the PoP (datacenter). Any
    * PoPs not explicitly defined will fall back to using the corresponding
    * country_pool, then region_pool mapping if it exists else to default_pools.
    */
-  pop_pools?: Record<string, Array<string>>;
+  pop_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: Whether the hostname should be gray clouded (false) or orange
@@ -1631,7 +1693,7 @@ export interface LoadBalancerCreateParams {
    * failover priority) for the given region. Any regions not explicitly defined will
    * fall back to using default_pools.
    */
-  region_pools?: Record<string, Array<string>>;
+  region_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: BETA Field Not General Access: A list of rules for this load
@@ -1641,28 +1703,25 @@ export interface LoadBalancerCreateParams {
 
   /**
    * Body param: Specifies the type of session affinity the load balancer should use
-   * unless specified as `"none"`. The supported types are:
-   *
-   * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
-   *   generated, encoding information of which origin the request will be forwarded
-   *   to. Subsequent requests, by the same client to the same load balancer, will be
-   *   sent to the origin server the cookie encodes, for the duration of the cookie
-   *   and as long as the origin server remains healthy. If the cookie has expired or
-   *   the origin server is unhealthy, then a new origin server is calculated and
-   *   used.
-   * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
-   *   selection is stable and based on the client's ip address.
-   * - `"header"`: On the first request to a proxied load balancer, a session key
-   *   based on the configured HTTP headers (see
-   *   `session_affinity_attributes.headers`) is generated, encoding the request
-   *   headers used for storing in the load balancer session state which origin the
-   *   request will be forwarded to. Subsequent requests to the load balancer with
-   *   the same headers will be sent to the same origin server, for the duration of
-   *   the session and as long as the origin server remains healthy. If the session
-   *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
-   *   server is unhealthy, then a new origin server is calculated and used. See
-   *   `headers` in `session_affinity_attributes` for additional required
-   *   configuration.
+   * unless specified as `"none"`. The supported types are: - `"cookie"`: On the
+   * first request to a proxied load balancer, a cookie is generated, encoding
+   * information of which origin the request will be forwarded to. Subsequent
+   * requests, by the same client to the same load balancer, will be sent to the
+   * origin server the cookie encodes, for the duration of the cookie and as long as
+   * the origin server remains healthy. If the cookie has expired or the origin
+   * server is unhealthy, then a new origin server is calculated and used. -
+   * `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
+   * selection is stable and based on the client's ip address. - `"header"`: On the
+   * first request to a proxied load balancer, a session key based on the configured
+   * HTTP headers (see `session_affinity_attributes.headers`) is generated, encoding
+   * the request headers used for storing in the load balancer session state which
+   * origin the request will be forwarded to. Subsequent requests to the load
+   * balancer with the same headers will be sent to the same origin server, for the
+   * duration of the session and as long as the origin server remains healthy. If the
+   * session has been idle for the duration of `session_affinity_ttl` seconds or the
+   * origin server is unhealthy, then a new origin server is calculated and used. See
+   * `headers` in `session_affinity_attributes` for additional required
+   * configuration.
    */
   session_affinity?: SessionAffinityParam;
 
@@ -1675,14 +1734,12 @@ export interface LoadBalancerCreateParams {
    * Body param: Time, in seconds, until a client's session expires after being
    * created. Once the expiry time has been reached, subsequent requests may get sent
    * to a different origin server. The accepted ranges per `session_affinity` policy
-   * are:
-   *
-   * - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
-   *   unless explicitly set. The accepted range of values is between [1800, 604800].
-   * - `"header"`: The current default of 1800 seconds will be used unless explicitly
-   *   set. The accepted range of values is between [30, 3600]. Note: With session
-   *   affinity by header, sessions only expire after they haven't been used for the
-   *   number of seconds specified.
+   * are: - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
+   * unless explicitly set. The accepted range of values is between [1800, 604800]. -
+   * `"header"`: The current default of 1800 seconds will be used unless explicitly
+   * set. The accepted range of values is between [30, 3600]. Note: With session
+   * affinity by header, sessions only expire after they haven't been used for the
+   * number of seconds specified.
    */
   session_affinity_ttl?: number;
 
@@ -1761,7 +1818,7 @@ export interface LoadBalancerUpdateParams {
    * will fall back to using the corresponding region_pool mapping if it exists else
    * to default_pools.
    */
-  country_pools?: Record<string, Array<string>>;
+  country_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: Object description.
@@ -1785,12 +1842,12 @@ export interface LoadBalancerUpdateParams {
   networks?: Array<string>;
 
   /**
-   * Body param: (Enterprise only): A mapping of Cloudflare PoP identifiers to a list
+   * Body param: Enterprise only: A mapping of Cloudflare PoP identifiers to a list
    * of pool IDs (ordered by their failover priority) for the PoP (datacenter). Any
    * PoPs not explicitly defined will fall back to using the corresponding
    * country_pool, then region_pool mapping if it exists else to default_pools.
    */
-  pop_pools?: Record<string, Array<string>>;
+  pop_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: Whether the hostname should be gray clouded (false) or orange
@@ -1815,7 +1872,7 @@ export interface LoadBalancerUpdateParams {
    * failover priority) for the given region. Any regions not explicitly defined will
    * fall back to using default_pools.
    */
-  region_pools?: Record<string, Array<string>>;
+  region_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: BETA Field Not General Access: A list of rules for this load
@@ -1825,28 +1882,25 @@ export interface LoadBalancerUpdateParams {
 
   /**
    * Body param: Specifies the type of session affinity the load balancer should use
-   * unless specified as `"none"`. The supported types are:
-   *
-   * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
-   *   generated, encoding information of which origin the request will be forwarded
-   *   to. Subsequent requests, by the same client to the same load balancer, will be
-   *   sent to the origin server the cookie encodes, for the duration of the cookie
-   *   and as long as the origin server remains healthy. If the cookie has expired or
-   *   the origin server is unhealthy, then a new origin server is calculated and
-   *   used.
-   * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
-   *   selection is stable and based on the client's ip address.
-   * - `"header"`: On the first request to a proxied load balancer, a session key
-   *   based on the configured HTTP headers (see
-   *   `session_affinity_attributes.headers`) is generated, encoding the request
-   *   headers used for storing in the load balancer session state which origin the
-   *   request will be forwarded to. Subsequent requests to the load balancer with
-   *   the same headers will be sent to the same origin server, for the duration of
-   *   the session and as long as the origin server remains healthy. If the session
-   *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
-   *   server is unhealthy, then a new origin server is calculated and used. See
-   *   `headers` in `session_affinity_attributes` for additional required
-   *   configuration.
+   * unless specified as `"none"`. The supported types are: - `"cookie"`: On the
+   * first request to a proxied load balancer, a cookie is generated, encoding
+   * information of which origin the request will be forwarded to. Subsequent
+   * requests, by the same client to the same load balancer, will be sent to the
+   * origin server the cookie encodes, for the duration of the cookie and as long as
+   * the origin server remains healthy. If the cookie has expired or the origin
+   * server is unhealthy, then a new origin server is calculated and used. -
+   * `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
+   * selection is stable and based on the client's ip address. - `"header"`: On the
+   * first request to a proxied load balancer, a session key based on the configured
+   * HTTP headers (see `session_affinity_attributes.headers`) is generated, encoding
+   * the request headers used for storing in the load balancer session state which
+   * origin the request will be forwarded to. Subsequent requests to the load
+   * balancer with the same headers will be sent to the same origin server, for the
+   * duration of the session and as long as the origin server remains healthy. If the
+   * session has been idle for the duration of `session_affinity_ttl` seconds or the
+   * origin server is unhealthy, then a new origin server is calculated and used. See
+   * `headers` in `session_affinity_attributes` for additional required
+   * configuration.
    */
   session_affinity?: SessionAffinityParam;
 
@@ -1859,14 +1913,12 @@ export interface LoadBalancerUpdateParams {
    * Body param: Time, in seconds, until a client's session expires after being
    * created. Once the expiry time has been reached, subsequent requests may get sent
    * to a different origin server. The accepted ranges per `session_affinity` policy
-   * are:
-   *
-   * - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
-   *   unless explicitly set. The accepted range of values is between [1800, 604800].
-   * - `"header"`: The current default of 1800 seconds will be used unless explicitly
-   *   set. The accepted range of values is between [30, 3600]. Note: With session
-   *   affinity by header, sessions only expire after they haven't been used for the
-   *   number of seconds specified.
+   * are: - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
+   * unless explicitly set. The accepted range of values is between [1800, 604800]. -
+   * `"header"`: The current default of 1800 seconds will be used unless explicitly
+   * set. The accepted range of values is between [30, 3600]. Note: With session
+   * affinity by header, sessions only expire after they haven't been used for the
+   * number of seconds specified.
    */
   session_affinity_ttl?: number;
 
@@ -1934,7 +1986,7 @@ export interface LoadBalancerEditParams {
    * will fall back to using the corresponding region_pool mapping if it exists else
    * to default_pools.
    */
-  country_pools?: Record<string, Array<string>>;
+  country_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: A list of pool IDs ordered by their failover priority. Pools defined
@@ -1972,12 +2024,12 @@ export interface LoadBalancerEditParams {
   name?: string;
 
   /**
-   * Body param: (Enterprise only): A mapping of Cloudflare PoP identifiers to a list
+   * Body param: Enterprise only: A mapping of Cloudflare PoP identifiers to a list
    * of pool IDs (ordered by their failover priority) for the PoP (datacenter). Any
    * PoPs not explicitly defined will fall back to using the corresponding
    * country_pool, then region_pool mapping if it exists else to default_pools.
    */
-  pop_pools?: Record<string, Array<string>>;
+  pop_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: Whether the hostname should be gray clouded (false) or orange
@@ -2002,7 +2054,7 @@ export interface LoadBalancerEditParams {
    * failover priority) for the given region. Any regions not explicitly defined will
    * fall back to using default_pools.
    */
-  region_pools?: Record<string, Array<string>>;
+  region_pools?: { [key: string]: Array<string> };
 
   /**
    * Body param: BETA Field Not General Access: A list of rules for this load
@@ -2012,28 +2064,25 @@ export interface LoadBalancerEditParams {
 
   /**
    * Body param: Specifies the type of session affinity the load balancer should use
-   * unless specified as `"none"`. The supported types are:
-   *
-   * - `"cookie"`: On the first request to a proxied load balancer, a cookie is
-   *   generated, encoding information of which origin the request will be forwarded
-   *   to. Subsequent requests, by the same client to the same load balancer, will be
-   *   sent to the origin server the cookie encodes, for the duration of the cookie
-   *   and as long as the origin server remains healthy. If the cookie has expired or
-   *   the origin server is unhealthy, then a new origin server is calculated and
-   *   used.
-   * - `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
-   *   selection is stable and based on the client's ip address.
-   * - `"header"`: On the first request to a proxied load balancer, a session key
-   *   based on the configured HTTP headers (see
-   *   `session_affinity_attributes.headers`) is generated, encoding the request
-   *   headers used for storing in the load balancer session state which origin the
-   *   request will be forwarded to. Subsequent requests to the load balancer with
-   *   the same headers will be sent to the same origin server, for the duration of
-   *   the session and as long as the origin server remains healthy. If the session
-   *   has been idle for the duration of `session_affinity_ttl` seconds or the origin
-   *   server is unhealthy, then a new origin server is calculated and used. See
-   *   `headers` in `session_affinity_attributes` for additional required
-   *   configuration.
+   * unless specified as `"none"`. The supported types are: - `"cookie"`: On the
+   * first request to a proxied load balancer, a cookie is generated, encoding
+   * information of which origin the request will be forwarded to. Subsequent
+   * requests, by the same client to the same load balancer, will be sent to the
+   * origin server the cookie encodes, for the duration of the cookie and as long as
+   * the origin server remains healthy. If the cookie has expired or the origin
+   * server is unhealthy, then a new origin server is calculated and used. -
+   * `"ip_cookie"`: Behaves the same as `"cookie"` except the initial origin
+   * selection is stable and based on the client's ip address. - `"header"`: On the
+   * first request to a proxied load balancer, a session key based on the configured
+   * HTTP headers (see `session_affinity_attributes.headers`) is generated, encoding
+   * the request headers used for storing in the load balancer session state which
+   * origin the request will be forwarded to. Subsequent requests to the load
+   * balancer with the same headers will be sent to the same origin server, for the
+   * duration of the session and as long as the origin server remains healthy. If the
+   * session has been idle for the duration of `session_affinity_ttl` seconds or the
+   * origin server is unhealthy, then a new origin server is calculated and used. See
+   * `headers` in `session_affinity_attributes` for additional required
+   * configuration.
    */
   session_affinity?: SessionAffinityParam;
 
@@ -2046,14 +2095,12 @@ export interface LoadBalancerEditParams {
    * Body param: Time, in seconds, until a client's session expires after being
    * created. Once the expiry time has been reached, subsequent requests may get sent
    * to a different origin server. The accepted ranges per `session_affinity` policy
-   * are:
-   *
-   * - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
-   *   unless explicitly set. The accepted range of values is between [1800, 604800].
-   * - `"header"`: The current default of 1800 seconds will be used unless explicitly
-   *   set. The accepted range of values is between [30, 3600]. Note: With session
-   *   affinity by header, sessions only expire after they haven't been used for the
-   *   number of seconds specified.
+   * are: - `"cookie"` / `"ip_cookie"`: The current default of 23 hours will be used
+   * unless explicitly set. The accepted range of values is between [1800, 604800]. -
+   * `"header"`: The current default of 1800 seconds will be used unless explicitly
+   * set. The accepted range of values is between [30, 3600]. Note: With session
+   * affinity by header, sessions only expire after they haven't been used for the
+   * number of seconds specified.
    */
   session_affinity_ttl?: number;
 
@@ -2095,8 +2142,11 @@ export interface LoadBalancerGetParams {
   zone_id: string;
 }
 
+LoadBalancers.LoadBalancersSinglePage = LoadBalancersSinglePage;
 LoadBalancers.Monitors = Monitors;
 LoadBalancers.MonitorsSinglePage = MonitorsSinglePage;
+LoadBalancers.MonitorGroups = MonitorGroups;
+LoadBalancers.MonitorGroupsSinglePage = MonitorGroupsSinglePage;
 LoadBalancers.Pools = Pools;
 LoadBalancers.PoolsSinglePage = PoolsSinglePage;
 LoadBalancers.Previews = Previews;
@@ -2105,6 +2155,34 @@ LoadBalancers.Searches = Searches;
 LoadBalancers.SearchListResponsesV4PagePagination = SearchListResponsesV4PagePagination;
 
 export declare namespace LoadBalancers {
+  export {
+    type AdaptiveRouting as AdaptiveRouting,
+    type CheckRegion as CheckRegion,
+    type DefaultPools as DefaultPools,
+    type FilterOptions as FilterOptions,
+    type Header as Header,
+    type Host as Host,
+    type LoadBalancer as LoadBalancer,
+    type LoadShedding as LoadShedding,
+    type LocationStrategy as LocationStrategy,
+    type NotificationFilter as NotificationFilter,
+    type Origin as Origin,
+    type OriginSteering as OriginSteering,
+    type RandomSteering as RandomSteering,
+    type Rules as Rules,
+    type SessionAffinity as SessionAffinity,
+    type SessionAffinityAttributes as SessionAffinityAttributes,
+    type SteeringPolicy as SteeringPolicy,
+    type LoadBalancerDeleteResponse as LoadBalancerDeleteResponse,
+    LoadBalancersSinglePage as LoadBalancersSinglePage,
+    type LoadBalancerCreateParams as LoadBalancerCreateParams,
+    type LoadBalancerUpdateParams as LoadBalancerUpdateParams,
+    type LoadBalancerListParams as LoadBalancerListParams,
+    type LoadBalancerDeleteParams as LoadBalancerDeleteParams,
+    type LoadBalancerEditParams as LoadBalancerEditParams,
+    type LoadBalancerGetParams as LoadBalancerGetParams,
+  };
+
   export {
     Monitors as Monitors,
     type Monitor as Monitor,
@@ -2116,6 +2194,18 @@ export declare namespace LoadBalancers {
     type MonitorDeleteParams as MonitorDeleteParams,
     type MonitorEditParams as MonitorEditParams,
     type MonitorGetParams as MonitorGetParams,
+  };
+
+  export {
+    MonitorGroups as MonitorGroups,
+    type MonitorGroup as MonitorGroup,
+    MonitorGroupsSinglePage as MonitorGroupsSinglePage,
+    type MonitorGroupCreateParams as MonitorGroupCreateParams,
+    type MonitorGroupUpdateParams as MonitorGroupUpdateParams,
+    type MonitorGroupListParams as MonitorGroupListParams,
+    type MonitorGroupDeleteParams as MonitorGroupDeleteParams,
+    type MonitorGroupEditParams as MonitorGroupEditParams,
+    type MonitorGroupGetParams as MonitorGroupGetParams,
   };
 
   export {

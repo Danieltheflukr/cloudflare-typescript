@@ -8,6 +8,15 @@ export class RegionalTieredCacheResource extends APIResource {
    * Instructs Cloudflare to check a regional hub data center on the way to your
    * upper tier. This can help improve performance for smart and custom tiered cache
    * topologies.
+   *
+   * @example
+   * ```ts
+   * const response =
+   *   await client.cache.regionalTieredCache.edit({
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     value: 'on',
+   *   });
+   * ```
    */
   edit(
     params: RegionalTieredCacheEditParams,
@@ -26,6 +35,14 @@ export class RegionalTieredCacheResource extends APIResource {
    * Instructs Cloudflare to check a regional hub data center on the way to your
    * upper tier. This can help improve performance for smart and custom tiered cache
    * topologies.
+   *
+   * @example
+   * ```ts
+   * const regionalTieredCache =
+   *   await client.cache.regionalTieredCache.get({
+   *     zone_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *   });
+   * ```
    */
   get(
     params: RegionalTieredCacheGetParams,
@@ -41,23 +58,23 @@ export class RegionalTieredCacheResource extends APIResource {
 }
 
 /**
- * ID of the zone setting.
+ * The identifier of the caching setting.
  */
 export type RegionalTieredCache = 'tc_regional';
 
 export interface RegionalTieredCacheEditResponse {
   /**
-   * ID of the zone setting.
+   * The identifier of the caching setting.
    */
   id: RegionalTieredCache;
 
   /**
-   * Whether the setting is editable
+   * Whether the setting is editable.
    */
   editable: boolean;
 
   /**
-   * The value of the feature
+   * Value of the Regional Tiered Cache zone setting.
    */
   value: 'on' | 'off';
 
@@ -69,17 +86,17 @@ export interface RegionalTieredCacheEditResponse {
 
 export interface RegionalTieredCacheGetResponse {
   /**
-   * ID of the zone setting.
+   * The identifier of the caching setting.
    */
   id: RegionalTieredCache;
 
   /**
-   * Whether the setting is editable
+   * Whether the setting is editable.
    */
   editable: boolean;
 
   /**
-   * The value of the feature
+   * Value of the Regional Tiered Cache zone setting.
    */
   value: 'on' | 'off';
 
@@ -91,7 +108,7 @@ export interface RegionalTieredCacheGetResponse {
 
 export interface RegionalTieredCacheEditParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   zone_id: string;
 
@@ -103,7 +120,7 @@ export interface RegionalTieredCacheEditParams {
 
 export interface RegionalTieredCacheGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   zone_id: string;
 }

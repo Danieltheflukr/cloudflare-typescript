@@ -8,6 +8,8 @@ export class Networks extends APIResource {
   /**
    * Routes a private network through a Cloudflare Tunnel. The CIDR in
    * `ip_network_encoded` must be written in URL-encoded format.
+   *
+   * @deprecated This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs.
    */
   create(
     ipNetworkEncoded: string,
@@ -31,6 +33,8 @@ export class Networks extends APIResource {
    * is missing it will assume Cloudflare Tunnel as default. If tunnel_id is provided
    * it will delete the route from that tunnel, otherwise it will delete the route
    * based on the vnet and tun_type.
+   *
+   * @deprecated This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs.
    */
   delete(
     ipNetworkEncoded: string,
@@ -49,6 +53,8 @@ export class Networks extends APIResource {
   /**
    * Updates an existing private network route in an account. The CIDR in
    * `ip_network_encoded` must be written in URL-encoded format.
+   *
+   * @deprecated This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs.
    */
   edit(
     ipNetworkEncoded: string,

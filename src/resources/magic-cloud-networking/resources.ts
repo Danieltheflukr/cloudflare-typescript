@@ -7,7 +7,7 @@ import { type Response } from '../../_shims/index';
 
 export class Resources extends APIResource {
   /**
-   * List resources in the Resource Catalog (Closed Beta)
+   * List resources in the Resource Catalog (Closed Beta).
    */
   list(
     params: ResourceListParams,
@@ -22,7 +22,7 @@ export class Resources extends APIResource {
   }
 
   /**
-   * Export resources in the Resource Catalog as a JSON file (Closed Beta)
+   * Export resources in the Resource Catalog as a JSON file (Closed Beta).
    */
   export(params: ResourceExportParams, options?: Core.RequestOptions): Core.APIPromise<Response> {
     const { account_id, ...query } = params;
@@ -35,7 +35,7 @@ export class Resources extends APIResource {
   }
 
   /**
-   * Read an resource from the Resource Catalog (Closed Beta)
+   * Read an resource from the Resource Catalog (Closed Beta).
    */
   get(
     resourceId: string,
@@ -52,7 +52,7 @@ export class Resources extends APIResource {
   }
 
   /**
-   * Preview Rego query result against the latest resource catalog (Closed Beta)
+   * Preview Rego query result against the latest resource catalog (Closed Beta).
    */
   policyPreview(
     params: ResourcePolicyPreviewParams,
@@ -77,7 +77,7 @@ export interface ResourceListResponse {
 
   cloud_type: 'AWS' | 'AZURE' | 'GOOGLE' | 'CLOUDFLARE';
 
-  config: Record<string, unknown>;
+  config: { [key: string]: unknown };
 
   deployment_provider: string;
 
@@ -89,11 +89,11 @@ export interface ResourceListResponse {
 
   native_id: string;
 
-  observations: Record<string, ResourceListResponse.Observations>;
+  observations: { [key: string]: ResourceListResponse.Observations };
 
   provider_ids: Array<string>;
 
-  provider_names_by_id: Record<string, string>;
+  provider_names_by_id: { [key: string]: string };
 
   region: string;
 
@@ -160,9 +160,9 @@ export interface ResourceListResponse {
 
   sections: Array<ResourceListResponse.Section>;
 
-  state: Record<string, unknown>;
+  state: { [key: string]: unknown };
 
-  tags: Record<string, string>;
+  tags: { [key: string]: string };
 
   updated_at: string;
 
@@ -654,7 +654,7 @@ export interface ResourceGetResponse {
 
   cloud_type: 'AWS' | 'AZURE' | 'GOOGLE' | 'CLOUDFLARE';
 
-  config: Record<string, unknown>;
+  config: { [key: string]: unknown };
 
   deployment_provider: string;
 
@@ -666,11 +666,11 @@ export interface ResourceGetResponse {
 
   native_id: string;
 
-  observations: Record<string, ResourceGetResponse.Observations>;
+  observations: { [key: string]: ResourceGetResponse.Observations };
 
   provider_ids: Array<string>;
 
-  provider_names_by_id: Record<string, string>;
+  provider_names_by_id: { [key: string]: string };
 
   region: string;
 
@@ -737,9 +737,9 @@ export interface ResourceGetResponse {
 
   sections: Array<ResourceGetResponse.Section>;
 
-  state: Record<string, unknown>;
+  state: { [key: string]: unknown };
 
-  tags: Record<string, string>;
+  tags: { [key: string]: string };
 
   updated_at: string;
 
@@ -1248,7 +1248,7 @@ export interface ResourceListParams extends V4PagePaginationArrayParams {
   managed?: boolean;
 
   /**
-   * Query param: one of ["id", "resource_type", "region"]
+   * Query param: One of ["id", "resource_type", "region"].
    */
   order_by?: string;
 
@@ -1358,7 +1358,7 @@ export interface ResourceExportParams {
   desc?: boolean;
 
   /**
-   * Query param: one of ["id", "resource_type", "region"]
+   * Query param: One of ["id", "resource_type", "region"].
    */
   order_by?: string;
 

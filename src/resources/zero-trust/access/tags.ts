@@ -2,11 +2,18 @@
 
 import { APIResource } from '../../../resource';
 import * as Core from '../../../core';
-import { SinglePage } from '../../../pagination';
+import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../../../pagination';
 
 export class Tags extends APIResource {
   /**
    * Create a tag
+   *
+   * @example
+   * ```ts
+   * const tag = await client.zeroTrust.access.tags.create({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * });
+   * ```
    */
   create(params: TagCreateParams, options?: Core.RequestOptions): Core.APIPromise<Tag> {
     const { account_id, ...body } = params;
@@ -19,6 +26,17 @@ export class Tags extends APIResource {
 
   /**
    * Update a tag
+   *
+   * @example
+   * ```ts
+   * const tag = await client.zeroTrust.access.tags.update(
+   *   'engineers',
+   *   {
+   *     account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   *     name: 'engineers',
+   *   },
+   * );
+   * ```
    */
   update(tagName: string, params: TagUpdateParams, options?: Core.RequestOptions): Core.APIPromise<Tag> {
     const { account_id, ...body } = params;
@@ -32,14 +50,38 @@ export class Tags extends APIResource {
 
   /**
    * List tags
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const tag of client.zeroTrust.access.tags.list({
+   *   account_id: '023e105f4ecef8ad9ca31a8372d0c353',
+   * })) {
+   *   // ...
+   * }
+   * ```
    */
-  list(params: TagListParams, options?: Core.RequestOptions): Core.PagePromise<TagsSinglePage, Tag> {
-    const { account_id } = params;
-    return this._client.getAPIList(`/accounts/${account_id}/access/tags`, TagsSinglePage, options);
+  list(
+    params: TagListParams,
+    options?: Core.RequestOptions,
+  ): Core.PagePromise<TagsV4PagePaginationArray, Tag> {
+    const { account_id, ...query } = params;
+    return this._client.getAPIList(`/accounts/${account_id}/access/tags`, TagsV4PagePaginationArray, {
+      query,
+      ...options,
+    });
   }
 
   /**
    * Delete a tag
+   *
+   * @example
+   * ```ts
+   * const tag = await client.zeroTrust.access.tags.delete(
+   *   'engineers',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   delete(
     tagName: string,
@@ -56,6 +98,14 @@ export class Tags extends APIResource {
 
   /**
    * Get a tag
+   *
+   * @example
+   * ```ts
+   * const tag = await client.zeroTrust.access.tags.get(
+   *   'engineers',
+   *   { account_id: '023e105f4ecef8ad9ca31a8372d0c353' },
+   * );
+   * ```
    */
   get(tagName: string, params: TagGetParams, options?: Core.RequestOptions): Core.APIPromise<Tag> {
     const { account_id } = params;
@@ -67,7 +117,7 @@ export class Tags extends APIResource {
   }
 }
 
-export class TagsSinglePage extends SinglePage<Tag> {}
+export class TagsV4PagePaginationArray extends V4PagePaginationArray<Tag> {}
 
 /**
  * A tag
@@ -77,15 +127,6 @@ export interface Tag {
    * The name of the tag
    */
   name: string;
-
-  /**
-   * The number of applications that have this tag
-   */
-  app_count?: number;
-
-  created_at?: string;
-
-  updated_at?: string;
 }
 
 export interface TagDeleteResponse {
@@ -97,7 +138,7 @@ export interface TagDeleteResponse {
 
 export interface TagCreateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -109,7 +150,7 @@ export interface TagCreateParams {
 
 export interface TagUpdateParams {
   /**
-   * Path param: Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 
@@ -119,34 +160,34 @@ export interface TagUpdateParams {
   name: string;
 }
 
-export interface TagListParams {
+export interface TagListParams extends V4PagePaginationArrayParams {
   /**
-   * Identifier
+   * Path param: Identifier.
    */
   account_id: string;
 }
 
 export interface TagDeleteParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
 export interface TagGetParams {
   /**
-   * Identifier
+   * Identifier.
    */
   account_id: string;
 }
 
-Tags.TagsSinglePage = TagsSinglePage;
+Tags.TagsV4PagePaginationArray = TagsV4PagePaginationArray;
 
 export declare namespace Tags {
   export {
     type Tag as Tag,
     type TagDeleteResponse as TagDeleteResponse,
-    TagsSinglePage as TagsSinglePage,
+    TagsV4PagePaginationArray as TagsV4PagePaginationArray,
     type TagCreateParams as TagCreateParams,
     type TagUpdateParams as TagUpdateParams,
     type TagListParams as TagListParams,

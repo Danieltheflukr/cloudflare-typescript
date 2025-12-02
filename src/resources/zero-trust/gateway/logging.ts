@@ -5,7 +5,15 @@ import * as Core from '../../../core';
 
 export class Logging extends APIResource {
   /**
-   * Updates logging settings for the current Zero Trust account.
+   * Update logging settings for the current Zero Trust account.
+   *
+   * @example
+   * ```ts
+   * const loggingSetting =
+   *   await client.zeroTrust.gateway.logging.update({
+   *     account_id: '699d98642c564d2e855e9661899b7252',
+   *   });
+   * ```
    */
   update(params: LoggingUpdateParams, options?: Core.RequestOptions): Core.APIPromise<LoggingSetting> {
     const { account_id, ...body } = params;
@@ -17,7 +25,15 @@ export class Logging extends APIResource {
   }
 
   /**
-   * Fetches the current logging settings for Zero Trust account.
+   * Retrieve the current logging settings for the Zero Trust account.
+   *
+   * @example
+   * ```ts
+   * const loggingSetting =
+   *   await client.zeroTrust.gateway.logging.get({
+   *     account_id: '699d98642c564d2e855e9661899b7252',
+   *   });
+   * ```
    */
   get(params: LoggingGetParams, options?: Core.RequestOptions): Core.APIPromise<LoggingSetting> {
     const { account_id } = params;
@@ -31,36 +47,84 @@ export class Logging extends APIResource {
 
 export interface LoggingSetting {
   /**
-   * Redact personally identifiable information from activity logging (PII fields
-   * are: source IP, user email, user ID, device ID, URL, referrer, user agent).
+   * Indicate whether to redact personally identifiable information from activity
+   * logging (PII fields include source IP, user email, user ID, device ID, URL,
+   * referrer, and user agent).
    */
   redact_pii?: boolean;
 
   /**
-   * Logging settings by rule type.
+   * Configure logging settings for each rule type.
    */
   settings_by_rule_type?: LoggingSetting.SettingsByRuleType;
 }
 
 export namespace LoggingSetting {
   /**
-   * Logging settings by rule type.
+   * Configure logging settings for each rule type.
    */
   export interface SettingsByRuleType {
     /**
-     * Logging settings for DNS firewall.
+     * Configure logging settings for DNS firewall.
      */
-    dns?: unknown;
+    dns?: SettingsByRuleType.DNS;
 
     /**
-     * Logging settings for HTTP/HTTPS firewall.
+     * Configure logging settings for HTTP/HTTPS firewall.
      */
-    http?: unknown;
+    http?: SettingsByRuleType.HTTP;
 
     /**
-     * Logging settings for Network firewall.
+     * Configure logging settings for Network firewall.
      */
-    l4?: unknown;
+    l4?: SettingsByRuleType.L4;
+  }
+
+  export namespace SettingsByRuleType {
+    /**
+     * Configure logging settings for DNS firewall.
+     */
+    export interface DNS {
+      /**
+       * Specify whether to log all requests to this service.
+       */
+      log_all?: boolean;
+
+      /**
+       * Specify whether to log only blocking requests to this service.
+       */
+      log_blocks?: boolean;
+    }
+
+    /**
+     * Configure logging settings for HTTP/HTTPS firewall.
+     */
+    export interface HTTP {
+      /**
+       * Specify whether to log all requests to this service.
+       */
+      log_all?: boolean;
+
+      /**
+       * Specify whether to log only blocking requests to this service.
+       */
+      log_blocks?: boolean;
+    }
+
+    /**
+     * Configure logging settings for Network firewall.
+     */
+    export interface L4 {
+      /**
+       * Specify whether to log all requests to this service.
+       */
+      log_all?: boolean;
+
+      /**
+       * Specify whether to log only blocking requests to this service.
+       */
+      log_blocks?: boolean;
+    }
   }
 }
 
@@ -71,37 +135,84 @@ export interface LoggingUpdateParams {
   account_id: string;
 
   /**
-   * Body param: Redact personally identifiable information from activity logging
-   * (PII fields are: source IP, user email, user ID, device ID, URL, referrer, user
-   * agent).
+   * Body param: Indicate whether to redact personally identifiable information from
+   * activity logging (PII fields include source IP, user email, user ID, device ID,
+   * URL, referrer, and user agent).
    */
   redact_pii?: boolean;
 
   /**
-   * Body param: Logging settings by rule type.
+   * Body param: Configure logging settings for each rule type.
    */
   settings_by_rule_type?: LoggingUpdateParams.SettingsByRuleType;
 }
 
 export namespace LoggingUpdateParams {
   /**
-   * Logging settings by rule type.
+   * Configure logging settings for each rule type.
    */
   export interface SettingsByRuleType {
     /**
-     * Logging settings for DNS firewall.
+     * Configure logging settings for DNS firewall.
      */
-    dns?: unknown;
+    dns?: SettingsByRuleType.DNS;
 
     /**
-     * Logging settings for HTTP/HTTPS firewall.
+     * Configure logging settings for HTTP/HTTPS firewall.
      */
-    http?: unknown;
+    http?: SettingsByRuleType.HTTP;
 
     /**
-     * Logging settings for Network firewall.
+     * Configure logging settings for Network firewall.
      */
-    l4?: unknown;
+    l4?: SettingsByRuleType.L4;
+  }
+
+  export namespace SettingsByRuleType {
+    /**
+     * Configure logging settings for DNS firewall.
+     */
+    export interface DNS {
+      /**
+       * Specify whether to log all requests to this service.
+       */
+      log_all?: boolean;
+
+      /**
+       * Specify whether to log only blocking requests to this service.
+       */
+      log_blocks?: boolean;
+    }
+
+    /**
+     * Configure logging settings for HTTP/HTTPS firewall.
+     */
+    export interface HTTP {
+      /**
+       * Specify whether to log all requests to this service.
+       */
+      log_all?: boolean;
+
+      /**
+       * Specify whether to log only blocking requests to this service.
+       */
+      log_blocks?: boolean;
+    }
+
+    /**
+     * Configure logging settings for Network firewall.
+     */
+    export interface L4 {
+      /**
+       * Specify whether to log all requests to this service.
+       */
+      log_all?: boolean;
+
+      /**
+       * Specify whether to log only blocking requests to this service.
+       */
+      log_blocks?: boolean;
+    }
   }
 }
 

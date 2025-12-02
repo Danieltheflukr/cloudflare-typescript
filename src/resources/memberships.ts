@@ -10,6 +10,14 @@ import { V4PagePaginationArray, type V4PagePaginationArrayParams } from '../pagi
 export class Memberships extends APIResource {
   /**
    * Accept or reject this account invitation.
+   *
+   * @example
+   * ```ts
+   * const membership = await client.memberships.update(
+   *   '4536bcfad5faccb111b47003c79917fa',
+   *   { status: 'accepted' },
+   * );
+   * ```
    */
   update(
     membershipId: string,
@@ -25,6 +33,14 @@ export class Memberships extends APIResource {
 
   /**
    * List memberships of accounts the user can access.
+   *
+   * @example
+   * ```ts
+   * // Automatically fetches more pages as needed.
+   * for await (const membership of client.memberships.list()) {
+   *   // ...
+   * }
+   * ```
    */
   list(
     query?: MembershipListParams,
@@ -43,6 +59,13 @@ export class Memberships extends APIResource {
 
   /**
    * Remove the associated member from an account.
+   *
+   * @example
+   * ```ts
+   * const membership = await client.memberships.delete(
+   *   '4536bcfad5faccb111b47003c79917fa',
+   * );
+   * ```
    */
   delete(membershipId: string, options?: Core.RequestOptions): Core.APIPromise<MembershipDeleteResponse> {
     return (
@@ -54,6 +77,13 @@ export class Memberships extends APIResource {
 
   /**
    * Get a specific membership.
+   *
+   * @example
+   * ```ts
+   * const membership = await client.memberships.get(
+   *   '4536bcfad5faccb111b47003c79917fa',
+   * );
+   * ```
    */
   get(membershipId: string, options?: Core.RequestOptions): Core.APIPromise<MembershipGetResponse> {
     return (
@@ -221,7 +251,7 @@ export namespace MembershipUpdateResponse {
      */
     export interface PermissionGroup {
       /**
-       * Identifier of the group.
+       * Identifier of the permission group.
        */
       id: string;
 
@@ -231,7 +261,7 @@ export namespace MembershipUpdateResponse {
       meta?: PermissionGroup.Meta;
 
       /**
-       * Name of the group.
+       * Name of the permission group.
        */
       name?: string;
     }
@@ -252,7 +282,7 @@ export namespace MembershipUpdateResponse {
      */
     export interface ResourceGroup {
       /**
-       * Identifier of the group.
+       * Identifier of the resource group.
        */
       id: string;
 
@@ -416,7 +446,7 @@ export namespace MembershipGetResponse {
      */
     export interface PermissionGroup {
       /**
-       * Identifier of the group.
+       * Identifier of the permission group.
        */
       id: string;
 
@@ -426,7 +456,7 @@ export namespace MembershipGetResponse {
       meta?: PermissionGroup.Meta;
 
       /**
-       * Name of the group.
+       * Name of the permission group.
        */
       name?: string;
     }
@@ -447,7 +477,7 @@ export namespace MembershipGetResponse {
      */
     export interface ResourceGroup {
       /**
-       * Identifier of the group.
+       * Identifier of the resource group.
        */
       id: string;
 
@@ -548,4 +578,18 @@ export namespace MembershipListParams {
      */
     name?: string;
   }
+}
+
+Memberships.MembershipsV4PagePaginationArray = MembershipsV4PagePaginationArray;
+
+export declare namespace Memberships {
+  export {
+    type Membership as Membership,
+    type MembershipUpdateResponse as MembershipUpdateResponse,
+    type MembershipDeleteResponse as MembershipDeleteResponse,
+    type MembershipGetResponse as MembershipGetResponse,
+    MembershipsV4PagePaginationArray as MembershipsV4PagePaginationArray,
+    type MembershipUpdateParams as MembershipUpdateParams,
+    type MembershipListParams as MembershipListParams,
+  };
 }
